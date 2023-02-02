@@ -147,7 +147,8 @@ class ProcessImage:
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow(self.settings_win, 4000, 35)
         else:  # is Windows
-            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL) # flags=cv2.WINDOW_GUI_NORMAL)
+            # TODO: FIX poor fit of trackbars and text img in settings_win.
+            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
             cv2.resizeWindow(self.settings_win, 500, 500)
 
         cv2.createTrackbar('Contrast/gain/alpha (100x):',
@@ -182,6 +183,9 @@ class ProcessImage:
                            1,
                            5,
                            self.noise_redux_iter_selector)
+        cv2.setTrackbarMin('Reduce noise, iterations:',
+                           self.settings_win,
+                           1)
         cv2.createTrackbar(('Border type: 0 default, 1 reflect, 2 replicate,'
                             '3 isolated'),
                            self.settings_win,
@@ -198,6 +202,9 @@ class ProcessImage:
                            3,
                            50,
                            self.filter_kernel_selector)
+        cv2.setTrackbarMin('Filter kernel size (odd only):',
+                           self.settings_win,
+                           1)
         cv2.createTrackbar('Thresholding type: 0 Otsu, 1 Triangle',
                            self.settings_win,
                            0,
@@ -291,7 +298,7 @@ class ProcessImage:
 
         Returns: None
         """
-        self.noise_iter = 1 if i_val == 0 else i_val
+        self.noise_iter = i_val
         self.adjust_contrast()
         self.reduce_noise()
         self.contour_threshold()
@@ -376,16 +383,10 @@ class ProcessImage:
         Returns: None
         """
 
-        if k_val == 0:
-            print('Filter slider: value of 0 has been set to 1.')
-            val_k = 1
-        else:
-            val_k = k_val
-
         # cv2.GaussianBlur and cv2.medianBlur need to have odd kernels,
         #   but cv2.blur and cv2.bilateralFilter will shift image between
         #   even and odd kernels so just make everything odd.
-        val_k = val_k + 1 if val_k % 2 == 0 else val_k
+        val_k = k_val + 1 if k_val % 2 == 0 else k_val
         self.filter_kernel = val_k, val_k
         self.contour_threshold()
 

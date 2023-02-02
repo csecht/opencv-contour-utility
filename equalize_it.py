@@ -178,7 +178,13 @@ class ProcessImage:
         cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
         # Move the control window away from the processing windows.
         # Place window at right edge of screen by using an excessive x-coordinate.
-        cv2.moveWindow(self.settings_win, 5000, 35)
+        if utils.MY_OS in 'lin, dar':
+            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
+            cv2.moveWindow(self.settings_win, 4000, 35)
+        else:  # is Windows
+            # TODO: FIX poor fit of trackbars and text img in settings_win.
+            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
+            cv2.resizeWindow(self.settings_win, 500, 500)
 
         cv2.createTrackbar('CLAHE clip limit (10X)',
                            self.settings_win,
