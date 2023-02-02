@@ -119,7 +119,6 @@ class ProcessImage:
         self.font_scale = size2scale * const.FONT_SCALE
         if self.font_scale < 0.5:
             self.font_scale = 0.5
-        # TODO: FIX font is pixelated in small images, like example_01.
         self.line_thickness = math.ceil(size2scale * const.LINE_SCALE)
         self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE)
 
@@ -141,10 +140,15 @@ class ProcessImage:
         """
 
         self.settings_win = "Image and cv2.threshold settings"
-        cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
+
         # Move the control window away from the processing windows.
         # Place window at right edge of screen by using an excessive x-coordinate.
-        cv2.moveWindow(self.settings_win, 5000, 35)
+        if utils.MY_OS in 'lin, dar':
+            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
+            cv2.moveWindow(self.settings_win, 4000, 35)
+        else:  # is Windows
+            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL) # flags=cv2.WINDOW_GUI_NORMAL)
+            cv2.resizeWindow(self.settings_win, 500, 500)
 
         cv2.createTrackbar('Contrast/gain/alpha (100x):',
                            self.settings_win,
@@ -465,7 +469,7 @@ class ProcessImage:
 
         win_name = 'Adjusted contrast <- | -> Reduced noise'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_KEEPRATIO)  # WINDOW_KEEPRATIO
 
         side_by_side = cv2.hconcat(
             [self.contrasted, self.reduce_noise()])
@@ -738,7 +742,10 @@ class ProcessImage:
 
         # Need to set the dimensions of the settings area to fit all text.
         #   Font style parameters are set in constants.py module.
-        settings_img = utils.text_array((380, 600), the_text)
+        if utils.MY_OS in 'lin, dar':
+            settings_img = utils.text_array((380, 600), the_text)
+        else:  # is Windows
+            settings_img = utils.text_array((820, 1200), the_text)
 
         cv2.imshow(self.settings_win, settings_img)
 

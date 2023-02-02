@@ -204,7 +204,11 @@ def text_array(text_shape: iter, do_text: str) -> np.ndarray:
                                    const.FONT_TYPE,
                                    const.TEXT_SCALER,
                                    const.TEXT_THICKNESS)
-    line_height = text_size[1] + 10
+    if MY_OS in 'lin, dar':
+        line_height = text_size[1] + 10
+    else:  # is Windows
+        line_height = text_size[1] + 30
+
     _x, y0 = (5, 50)
     for i, line in enumerate(do_text.split("\n")):
         _y = y0 + i * line_height

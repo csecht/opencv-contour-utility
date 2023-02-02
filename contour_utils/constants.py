@@ -1,4 +1,7 @@
 import cv2
+import sys
+
+MY_OS = sys.platform[:3]
 
 # Set ranges for trackbars used to adjust contrast and brightness for
 #  the cv2.convertScaleAbs method.
@@ -92,7 +95,10 @@ CONTOUR = {
 FONT_TYPE = cv2.FONT_HERSHEY_SIMPLEX
 
 # Settings window text constants used in utils.text_array():
-TEXT_SCALER = 0.5
+if MY_OS in 'lin, dar':
+    TEXT_SCALER = 0.5
+else:
+    TEXT_SCALER = 1
 TEXT_THICKNESS = 1
 TEXT_COLOR = 180, 180, 180  # light gray for a dark gray background
 

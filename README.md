@@ -8,7 +8,7 @@ https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-
 The intention is to help OpenCV users understand the pertinent parameters and value ranges needed to identify objects.
 
 # HEADS UP:
-IN PROGRESS: Modules are not executing properly in Windows. A fix is in the works for version 0.0.2.
+WINDOWS is BUGGY: ver. 0.0.3 In Windows only, the trackbar & settings window may need to be manually widened to see settings text at the bottom of the window (and align trackbars in two columns). Also trackbar names are truncated. A fix is in the works.
 ## edge_it.py
 The module `edge_it.py` uses Canny edge detection, cv2.Canny, as the basis to identify contours.
 ## thresh_it.py
