@@ -1,6 +1,6 @@
 numpy==1.23.4
-opencv-python-4.6.0.66
-#opencv-python==4.5.5.62  # Use if 4.6 doesn't work well in PyCharm.
+#opencv-python==4.6.0.66   # may work
+opencv-python==4.5.5.62  # Use if 4.6 doesn't work well in PyCharm.
 matplotlib==3.6.3
 Pillow==9.4.0
 

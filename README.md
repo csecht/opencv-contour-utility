@@ -6,6 +6,9 @@ https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-
 </sub>
 
 The intention is to help OpenCV users understand the pertinent parameters and value ranges needed to identify objects.
+
+# HEADS UP:
+IN PROGRESS: Modules are not executing properly in Windows. A fix is in the works for version 0.0.2.
 ## edge_it.py
 The module `edge_it.py` uses Canny edge detection, cv2.Canny, as the basis to identify contours.
 ## thresh_it.py
@@ -22,11 +25,6 @@ From within the program's folder, use one of these Terminal or Command Prompt co
        python3 -m thresh_it --input images/sample2.jpg
 
        python3 -m equalize_it -i images/sample2.jpg
-       
-       Alternative command line examples for different systems:
-       Windows:    py thresh_it.py -i images/sample3.jpg
-       Linux, Mac: python3 thresh_it.py -i images/sample3.jpg
-       Linux, Mac: ./thresh_it.py -i images/sample3.jpg
 
 List command line options: `python3 -m thresh_it --help`
        

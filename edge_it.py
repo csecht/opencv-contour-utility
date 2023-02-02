@@ -20,10 +20,25 @@ Developed in Python 3.8-3.9.
 # Copyright (C) 2022 C.S. Echt, under GNU General Public License
 
 # Standard library imports
-import cv2
 import numpy as np
 import math
+import sys
 from pathlib import Path
+
+# Third party imports
+try:
+    import cv2
+except (ImportError, ModuleNotFoundError) as err:
+    print('*** The opencv-python package was not found'
+          ' or needs an update:\n\n'
+          'To install: from the current folder, run this command'
+          ' for the Python package installer (PIP):\n'
+          '   python3 -m pip install opencv-python\n\n'
+          'A package may already be installed, but needs an update;\n'
+          '   python3 -m pip install -U opencv-python\n\n'
+          f'Error message:\n{err}')
+    sys.exit(1)
+
 
 # Local application imports
 from contour_utils import (vcheck,

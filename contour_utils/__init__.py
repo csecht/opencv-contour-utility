@@ -4,7 +4,7 @@ These constants are used with the --about command line argument or button.
 
 # Development status standards: https://pypi.org/classifiers/
 __author__ = 'Craig S. Echt'
-__version__: str = '0.0.1'
+__version__: str = '0.0.2'
 __status__ = 'Development Status :: 3 - Alpha'
 __copyright__ = 'Copyright (C) 2022 C.S. Echt, under GNU General Public License'
 __license__ = """
@@ -22,4 +22,4 @@ __license__ = """
     along with this program (the LICENCE.txt file). If not, see
     https://www.gnu.org/licenses/."""
 
-URL = 'https://github.com/csecht/opencv-contour-util'
+URL = 'https://github.com/csecht/opencv-contour-utility'
