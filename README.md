@@ -7,9 +7,8 @@ https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-
 
 The intention is to help OpenCV users understand the pertinent parameters and value ranges needed to identify objects.
 
-# HEADS UP (as of 2 Feb 2023):
-WINDOWS is BUGGY: ver. 0.0.3 In Windows only, the trackbar & settings window may need to be manually widened to see settings text at the bottom of the window (and align trackbars in two columns). Also, trackbar names are truncated. A fix is in the works.
-Has not yet been tested in MacOS.
+## Operating Platform Compatibility (as of 3 Feb 2023):
+Implementation in Windows has problems with the system gui window manager, so running is Windows is not recommended at this time. Has not yet been tested in macOS. Everything should work fine in Linux distros. 
 
 ## edge_it.py
 The module `edge_it.py` uses Canny edge detection, cv2.Canny, as the basis to identify contours.
@@ -44,8 +43,8 @@ Basic information, author, version, license, etc.: `python3 -m thresh_it --about
 The Esc or Q key will quit any running module (except if "Histograms" window in `equalize_it.py` is currently selected; then just select one of the other windows to use a Quit key). From the command line, the usual Ctrl-C will also exit a module.
 
 ### Requirements:
-Python 3.7 or later, plus the packages OpenCV Matplotlib, Pandas, and Numpy.
-This program was developed in Python 3.8-3.9 Ubuntu Linux and Windows10.
+Python 3.7 or later, plus the packages OpenCV Matplotlib, Pandas, Numpy, and tkinter (included with 3.7 and above).
+This program was developed in Python 3.8.
 
 For quick installation of the required Python PIP packages:
 from the downloaded GitHub repository folder, run this command

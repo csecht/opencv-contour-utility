@@ -122,11 +122,11 @@ class ProcessImage:
         self.line_thickness = math.ceil(size2scale * const.LINE_SCALE)
         self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE)
 
-        # Display starting images. Use WINDOW_KEEPRATIO to fit any size
+        # Display starting images. Use WINDOW_GUI_NORMAL to fit any size
         #   image on screen and allow manual resizing of window.
         win_name = 'Input <- | ->Grayscaled for processing'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
         side_by_side = cv2.hconcat(
             [self.orig_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
         cv2.imshow(win_name, side_by_side)
@@ -470,7 +470,7 @@ class ProcessImage:
 
         win_name = 'Adjusted contrast <- | -> Reduced noise'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)  # WINDOW_KEEPRATIO
+                        flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
             [self.contrasted, self.reduce_noise()])
@@ -567,7 +567,7 @@ class ProcessImage:
 
         win_name = 'Filtered image'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
         cv2.imshow(win_name, filtered_img)
 
         return filtered_img
@@ -636,7 +636,7 @@ class ProcessImage:
 
         win_name = 'Threshold <- | -> Selected threshold contours'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
             [cv2.cvtColor(th_img, cv2.COLOR_GRAY2RGB), self.drawn_contours])
@@ -693,7 +693,7 @@ class ProcessImage:
 
         win_name = 'Identified objects, with sizes'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
         cv2.imshow(win_name, self.result_img)
 
     def show_settings(self) -> None:
