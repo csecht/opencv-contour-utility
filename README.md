@@ -8,7 +8,12 @@ https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-
 The intention is to help OpenCV users understand the pertinent parameters and value ranges needed to identify objects.
 
 ## Operating Platform Compatibility (as of 3 Feb 2023):
-Implementation in Windows has problems with the system gui window manager, so running is Windows is not recommended at this time. Has not yet been tested in macOS. Everything should work fine in Linux distros. 
+Implementation in Windows10 has problems with the system gui window manager, so running in Windows is not recommended at this time. Not tested on Windows11 or later. 
+
+Has not yet been tested in macOS 11; dependencies are not compatible with macOS 10.
+
+Everything should work fine in Linux distros.
+Development environment was Linux Ubuntu 20.04.
 
 ## edge_it.py
 The module `edge_it.py` uses Canny edge detection, cv2.Canny, as the basis to identify contours.
