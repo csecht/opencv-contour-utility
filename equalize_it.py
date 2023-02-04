@@ -128,7 +128,7 @@ class ProcessImage:
         A tkinter window for the Matplotlib figure canvas.
         """
 
-        # canvas_window is the Tk mainloop defined in if __name__ == "__main__".
+        # histogram_window is the Tk mainloop defined in if __name__ == "__main__".
         canvas_window.title('Histograms')
         canvas_window.resizable(False, False)
 
@@ -146,14 +146,7 @@ class ProcessImage:
         for child in toolbar.children:
             toolbar.children[child].pack_forget()
 
-        # Note: Toolbar and X icon do not execute until program quits or
-        #   until a Trackbar event occurs. Something to do with
-        #   self.fig.canvas.start_event_loop(0.1)?
-        # def no_exit_on_x():
-        #     print('The Histogram window will close when you quit the program (Esc or Q).')
-        # canvas_window.protocol('WM_DELETE_WINDOW', no_exit_on_x)
-
-        # Now display remaining widgets in canvas_window.
+        # Now display remaining widgets in histogram_window.
         # NOTE: toolbar must be gridded BEFORE canvas to prevent
         #   FigureCanvasTkAgg from preempting window geometry with its pack().
         toolbar.grid(row=1, column=0,
@@ -383,7 +376,4 @@ if __name__ == "__main__":
     # Set infinite loop with sigint handler to monitor "quit" keystrokes.
     utils.quit_keys()
 
-    try:
-        canvas_window.mainloop()
-    except KeyboardInterrupt:
-        print("\n*** User quit the program from Terminal/Console ***\n")
+    canvas_window.mainloop()
