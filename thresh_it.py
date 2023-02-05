@@ -147,7 +147,6 @@ class ProcessImage:
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow(self.settings_win, 4000, 35)
         else:  # is Windows
-            # TODO: FIX poor fit of trackbars and text img in settings_win.
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
             cv2.resizeWindow(self.settings_win, 500, 500)
 
@@ -698,7 +697,7 @@ class ProcessImage:
 
     def show_settings(self) -> None:
         """
-        Display name of file and processing parameters in self.settings_win
+        Display name of file and processing parameters in settings_win
         window. Displays real-time parameter changes.
         Calls module utils.text_array() in contour_utils directory.
 

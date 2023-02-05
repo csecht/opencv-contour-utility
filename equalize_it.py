@@ -114,12 +114,14 @@ class ProcessImage:
         self.orig_img = cv2.imread(arguments['input'])
         self.gray_img = cv2.cvtColor(self.orig_img, cv2.COLOR_BGR2GRAY)
 
-        # Display starting images here so that their imshow is called only once.
-        win_name = '<- Input | Grayscale for processing'
+        win_name = 'Input <- | -> Grayscale for processing'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_KEEPRATIO)
+
+        # Need to match shapes of the two cv image arrays.
         side_by_side = cv2.hconcat(
             [self.orig_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
+
         cv2.imshow(win_name, side_by_side)
 
     @staticmethod
@@ -332,7 +334,7 @@ class ProcessImage:
 
     def show_settings(self) -> None:
         """
-        Display name of file and processing parameters in self.settings_win
+        Display name of file and processing parameters in settings_win
         window. Displays real-time parameter changes.
         Calls module utils.text_array() in contour_utils directory.
 

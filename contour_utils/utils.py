@@ -72,9 +72,9 @@ def handle_exception(exc_type, exc_value, exc_traceback) -> None:
 
 
 def check_platform() -> None:
-    if MY_OS not in 'lin, win, dar':
-        print(f'Platform <{sys.platform}> is not supported.\n'
-              'Windows, Linux, and MacOS (darwin) are supported.')
+    if MY_OS == 'dar':
+        print(f'Mac OS is not currently supported. \n'
+              f'Linux is supported. Windows support is minimal.')
         sys.exit(1)
 
     # Need to account for scaling in Windows10 and earlier releases.
@@ -85,6 +85,9 @@ def check_platform() -> None:
             windll.user32.SetProcessDPIAware()
         else:
             windll.shcore.SetProcessDpiAwareness(1)
+
+        print('NOTE: Windows is minimally supported. Manual window resizing'
+              'will be needed. Better performance is attained on Linux systems.')
 
 
 def args_handler() -> dict:
