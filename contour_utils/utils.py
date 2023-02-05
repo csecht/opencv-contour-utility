@@ -73,9 +73,11 @@ def handle_exception(exc_type, exc_value, exc_traceback) -> None:
 
 def check_platform() -> None:
     if MY_OS == 'dar':
-        print(f'Mac OS is not currently supported. \n'
-              f'Linux is supported. Windows support is minimal.')
-        sys.exit(1)
+        print('macOS 13 was the development environment. Earlier version may not run.\n'
+              'NOTE that equalize_it.py generates a fatal  "autorelease pool page corrupted" '
+              'error.\n'
+              'NOTE that slide bar names are truncated; look at settings text for info.'
+              )
 
     # Need to account for scaling in Windows10 and earlier releases.
     if MY_OS == 'win':

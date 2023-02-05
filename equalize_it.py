@@ -173,12 +173,15 @@ class ProcessImage:
         cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
         # Move the control window away from the processing windows.
         # Place window at right edge of screen by using an excessive x-coordinate.
-        if utils.MY_OS in 'lin, dar':
+        if utils.MY_OS == 'lin':
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.settings_win, 4000, 35)
+            cv2.moveWindow(self.settings_win, 2000, 35)
+        elif utils.MY_OS == 'dar':
+            cv2.namedWindow(self.settings_win)
+            cv2.moveWindow(self.settings_win, 500, 35)
         else:  # is Windows
-            # TODO: FIX poor fit of trackbars and text img in settings_win.
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
+            cv2.resizeWindow(self.settings_win, 500, 500)
             cv2.resizeWindow(self.settings_win, 500, 500)
 
         cv2.createTrackbar('CLAHE clip limit (10X)',
@@ -191,9 +194,9 @@ class ProcessImage:
                            8,
                            200,
                            self.tile_selector)
-        cv2.createTrackbar('Slide to save CLAHE image and settings (0 <- -> 1):',
+        cv2.createTrackbar('Save; slide to 0:',
                            self.settings_win,
-                           0,
+                           1,
                            1,
                            self.save_selector)
 
@@ -233,20 +236,22 @@ class ProcessImage:
 
         self.set_clahe()
 
-    def save_selector(self, event=None) -> None:
+    def save_selector(self, s_val) -> None:
         """
         The 'save' trackbar handler.
         Args:
-            event: Implicit event from movement of 'Save' trackbar.
+            s_val: The integer value passed from trackbar.
 
         Returns: None
 
         """
-        utils.save_img_and_settings(self.clahe_img,
-                                    self.settings_txt,
-                                    'clahe')
-
-        return event  # Null use of *event* parameter; a formality.
+        if s_val == 0:
+            utils.save_img_and_settings(self.result_img,
+                                        self.settings_txt,
+                                        'threshold')
+            cv2.setTrackbarPos('Save; move to 0',
+                               self.settings_win,
+                               1)
 
     def set_clahe(self, startup=None) -> None:
         """
