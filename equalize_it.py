@@ -246,7 +246,7 @@ class ProcessImage:
 
         """
         if s_val == 0:
-            utils.save_img_and_settings(self.result_img,
+            utils.save_img_and_settings(self.clahe_img,
                                         self.settings_txt,
                                         'threshold')
             cv2.setTrackbarPos('Save; move to 0',
