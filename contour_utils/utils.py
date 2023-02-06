@@ -34,49 +34,13 @@ import contour_utils
 from contour_utils import constants as const
 
 MY_OS = sys.platform[:3]
-logger = logging.getLogger(__name__)
-handler = logging.StreamHandler(stream=sys.stdout)
-logger.addHandler(handler)
-
-
-def handle_exception(exc_type, exc_value, exc_traceback) -> None:
-    """
-    Changes an unhandled exception to go to stdout rather than
-    stderr. Ignores KeyboardInterrupt so a console program can exit
-    with Ctrl + C. Relies entirely on python's logging module for
-    formatting the exception. Sources:
-    https://stackoverflow.com/questions/6234405/
-    logging-uncaught-exceptions-in-python/16993115#16993115
-    https://stackoverflow.com/questions/43941276/
-    python-tkinter-and-imported-classes-logging-uncaught-exceptions/
-    44004413#44004413
-
-    Usage: For developers; use in mainloop,
-     - sys.excepthook = utils.handle_exception
-     - app.report_callback_exception = utils.handle_exception
-
-    Args:
-        exc_type: The type of the BaseException class.
-        exc_value: The value of the BaseException instance.
-        exc_traceback: The traceback object.
-
-    Returns: None
-
-    """
-    if issubclass(exc_type, KeyboardInterrupt):
-        sys.__excepthook__(exc_type, exc_value, exc_traceback)
-        return
-
-    logger.error("Uncaught exception",
-                 exc_info=(exc_type, exc_value, exc_traceback))
-
 
 def check_platform() -> None:
     if MY_OS == 'dar':
-        print('macOS 13 was the development environment. Earlier version may not run.\n'
-              'NOTE that equalize_it.py generates a fatal  "autorelease pool page corrupted" '
+        print('Developed in macOS 13; earlier versions may not work.\n'
+              'NOTE: equalize_it.py generates a fatal "autorelease pool page corrupted" '
               'error.\n'
-              'NOTE that slide bar names are truncated; look at settings text for info.'
+              'NOTE: the Settings window may need to be resized for proper fit of contents.'
               )
 
     # Need to account for scaling in Windows10 and earlier releases.
@@ -91,6 +55,7 @@ def check_platform() -> None:
         print('NOTE: Windows is minimally supported. Manual window resizing'
               'will be needed. Better performance is attained on Linux systems.')
 
+    print('Quit program with Esc or Q key, or Ctrl-C from Terminal.')
 
 def args_handler() -> dict:
     """
@@ -210,7 +175,7 @@ def text_array(text_shape: iter, do_text: str) -> np.ndarray:
                                    const.TEXT_SCALER,
                                    const.TEXT_THICKNESS)
     if MY_OS in 'lin, dar':
-        line_height = text_size[1] + 10
+        line_height = text_size[1] + 9
     else:  # is Windows
         line_height = text_size[1] + 30
 

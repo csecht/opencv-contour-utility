@@ -139,7 +139,7 @@ class ProcessImage:
         Returns: None
         """
 
-        self.settings_win = "Image and cv2.threshold settings"
+        self.settings_win = "Settings for images and cv2.threshold"
 
         # Move the control window away from the processing windows.
         # Place window at right edge of screen by using an excessive x-coordinate.
@@ -153,79 +153,109 @@ class ProcessImage:
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
             cv2.resizeWindow(self.settings_win, 500, 500)
 
-        cv2.createTrackbar('Contrast/gain/alpha (100x):',
+        if utils.MY_OS in 'dar, win':
+            _contrast = 'Contrast:'
+            _bright = 'Brightness:'
+            _morph_op = 'Morph operator:'
+            _morph_shape = 'Morph shape:'
+            _noise_k = 'Lower noise, k:'
+            _noise_i = '   ..iterations:'
+            _border = 'Border type:'
+            _filter = 'Filter type:'
+            _kernel_size = 'Filter k size:'
+            _thresh_type = 'Threshold type'
+            _contour = 'Contour type:'
+            _contour_min = 'Contour size min:'
+            _save = 'Save (slide to 0):'
+        else:  # is Linux
+            _contrast = f'{"Contrast/gain/alpha (100x):" : <40}'
+            _bright = f"{'Brightness/bias/beta, (-127):' : <40}"
+            _morph_op = ("Reduce noise morphology operator: "
+                         f'{"0 open, 1 hitmiss, 2 close, 3 gradient" : <45}')
+            _morph_shape = ("Reduce noise morphology shape: "
+                           f'{"0 rectangle, 1 cross, 2 ellipse" : <48}')
+            _noise_k = f'{"Reduce noise, kernel size (odd only):" : <40}'
+            _noise_i = f'{"Reduce noise, iterations:" : <46}'
+            _border = ("Border type:  "
+                       f'{"0 default, 1 reflect, 2 replicate, 3 isolated" : <46}')
+            _filter = ("Filter type:  "
+                       f'{"0 box, 1 bilateral, 2 Gaussian, 3 median" : <46}')
+            _kernel_size = f'{"Filter kernel size (odd only):" : <43}'
+            _thresh_type = f'{"Thresholding type: 0 Otsu, 1 Triangle" : <40}'
+            _contour = f'{"Contour size type: 0 area, 1 arc length" : <40}'
+            _contour_min = f'{"Contour size minimum (pixels):" : <30}'
+            _save = f'{"Save (click on 0)" : <54}'
+
+        cv2.createTrackbar(_contrast,
                            self.settings_win,
                            100,
                            const.ALPHA_MAX,
                            self.alpha_selector)
-        cv2.createTrackbar('Brightness/bias/beta, (-127):',
+        cv2.createTrackbar(_bright,
                            self.settings_win,
                            127,
                            const.BETA_MAX,
                            self.beta_selector)
-        cv2.createTrackbar(f'{"Reduce noise morphology operator:".ljust(50)}\n'
-                           '0 open, 1 hitmiss, 2 close, 3 gradient',
+        cv2.createTrackbar(_morph_op,
                            self.settings_win,
                            1,
                            3,
                            self.morphology_op_selector)
-        cv2.createTrackbar(f'{"Reduce noise morphology shape:".ljust(50)}\n'
-                           '0 rectangle, 1 cross, 2 ellipse',
+        cv2.createTrackbar(_morph_shape,
                            self.settings_win,
                            2,
                            2,
                            self.noise_redux_shape_selector)
-        cv2.createTrackbar('Reduce noise, kernel size (odd only):',
+        cv2.createTrackbar(_noise_k,
                            self.settings_win,
                            3,
                            20,
                            self.noise_redux_kernel_selector)
-        cv2.createTrackbar('Reduce noise, iterations:',
+        cv2.createTrackbar(_noise_i,
                            self.settings_win,
                            1,
                            5,
                            self.noise_redux_iter_selector)
-        cv2.setTrackbarMin('Reduce noise, iterations:',
+        cv2.setTrackbarMin(_noise_i,
                            self.settings_win,
                            1)
-        cv2.createTrackbar(('Border type: 0 default, 1 reflect, 2 replicate,'
-                            '3 isolated'),
+        cv2.createTrackbar(_border,
                            self.settings_win,
-                           0,
+                           2,
                            3,
                            self.border_selector)
-        cv2.createTrackbar('Filter type: 0 box, 1 bilateral, 2 Gaussian, 3 median',
+        cv2.createTrackbar(_filter,
                            self.settings_win,
                            2,
                            3,
                            self.filter_type_selector)
-        cv2.createTrackbar('Filter kernel size (odd only):',
+        cv2.createTrackbar(_kernel_size,
                            self.settings_win,
                            3,
                            50,
                            self.filter_kernel_selector)
-        cv2.setTrackbarMin('Filter kernel size (odd only):',
+        cv2.setTrackbarMin(_kernel_size,
                            self.settings_win,
                            1)
-        cv2.createTrackbar('Thresholding type: 0 Otsu, 1 Triangle',
+        cv2.createTrackbar(_thresh_type,
                            self.settings_win,
                            0,
                            1,
                            self.thresh_type_selector)
-        cv2.createTrackbar('Contour size type: 0 area, 1 arc length',
+        cv2.createTrackbar(_contour,
                            self.settings_win,
                            1,
                            1,
                            self.contour_type_selector)
-        cv2.createTrackbar('Contour size minimum (pixels):',
+        cv2.createTrackbar(_contour_min,
                            self.settings_win,
                            100,
                            1000,
                            self.contour_limit_selector)
-        cv2.createTrackbar('Save; slide to 0:',
+        cv2.createTrackbar(_save,
                            self.settings_win,
-                           1,
-                           1,
+                           10,
+                           50,
                            self.save_selector)
 
     def alpha_selector(self, a_val) -> None:
@@ -750,7 +780,6 @@ class ProcessImage:
         if utils.MY_OS in 'lin, dar':
             # settings_img = utils.text_array((380, 600), the_text)  # Linux
             settings_img = utils.text_array((380, 800), the_text)
-
         else:  # is Windows
             settings_img = utils.text_array((820, 1200), the_text)
 
