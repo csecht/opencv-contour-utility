@@ -501,7 +501,7 @@ class ProcessImage:
                                         'threshold')
             cv2.setTrackbarPos('Save; move to 0',
                                self.settings_win,
-                               1)
+                               10)
 
     def adjust_contrast(self) -> None:
         """

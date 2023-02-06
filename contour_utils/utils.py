@@ -14,7 +14,6 @@ quit_keys -  Error-free and informative exit from the program.
 
 # Standard library imports.
 import argparse
-import logging
 import platform
 import signal
 import sys
@@ -38,9 +37,7 @@ MY_OS = sys.platform[:3]
 def check_platform() -> None:
     if MY_OS == 'dar':
         print('Developed in macOS 13; earlier versions may not work.\n'
-              'NOTE: equalize_it.py generates a fatal "autorelease pool page corrupted" '
-              'error.\n'
-              'NOTE: the Settings window may need to be resized for proper fit of contents.'
+              'NOTE: Histograms will not be displayed in equalize_it.py'
               )
 
     # Need to account for scaling in Windows10 and earlier releases.
