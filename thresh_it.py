@@ -142,7 +142,7 @@ class ProcessImage:
         self.settings_win = "Settings for images and cv2.threshold"
 
         # Move the control window away from the processing windows.
-        # Place window at right edge of screen by using an excessive x-coordinate.
+        # Linux Ubuntiu: Place window at right edge of screen with excessive x-coordinate.
         if utils.MY_OS == 'lin':
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow(self.settings_win, 2000, 35)
