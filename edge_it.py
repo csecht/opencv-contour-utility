@@ -798,7 +798,7 @@ class ProcessImage:
         if utils.MY_OS == 'lin':
             settings_img = utils.text_array((400, 620), self.settings_txt)
         elif utils.MY_OS == 'dar':
-            settings_img = utils.text_array((350, 620), self.settings_txt)
+            settings_img = utils.text_array((380, 620), self.settings_txt)
         else:  # is Windows
             settings_img = utils.text_array((820, 1200), the_text)
 
