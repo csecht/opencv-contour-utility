@@ -166,14 +166,14 @@ class ProcessImage:
             _thresh_type = 'Threshold type'
             _contour = 'Contour type:'
             _contour_min = 'Contour size min:'
-            _save = 'Save (slide to 0):'
+            _save = 'Save (click or slide to 0):'
         else:  # is Linux
             _contrast = f'{"Contrast/gain/alpha (100x):" : <40}'
             _bright = f"{'Brightness/bias/beta, (-127):' : <40}"
             _morph_op = ("Reduce noise morphology operator: "
                          f'{"0 open, 1 hitmiss, 2 close, 3 gradient" : <45}')
             _morph_shape = ("Reduce noise morphology shape: "
-                           f'{"0 rectangle, 1 cross, 2 ellipse" : <48}')
+                            f'{"0 rectangle, 1 cross, 2 ellipse" : <48}')
             _noise_k = f'{"Reduce noise, kernel size (odd only):" : <40}'
             _noise_i = f'{"Reduce noise, iterations:" : <46}'
             _border = ("Border type:  "
@@ -184,7 +184,7 @@ class ProcessImage:
             _thresh_type = f'{"Thresholding type: 0 Otsu, 1 Triangle" : <40}'
             _contour = f'{"Contour size type: 0 area, 1 arc length" : <40}'
             _contour_min = f'{"Contour size minimum (pixels):" : <30}'
-            _save = f'{"Save (click on 0)" : <54}'
+            _save = f'{"Save (click or slide to 0)" : <45}'
 
         cv2.createTrackbar(_contrast,
                            self.settings_win,
@@ -777,9 +777,10 @@ class ProcessImage:
 
         # Need to set the dimensions of the settings area to fit all text.
         #   Font style parameters are set in constants.py module.
-        if utils.MY_OS in 'lin, dar':
-            # settings_img = utils.text_array((380, 600), the_text)  # Linux
-            settings_img = utils.text_array((380, 800), the_text)
+        if utils.MY_OS == 'lin':
+            settings_img = utils.text_array((380, 620), the_text)  # Linux
+        elif utils.MY_OS == 'dar':
+            settings_img = utils.text_array((380, 620), the_text)
         else:  # is Windows
             settings_img = utils.text_array((820, 1200), the_text)
 

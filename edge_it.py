@@ -166,14 +166,14 @@ class ProcessImage:
             _thresh_min = '  ..lower thresh:'
             _contour = 'Contour type:'
             _contour_min = 'Contour size min:'
-            _save = 'Save (slide to 0):'
+            _save = 'Save (click or slide to 0):'
         else:  # is Linux
             _contrast = f'{"Contrast/gain/alpha (100x):" : <40}'
             _bright = f"{'Brightness/bias/beta, (-127):' : <40}"
             _morph_op = ("Reduce noise morphology operator: "
                          f'{"0 open, 1 hitmiss, 2 close, 3 gradient" : <45}')
             _morph_shape = ("Reduce noise morphology shape: "
-                           f'{"0 rectangle, 1 cross, 2 ellipse" : <48}')
+                            f'{"0 rectangle, 1 cross, 2 ellipse" : <48}')
             _noise_k = f'{"Reduce noise, kernel size (odd only):" : <40}'
             _noise_i = f'{"Reduce noise, iterations:" : <46}'
             _border = ("Border type:  "
@@ -185,7 +185,7 @@ class ProcessImage:
             _thresh_min = f'{"Edges, lower t-hold:" : <50}'
             _contour = f'{"Contour size type: 0 area, 1 arc length" : <40}'
             _contour_min = f'{"Contour size minimum (pixels):" : <30}'
-            _save = f'{"Save (click on 0)" : <54}'
+            _save = f'{"Save (click or slide to 0)" : <45}'
 
         cv2.createTrackbar(_contrast,
                            self.settings_win,
