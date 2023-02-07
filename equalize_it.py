@@ -97,11 +97,15 @@ class ProcessImage:
         self.settings_txt = ''
         self.settings_win = ''
 
+        # Note: This order of calls in Linus and Windows is
+        #  needed for histograms to display at start; it's an
+        #  event issue (where setup_trackbars() triggers an event
+        #  that prompts drawing of histogram window).
         self.manage_input()
-        self.setup_canvas_window()
         if utils.MY_OS in 'lin, win':
+            self.setup_canvas_window()
             self.show_input_histogram()
-            self.setup_trackbars()
+        self.setup_trackbars()
 
     def manage_input(self):
         """
@@ -181,7 +185,7 @@ class ProcessImage:
             cv2.moveWindow(self.settings_win, 800, 35)
         elif utils.MY_OS == 'dar':
             cv2.namedWindow(self.settings_win)
-            cv2.moveWindow(self.settings_win, 600, 250)
+            cv2.moveWindow(self.settings_win, 600, 300)
         else:  # is Windows
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
             cv2.resizeWindow(self.settings_win, 500, 500)
@@ -248,10 +252,11 @@ class ProcessImage:
         Returns: None
 
         """
-        if s_val == 0:
+        while s_val == 0:
             utils.save_img_and_settings(self.clahe_img,
                                         self.settings_txt,
                                         'threshold')
+            break
 
     def set_clahe(self, startup=None) -> None:
         """
