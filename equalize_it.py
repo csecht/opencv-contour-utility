@@ -255,7 +255,7 @@ class ProcessImage:
         while s_val == 0:
             utils.save_img_and_settings(self.clahe_img,
                                         self.settings_txt,
-                                        'threshold')
+                                        'equalize')
             break
 
     def set_clahe(self, startup=None) -> None:
