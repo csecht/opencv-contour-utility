@@ -69,6 +69,23 @@ class ProcessImage:
         self.flat_gray_array = None
         self.clahe_img = None
 
+        if utils.MY_OS in 'lin, win':
+            # Matplotlib plotting with live updates.
+            plt.style.use(('bmh', 'fast'))
+            self.fig, (self.ax1, self.ax2) = plt.subplots(
+                nrows=2,
+                num='Histograms',  # Provide a window title to replace 'Figure 1'.
+                sharex='all',
+                sharey='all',
+                clear=True
+            )
+            # Note that plt.ion() needs to be called
+            # AFTER subplots() is called,
+            #   otherwise a "Segmentation fault (core dumped)" error is raised.
+            # plt.ion() is used with fig.canvas.start_event_loop(0.1);
+            #   not needed if fig.canvas.draw_idle() is used.
+            plt.ion()
+
         # Image processing parameters amd metrics.
         self.clip_limit = 2.0  # Default trackbar value.
         self.tile_size = (8, 8)  # Default trackbar value.
@@ -81,27 +98,10 @@ class ProcessImage:
         self.settings_win = ''
 
         self.manage_input()
-        self.setup_trackbars()
-
-        if utils.MY_OS != 'dar':
-            # Matplotlib plotting with live updates.
-            plt.style.use(('bmh', 'fast'))
-            self.fig, (self.ax1, self.ax2) = plt.subplots(
-                nrows=2,
-                num='Histograms',  # Provide a window title to replace 'Figure 1'.
-                sharex='all',
-                sharey='all',
-                # clear=True
-            )
-            # Note that plt.ion() needs to be called
-            # AFTER subplots() is called,
-            #   otherwise a "Segmentation fault (core dumped)" error is raised.
-            # plt.ion() is used with fig.canvas.start_event_loop(0.1);
-            #   not needed if fig.canvas.draw_idle() is used.
-            plt.ion()
-
-            self.setup_canvas_window()
+        self.setup_canvas_window()
+        if utils.MY_OS in 'lin, win':
             self.show_input_histogram()
+            self.setup_trackbars()
 
     def manage_input(self):
         """
@@ -174,12 +174,11 @@ class ProcessImage:
         self.settings_win = "Image and cv2.createCLAHE settings"
         cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
 
-
         # Move the control window away from the processing windows.
         # Place window at right edge of screen by using an excessive x-coordinate.
         if utils.MY_OS == 'lin':
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.settings_win, 2000, 35)
+            cv2.moveWindow(self.settings_win, 800, 35)
         elif utils.MY_OS == 'dar':
             cv2.namedWindow(self.settings_win)
             cv2.moveWindow(self.settings_win, 600, 250)
@@ -253,9 +252,6 @@ class ProcessImage:
             utils.save_img_and_settings(self.clahe_img,
                                         self.settings_txt,
                                         'threshold')
-            cv2.setTrackbarPos('Save (click on 0)',
-                               self.settings_win,
-                               10)
 
     def set_clahe(self, startup=None) -> None:
         """
@@ -284,10 +280,10 @@ class ProcessImage:
         win_name = 'CLAHE adjusted'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.moveWindow(win_name, 20, 250)
+        cv2.moveWindow(win_name, 300, 250)
         cv2.imshow(win_name, self.clahe_img)
 
-        if utils.MY_OS != 'dar':
+        if utils.MY_OS in 'lin, win':
             self.show_clahe_histogram()
 
     def show_input_histogram(self) -> None:
@@ -334,6 +330,7 @@ class ProcessImage:
         self.ax2.set_title('CLAHE adjusted')
         self.ax2.set_xlabel("Pixel value")
         self.ax2.set_ylabel("Pixel count")
+
         # From: https://stackoverflow.com/questions/28269157/
         #  plotting-in-a-non-blocking-way-with-matplotlib
         # and, https://github.com/matplotlib/matplotlib/issues/11131
@@ -383,7 +380,7 @@ if __name__ == "__main__":
     # Need to not set up tk canvas to display Histograms b/c
     #  generates a fatal memory allocation error. It has something
     #  to do with the start_event_loop function.
-    if utils.MY_OS != 'dar':
+    if utils.MY_OS == 'dar':
         PI = ProcessImage()
         print(f'{Path(__file__).name} is now running...')
 
