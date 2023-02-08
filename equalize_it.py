@@ -10,7 +10,7 @@ python3 -m equalize_it --help
 python3 -m equalize_it --about
 python3 -m equalize_it --input images/sample2.jpg
 
-Quit program with Esc or Q key when a window other than Histograms is selected.
+Quit program with Esc or Q key; may need to select a window other than Histograms.
 Or quit from command line with Ctrl-C.
 Save settings and CLAHE image with the Save slide bar.
 
@@ -98,7 +98,7 @@ class ProcessImage:
 
         win_name = 'Input <- | -> Grayscale for processing'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
 
         # Need to match shapes of the two cv image arrays.
         side_by_side = cv2.hconcat(
@@ -115,7 +115,7 @@ class ProcessImage:
         """
 
         self.settings_win = "Image and cv2.createCLAHE settings"
-        self.save_tb_name = 'Save, click at 0'
+        self.save_tb_name = 'Save, on 0'
         cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
 
         # Move the control window away from the processing windows.
@@ -232,7 +232,6 @@ class ProcessImage:
         win_name = 'CLAHE adjusted'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.moveWindow(win_name, 300, 50)
         cv2.imshow(win_name, self.clahe_img)
 
         self.show_clahe_histogram()
@@ -255,13 +254,13 @@ class ProcessImage:
         #   Rectangle artists.
 
         plt.hist(self.gray_img.ravel(),
-                      bins=255,
-                      range=[0, 256],
-                      color='gray',
-                      alpha=0.4,
-                      histtype='stepfilled',
-                      label='Input grayscale'
-                      )
+                 bins=255,
+                 range=[0, 256],
+                 color='gray',
+                 alpha=0.4,
+                 histtype='stepfilled',
+                 label='Input grayscale'
+                 )
 
     def show_clahe_histogram(self) -> None:
         """
@@ -278,19 +277,17 @@ class ProcessImage:
 
         # Need to clear prior histograms before drawing new ones.
         plt.hist(self.clahe_img.ravel(),
-                      bins=255,
-                      range=[0, 256],
-                      color='orange',
-                      alpha=0.6,
-                      histtype='stepfilled',  # 'step' draws a line.
-                      label='CLAHE adjusted'
-                      )
+                 bins=255,
+                 range=[0, 256],
+                 color='orange',
+                 alpha=0.6,
+                 histtype='stepfilled',  # 'step' draws a line.
+                 label='CLAHE adjusted'
+                 )
         plt.title('Histograms')
         plt.xlabel('Pixel value')
         plt.ylabel('Pixel count')
-
         plt.legend()
-
 
     def show_settings(self) -> None:
         """

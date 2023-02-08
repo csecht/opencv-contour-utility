@@ -9,7 +9,7 @@ python3 -m thresh_it --about
 python3 -m thresh_it --input images/sample1.jpg
 python3 -m thresh_it -i images/sample2.jpg
 
-Quit program with Return/Enter key. Quit from command line with Ctrl-C.
+Quit program with Esc or Q key or from command line with Ctrl-C.
 Save any selected window with Ctrl-S or from rt-click menu.
 Save settings and contour image with the Save/Print slide bar.
 
