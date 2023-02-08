@@ -34,11 +34,10 @@ from contour_utils import constants as const
 
 MY_OS = sys.platform[:3]
 
+
 def check_platform() -> None:
     if MY_OS == 'dar':
-        print('Developed in macOS 13; earlier versions may not work.\n'
-              'NOTE: Histograms will not be displayed in equalize_it.py'
-              )
+        print('Developed in macOS 13; earlier versions may not work.\n')
 
     # Need to account for scaling in Windows10 and earlier releases.
     if MY_OS == 'win':
@@ -53,6 +52,7 @@ def check_platform() -> None:
               'will be needed. Better performance is attained on Linux systems.')
 
     print('Quit program with Esc or Q key, or Ctrl-C from Terminal.')
+
 
 def args_handler() -> dict:
     """

@@ -8,11 +8,11 @@ thresh_it.py and edge_it.py to identify object contours.
 USAGE Example command lines, from within the image-processor-main folder:
 python3 -m equalize_it --help
 python3 -m equalize_it --about
-python3 -m equalize_it --input images/sample2.jpg --resize 0.5
+python3 -m equalize_it --input images/sample2.jpg
 
-Quit program with Return/Enter key. Quit from command line with Ctrl-C.
-Save any selected window with Ctrl-S or from rt-click menu.
-Save settings and CLAHE image with the Save/Print slide bar.
+Quit program with Esc or Q key when a window other than Histograms is selected.
+Or quit from command line with Ctrl-C.
+Save settings and CLAHE image with the Save slide bar.
 
 Requires Python3.7 or later and the packages opencv-python and numpy.
 Developed in Python 3.8-3.9.
@@ -22,18 +22,14 @@ Developed in Python 3.8-3.9.
 # Standard library imports.
 import sys
 from pathlib import Path
+from datetime import datetime
 
 # Third party imports.
 try:
     import cv2
-    import numpy as np
-    import matplotlib
-    import matplotlib.backends.backend_tkagg as backend
-    import tkinter as tk
     from matplotlib import pyplot as plt
-    from matplotlib.widgets import Button
 except (ImportError, ModuleNotFoundError) as import_err:
-    print('*** OpenCV, Numpy, Matplotlib or tkinter (tk/tcl) was not found or needs an update:\n\n'
+    print('*** OpenCV or Matplotlib was not found or needs an update:\n\n'
           'To install: from the current folder, run this command'
           ' for the Python package installer (PIP):\n'
           '   python3 -m pip install -r requirements.txt\n\n'
@@ -59,7 +55,7 @@ class ProcessImage:
                  'flat_gray_array', 'gray_img', 'orig_img', 'orig_mean',
                  'orig_sd', 'settings_txt',
                  'settings_win', 'tile_size',
-                 'fig', 'ax1', 'ax2')
+                 'save_tb_name', 'clahe_hist')
 
     def __init__(self):
 
@@ -68,23 +64,6 @@ class ProcessImage:
         self.gray_img = None
         self.flat_gray_array = None
         self.clahe_img = None
-
-        if utils.MY_OS in 'lin, win':
-            # Matplotlib plotting with live updates.
-            plt.style.use(('bmh', 'fast'))
-            self.fig, (self.ax1, self.ax2) = plt.subplots(
-                nrows=2,
-                num='Histograms',  # Provide a window title to replace 'Figure 1'.
-                sharex='all',
-                sharey='all',
-                clear=True
-            )
-            # Note that plt.ion() needs to be called
-            # AFTER subplots() is called,
-            #   otherwise a "Segmentation fault (core dumped)" error is raised.
-            # plt.ion() is used with fig.canvas.start_event_loop(0.1);
-            #   not needed if fig.canvas.draw_idle() is used.
-            plt.ion()
 
         # Image processing parameters amd metrics.
         self.clip_limit = 2.0  # Default trackbar value.
@@ -96,16 +75,13 @@ class ProcessImage:
 
         self.settings_txt = ''
         self.settings_win = ''
+        self.save_tb_name = ''
 
-        # Note: This order of calls in Linus and Windows is
-        #  needed for histograms to display at start; it's an
-        #  event issue (where setup_trackbars() triggers an event
-        #  that prompts drawing of histogram window).
+        plt.ion()
         self.manage_input()
-        if utils.MY_OS in 'lin, win':
-            self.setup_canvas_window()
-            self.show_input_histogram()
         self.setup_trackbars()
+        # NOTE that setup_trackbars sets starting pos other than zero,
+        #  which creates a call event for set_clahe()
 
     def manage_input(self):
         """
@@ -130,43 +106,6 @@ class ProcessImage:
 
         cv2.imshow(win_name, side_by_side)
 
-    @staticmethod
-    def setup_canvas_window() -> None:
-        """
-        A tkinter window for the Matplotlib figure canvas.
-        """
-
-        # histogram_window is the Tk mainloop defined in if __name__ == "__main__".
-        canvas_window.title('Histograms')
-        canvas_window.resizable(False, False)
-
-        canvas_window.bind_all('<Escape>', utils.quit_keys)
-        canvas_window.bind('<Control-q>', utils.quit_keys)
-
-        canvas = backend.FigureCanvasTkAgg(plt.gcf(), canvas_window)
-        toolbar = backend.NavigationToolbar2Tk(canvas, canvas_window)
-
-        # Need to remove the useless subplots navigation button.
-        # Source: https://stackoverflow.com/questions/59155873/
-        #   how-to-remove-toolbar-button-from-navigationtoolbar2tk-figurecanvastkagg
-        # Remove all tools from toolbar because the Histograms window is
-        # non-responsive while in event_loop.
-        for child in toolbar.children:
-            toolbar.children[child].pack_forget()
-
-        # Now display remaining widgets in histogram_window.
-        # NOTE: toolbar must be gridded BEFORE canvas to prevent
-        #   FigureCanvasTkAgg from preempting window geometry with its pack().
-        toolbar.grid(row=1, column=0,
-                     padx=5, pady=(0, 5),  # Put a border around toolbar.
-                     sticky=tk.NSEW,
-                     )
-        canvas.get_tk_widget().grid(row=0, column=0,
-                                    ipady=10, ipadx=10,
-                                    padx=5, pady=5,  # Put a border around plot.
-                                    sticky=tk.NSEW,
-                                    )
-
     def setup_trackbars(self) -> None:
         """
         All trackbars that go in a separate window of image processing
@@ -176,6 +115,7 @@ class ProcessImage:
         """
 
         self.settings_win = "Image and cv2.createCLAHE settings"
+        self.save_tb_name = 'Save, click at 0'
         cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
 
         # Move the control window away from the processing windows.
@@ -184,8 +124,8 @@ class ProcessImage:
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow(self.settings_win, 800, 35)
         elif utils.MY_OS == 'dar':
-            cv2.namedWindow(self.settings_win)
-            cv2.moveWindow(self.settings_win, 600, 300)
+            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
+            cv2.moveWindow(self.settings_win, 600, 15)
         else:  # is Windows
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
             cv2.resizeWindow(self.settings_win, 500, 500)
@@ -196,14 +136,22 @@ class ProcessImage:
                            20,
                            50,
                            self.clip_selector)
+        cv2.setTrackbarMin('Clip limit (10X)',
+                           self.settings_win,
+                           1)
+
         cv2.createTrackbar('Tile size (N, N)',
                            self.settings_win,
                            8,
                            200,
                            self.tile_selector)
-        cv2.createTrackbar('Save (click on 0)',
+        cv2.setTrackbarMin('Tile size (N, N)',
                            self.settings_win,
-                           10,
+                           1)
+
+        cv2.createTrackbar(self.save_tb_name,
+                           self.settings_win,
+                           2,
                            50,
                            self.save_selector)
 
@@ -245,25 +193,25 @@ class ProcessImage:
 
     def save_selector(self, s_val) -> None:
         """
-        The 'save' trackbar handler.
+        The 'Save' trackbar handler.
         Args:
             s_val: The integer value passed from trackbar.
 
         Returns: None
 
         """
-        while s_val == 0:
-            utils.save_img_and_settings(self.clahe_img,
-                                        self.settings_txt,
-                                        'equalize')
-            break
+        # Need a pause to prevent multiple Trackbar event calls.
+        if s_val == 0:
+            plt.pause(0.5)
+            self.save_img_and_settings()
+            cv2.setTrackbarPos(self.save_tb_name,
+                               self.settings_win,
+                               1)
 
-    def set_clahe(self, startup=None) -> None:
+    def set_clahe(self) -> None:
         """
         Applies CLAHE adjustments to image and calculates pixel values
         for reporting.
-        Args:
-            startup: Flag for when call is from program startup.
 
         Returns: None
         """
@@ -279,17 +227,16 @@ class ProcessImage:
         self.clahe_mean = int(self.clahe_img.mean())
 
         # A hack to avoid having two settings text windows appear.
-        if not startup:
-            self.show_settings()
+        self.show_settings()
 
         win_name = 'CLAHE adjusted'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.moveWindow(win_name, 300, 250)
+        cv2.moveWindow(win_name, 300, 50)
         cv2.imshow(win_name, self.clahe_img)
 
-        if utils.MY_OS in 'lin, win':
-            self.show_clahe_histogram()
+        self.show_clahe_histogram()
+        # show_clahe_histogram() calls show_input_histogram()
 
     def show_input_histogram(self) -> None:
         """
@@ -306,44 +253,44 @@ class ProcessImage:
         #   both are patches.Polygon artists that provide faster rendering
         #   than the default 'bar', which is a BarContainer object of
         #   Rectangle artists.
-        # Need to match these parameters with those for ax2.hist().
-        self.ax1.hist(self.gray_img.ravel(),
+
+        plt.hist(self.gray_img.ravel(),
                       bins=255,
                       range=[0, 256],
-                      color='blue',
+                      color='gray',
+                      alpha=0.4,
                       histtype='stepfilled',
+                      label='Input grayscale'
                       )
-        self.ax1.set_ylabel("Pixel count")
-        self.ax1.set_title('Input (grayscale)')
 
     def show_clahe_histogram(self) -> None:
         """
         Updates CLAHE adjusted histogram plot with Matplotlib from
         trackbar changes. Called from set_clahe().
+        Calls show_input_histogram()
 
         Returns: None
         """
 
+        plt.cla()
+
+        self.show_input_histogram()
+
         # Need to clear prior histograms before drawing new ones.
-        self.ax2.clear()
-        self.ax2.hist(self.clahe_img.ravel(),
+        plt.hist(self.clahe_img.ravel(),
                       bins=255,
                       range=[0, 256],
                       color='orange',
+                      alpha=0.6,
                       histtype='stepfilled',  # 'step' draws a line.
+                      label='CLAHE adjusted'
                       )
-        self.ax2.set_title('CLAHE adjusted')
-        self.ax2.set_xlabel("Pixel value")
-        self.ax2.set_ylabel("Pixel count")
+        plt.title('Histograms')
+        plt.xlabel('Pixel value')
+        plt.ylabel('Pixel count')
 
-        # From: https://stackoverflow.com/questions/28269157/
-        #  plotting-in-a-non-blocking-way-with-matplotlib
-        # and, https://github.com/matplotlib/matplotlib/issues/11131
-        # Note that start_event_loop is needed for live updates of clahe histograms.
-        self.fig.canvas.start_event_loop(0.1)
-        # Note that plt.ion() is not needed if draw_idle is used here.
-        #  Using it in addition to plt.ion() is okay; no obvious effect.
-        # self.fig.canvas.draw_idle()
+        plt.legend()
+
 
     def show_settings(self) -> None:
         """
@@ -372,6 +319,48 @@ class ProcessImage:
 
         cv2.imshow(self.settings_win, settings_img)
 
+    def save_img_and_settings(self) -> None:
+        """
+        Print to terminal/console and to file the currently selected
+        trackbar and calculated image processing values.
+        Save current result image. Called from save_selector().
+
+        Returns: None
+        """
+
+        curr_time = datetime.now().strftime('%I%M%S')
+        time2print = datetime.now().strftime('%I:%M:%S%p')
+
+        image_file = utils.args_handler()['input']
+
+        # For JPEG file format the supported parameter is cv2.IMWRITE_JPEG_QUALITY
+        # with a possible value between 0 and 100, the default value being 95.
+        # The higher value produces a better quality image file.
+        #
+        # For PNG file format the supported imwrite parameter is
+        # cv2.IMWRITE_PNG_COMPRESSION with a possible value between 0 and 9,
+        # the default being 3. The higher value does high compression of the
+        # image resulting in a smaller file size but a longer compression time.
+
+        img_ext = Path(Path(image_file).suffix)
+        img_stem = Path(Path(image_file).stem)
+        cv2.imwrite(f'{img_stem}_equalize_{curr_time}{img_ext}', self.clahe_img)
+
+        settings2save = (f'\n\nTime saved: {time2print}\n'
+                         'Settings for image:'
+                         f' {img_stem}_equalize_{curr_time}{img_ext}\n'
+                         + self.settings_txt)
+
+        # Use this Path function for saving individual settings files:
+        # Path(f'{img_stem}_clahe_settings{curr_time}.txt').write_text(settings2save)
+
+        # Use this for appending multiple settings to single file:
+        with Path(f'{img_stem}_equalize_settings.txt').open('a') as fp:
+            fp.write(settings2save)
+
+        print(f'\nCLAHE image and its settings were saved to files.'
+              f'{settings2save}')
+
 
 if __name__ == "__main__":
     # Program exits here if system platform or Python version check fails.
@@ -385,20 +374,12 @@ if __name__ == "__main__":
     # Need to not set up tk canvas to display Histograms b/c
     #  generates a fatal memory allocation error. It has something
     #  to do with the start_event_loop function.
-    if utils.MY_OS == 'dar':
-        PI = ProcessImage()
-        print(f'{Path(__file__).name} is now running...')
+    PI = ProcessImage()
+    print(f'{Path(__file__).name} is now running...')
 
-        # Set infinite loop with sigint handler to monitor "quit" keystrokes.
-        utils.quit_keys()
-    else:  # is Linux or Windows
-        # Run the Matplotlib histogram plots in a tkinter window.
-        canvas_window = tk.Tk()
+    # Set infinite loop with sigint handler to monitor "quit"
+    #  keystrokes.
+    utils.quit_keys()
 
-        PI = ProcessImage()
-        print(f'{Path(__file__).name} is now running...')
-
-        # Set infinite loop with sigint handler to monitor "quit" keystrokes.
-        utils.quit_keys()
-
-        canvas_window.mainloop()
+    # Set infinite loop with sigint handler to monitor "quit" keystrokes.
+    utils.quit_keys()
