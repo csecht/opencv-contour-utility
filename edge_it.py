@@ -24,6 +24,7 @@ import numpy as np
 import math
 import sys
 from pathlib import Path
+from time import sleep
 
 # Third party imports
 try:
@@ -58,7 +59,8 @@ class ProcessImage:
                  'orig_contrast_sd', 'orig_img', 'ratio', 'result_img',
                  'settings_txt', 'settings_win',
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
-                 'font_scale', 'line_thickness', 'center_xoffset')
+                 'font_scale', 'line_thickness', 'center_xoffset',
+                 'save_tb_name')
 
     def __init__(self):
 
@@ -104,6 +106,7 @@ class ProcessImage:
 
         self.settings_txt = ''
         self.settings_win = ''
+        self.save_tb_name = ''
 
         self.manage_input()
         self.setup_trackbars()
@@ -126,7 +129,7 @@ class ProcessImage:
         # Display starting images here so that their imshow is called only once.
         win_name = 'Input <- | -> Grayscale for processing'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
             [self.orig_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
@@ -147,7 +150,7 @@ class ProcessImage:
             cv2.moveWindow(self.settings_win, 2000, 35)
         elif utils.MY_OS == 'dar':
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.settings_win, 500, 35)
+            cv2.moveWindow(self.settings_win, 500, 15)
         else:  # is Windows
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
             cv2.resizeWindow(self.settings_win, 500, 500)
@@ -166,7 +169,7 @@ class ProcessImage:
             _thresh_min = '  ..lower thresh:'
             _contour = 'Contour type:'
             _contour_min = 'Contour size min:'
-            _save = 'Save (click or slide to 0):'
+            self.save_tb_name = 'Save, click 0:'
         else:  # is Linux
             _contrast = f'{"Contrast/gain/alpha (100x):" : <40}'
             _bright = f"{'Brightness/bias/beta, (-127):' : <40}"
@@ -185,7 +188,7 @@ class ProcessImage:
             _thresh_min = f'{"Edges, lower t-hold:" : <50}'
             _contour = f'{"Contour size type: 0 area, 1 arc length" : <40}'
             _contour_min = f'{"Contour size minimum (pixels):" : <30}'
-            _save = f'{"Save (click or slide to 0)" : <45}'
+            self.save_tb_name = f'{"Save, set to 0" : <45}'
 
         cv2.createTrackbar(_contrast,
                            self.settings_win,
@@ -259,9 +262,9 @@ class ProcessImage:
                            100,
                            1000,
                            self.contour_limit_selector)
-        cv2.createTrackbar(_save,
+        cv2.createTrackbar(self.save_tb_name,
                            self.settings_win,
-                           10,
+                           2,
                            50,
                            self.save_selector)
 
@@ -496,12 +499,13 @@ class ProcessImage:
 
         """
         if s_val == 0:
+            sleep(0.3)
+            cv2.setTrackbarPos(self.save_tb_name,
+                               self.settings_win,
+                               1)
             utils.save_img_and_settings(self.result_img,
                                         self.settings_txt,
-                                        'threshold')
-            cv2.setTrackbarPos('Save; move to 0',
-                               self.settings_win,
-                               10)
+                                        'edges')
 
     def adjust_contrast(self) -> None:
         """
@@ -523,9 +527,9 @@ class ProcessImage:
 
         self.curr_contrast_sd = int(self.contrasted.std())
 
-        win_name = '<- Adjusted contrast | Reduced noise ->'
+        win_name = 'Adjusted contrast <- | -> Reduced noise'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
             [self.contrasted, self.reduce_noise()])
@@ -622,7 +626,7 @@ class ProcessImage:
 
         win_name = 'Filtered image'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
         cv2.imshow(win_name, filtered_img)
 
         return filtered_img
@@ -679,9 +683,9 @@ class ProcessImage:
                                                thickness=2,
                                                lineType=cv2.LINE_AA)
 
-        win_name = '<- Edges | Selected edged contours ->'
+        win_name = 'Edges <- | -> Selected edged contours'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
             [cv2.cvtColor(edged_img, cv2.COLOR_GRAY2RGB), self.drawn_contours])
@@ -744,7 +748,7 @@ class ProcessImage:
 
         win_name = 'Identified objects, with sizes'
         cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_KEEPRATIO)
+                        flags=cv2.WINDOW_GUI_NORMAL)
         cv2.imshow(win_name, self.result_img)
 
     def show_settings(self) -> None:
@@ -796,9 +800,9 @@ class ProcessImage:
         # Need to set the dimensions of the settings area to fit all text.
         #   Font style parameters are set in constants.py module.
         if utils.MY_OS == 'lin':
-            settings_img = utils.text_array((400, 620), self.settings_txt)
+            settings_img = utils.text_array((400, 620), the_text)
         elif utils.MY_OS == 'dar':
-            settings_img = utils.text_array((420, 620), self.settings_txt)
+            settings_img = utils.text_array((330, 600), the_text)
         else:  # is Windows
             settings_img = utils.text_array((820, 1200), the_text)
 

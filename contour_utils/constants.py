@@ -95,9 +95,11 @@ CONTOUR = {
 FONT_TYPE = cv2.FONT_HERSHEY_SIMPLEX
 
 # Settings window text constants used in utils.text_array():
-if MY_OS in 'lin, dar':
+if MY_OS == 'lin':
     TEXT_SCALER = 0.5
-else:
+elif MY_OS == 'dar':
+    TEXT_SCALER = 0.4
+else:  # is Windows
     TEXT_SCALER = 1
 TEXT_THICKNESS = 1
 TEXT_COLOR = 180, 180, 180  # light gray for a dark gray background

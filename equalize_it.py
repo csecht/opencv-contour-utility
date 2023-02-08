@@ -117,7 +117,7 @@ class ProcessImage:
         """
 
         self.settings_win = "Image and cv2.createCLAHE settings"
-        self.save_tb_name = 'Save, on 0'
+        self.save_tb_name = 'Save, set to 0'
         cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
 
         # Move the control window away from the processing windows.

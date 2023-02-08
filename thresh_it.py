@@ -24,6 +24,7 @@ import math
 import numpy as np
 import sys
 from pathlib import Path
+from time import sleep
 
 # Third party imports
 try:
@@ -57,7 +58,8 @@ class ProcessImage:
                  'result_img', 'settings_txt', 'settings_win',
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
                  'th_max', 'th_type', 'thresh',
-                 'font_scale', 'line_thickness', 'center_xoffset')
+                 'font_scale', 'line_thickness', 'center_xoffset',
+                 'save_tb_name')
 
     def __init__(self):
 
@@ -103,6 +105,7 @@ class ProcessImage:
 
         self.settings_txt = ''
         self.settings_win = ''
+        self.save_tb_name = ''
 
         self.manage_input()
         self.setup_trackbars()
@@ -166,7 +169,7 @@ class ProcessImage:
             _thresh_type = 'Threshold type'
             _contour = 'Contour type:'
             _contour_min = 'Contour size min:'
-            _save = 'Save (click or slide to 0):'
+            self.save_tb_name = 'Save, click 0:'
         else:  # is Linux
             _contrast = f'{"Contrast/gain/alpha (100x):" : <40}'
             _bright = f"{'Brightness/bias/beta, (-127):' : <40}"
@@ -184,7 +187,7 @@ class ProcessImage:
             _thresh_type = f'{"Thresholding type: 0 Otsu, 1 Triangle" : <40}'
             _contour = f'{"Contour size type: 0 area, 1 arc length" : <40}'
             _contour_min = f'{"Contour size minimum (pixels):" : <30}'
-            _save = f'{"Save (click or slide to 0)" : <45}'
+            self.save_tb_name = 'Save, click 0:'
 
         cv2.createTrackbar(_contrast,
                            self.settings_win,
@@ -252,9 +255,9 @@ class ProcessImage:
                            100,
                            1000,
                            self.contour_limit_selector)
-        cv2.createTrackbar(_save,
+        cv2.createTrackbar(self.save_tb_name,
                            self.settings_win,
-                           10,
+                           1,
                            50,
                            self.save_selector)
 
@@ -475,12 +478,13 @@ class ProcessImage:
 
         """
         if s_val == 0:
+            sleep(0.3)
+            cv2.setTrackbarPos(self.save_tb_name,
+                               self.settings_win,
+                               1)
             utils.save_img_and_settings(self.result_img,
                                         self.settings_txt,
                                         'threshold')
-            cv2.setTrackbarPos('Save; move to 0',
-                               self.settings_win,
-                               1)
 
     def adjust_contrast(self) -> None:
         """
@@ -780,7 +784,7 @@ class ProcessImage:
         if utils.MY_OS == 'lin':
             settings_img = utils.text_array((380, 620), the_text)  # Linux
         elif utils.MY_OS == 'dar':
-            settings_img = utils.text_array((380, 620), the_text)
+            settings_img = utils.text_array((350, 580), the_text)
         else:  # is Windows
             settings_img = utils.text_array((820, 1200), the_text)
 
