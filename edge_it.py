@@ -188,7 +188,7 @@ class ProcessImage:
             _thresh_min = f'{"Edges, lower t-hold:" : <50}'
             _contour = f'{"Contour size type: 0 area, 1 arc length" : <40}'
             _contour_min = f'{"Contour size minimum (pixels):" : <30}'
-            self.save_tb_name = f'{"Save, set to 0" : <45}'
+            self.save_tb_name = f'{"Save, click on 0" : <45}'
 
         cv2.createTrackbar(_contrast,
                            self.settings_win,
@@ -264,8 +264,8 @@ class ProcessImage:
                            self.contour_limit_selector)
         cv2.createTrackbar(self.save_tb_name,
                            self.settings_win,
+                           1,
                            2,
-                           50,
                            self.save_selector)
 
     def alpha_selector(self, a_val) -> None:
@@ -498,14 +498,18 @@ class ProcessImage:
         Returns: None
 
         """
+
+        # Need a pause to prevent multiple Trackbar event calls.
+        # Note that while a click on zero triggers a single call here,
+        #  sliding trackbar to zero will trigger 2-3 calls. Need to fix that.
         if s_val == 0:
-            sleep(0.3)
-            cv2.setTrackbarPos(self.save_tb_name,
-                               self.settings_win,
-                               1)
             utils.save_img_and_settings(self.result_img,
                                         self.settings_txt,
                                         'edges')
+        cv2.setTrackbarPos(self.save_tb_name,
+                           self.settings_win,
+                           1)
+        sleep(0.5)
 
     def adjust_contrast(self) -> None:
         """

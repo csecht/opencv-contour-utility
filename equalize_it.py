@@ -22,7 +22,7 @@ Developed in Python 3.8-3.9.
 # Standard library imports.
 import sys
 from pathlib import Path
-from datetime import datetime
+from time import sleep
 
 # Third party imports.
 try:
@@ -117,7 +117,7 @@ class ProcessImage:
         """
 
         self.settings_win = "Image and cv2.createCLAHE settings"
-        self.save_tb_name = 'Save, set to 0'
+        self.save_tb_name = 'Save, click on 0'
         cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
 
         # Move the control window away from the processing windows.
@@ -153,8 +153,8 @@ class ProcessImage:
 
         cv2.createTrackbar(self.save_tb_name,
                            self.settings_win,
+                           1,
                            2,
-                           50,
                            self.save_selector)
 
     def clip_selector(self, c_val) -> None:
@@ -203,12 +203,16 @@ class ProcessImage:
 
         """
         # Need a pause to prevent multiple Trackbar event calls.
+        # Note that while a click on zero triggers a single call here,
+        #  sliding trackbar to zero will trigger 2-3 calls. Need to fix that.
         if s_val == 0:
-            plt.pause(0.5)
-            self.save_img_and_settings()
-            cv2.setTrackbarPos(self.save_tb_name,
-                               self.settings_win,
-                               1)
+            utils.save_img_and_settings(self.clahe_img,
+                                        self.settings_txt,
+                                        'clahe')
+        cv2.setTrackbarPos(self.save_tb_name,
+                           self.settings_win,
+                           1)
+        sleep(0.5)
 
     def set_clahe(self) -> None:
         """
@@ -316,48 +320,6 @@ class ProcessImage:
         settings_img = utils.text_array((150, 500), the_text)
 
         cv2.imshow(self.settings_win, settings_img)
-
-    def save_img_and_settings(self) -> None:
-        """
-        Print to terminal/console and to file the currently selected
-        trackbar and calculated image processing values.
-        Save current result image. Called from save_selector().
-
-        Returns: None
-        """
-
-        curr_time = datetime.now().strftime('%I%M%S')
-        time2print = datetime.now().strftime('%I:%M:%S%p')
-
-        image_file = utils.args_handler()['input']
-
-        # For JPEG file format the supported parameter is cv2.IMWRITE_JPEG_QUALITY
-        # with a possible value between 0 and 100, the default value being 95.
-        # The higher value produces a better quality image file.
-        #
-        # For PNG file format the supported imwrite parameter is
-        # cv2.IMWRITE_PNG_COMPRESSION with a possible value between 0 and 9,
-        # the default being 3. The higher value does high compression of the
-        # image resulting in a smaller file size but a longer compression time.
-
-        img_ext = Path(Path(image_file).suffix)
-        img_stem = Path(Path(image_file).stem)
-        cv2.imwrite(f'{img_stem}_equalize_{curr_time}{img_ext}', self.clahe_img)
-
-        settings2save = (f'\n\nTime saved: {time2print}\n'
-                         'Settings for image:'
-                         f' {img_stem}_equalize_{curr_time}{img_ext}\n'
-                         + self.settings_txt)
-
-        # Use this Path function for saving individual settings files:
-        # Path(f'{img_stem}_clahe_settings{curr_time}.txt').write_text(settings2save)
-
-        # Use this for appending multiple settings to single file:
-        with Path(f'{img_stem}_equalize_settings.txt').open('a') as fp:
-            fp.write(settings2save)
-
-        print(f'\nCLAHE image and its settings were saved to files.'
-              f'{settings2save}')
 
 
 if __name__ == "__main__":

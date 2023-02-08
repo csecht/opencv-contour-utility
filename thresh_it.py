@@ -258,7 +258,7 @@ class ProcessImage:
         cv2.createTrackbar(self.save_tb_name,
                            self.settings_win,
                            1,
-                           50,
+                           2,
                            self.save_selector)
 
     def alpha_selector(self, a_val) -> None:
@@ -477,14 +477,18 @@ class ProcessImage:
         Returns: None
 
         """
+
+        # Need a pause to prevent multiple Trackbar event calls.
+        # Note that while a click on zero triggers a single call here,
+        #  sliding trackbar to zero will trigger 2-3 calls. Need to fix that.
         if s_val == 0:
-            sleep(0.3)
-            cv2.setTrackbarPos(self.save_tb_name,
-                               self.settings_win,
-                               1)
             utils.save_img_and_settings(self.result_img,
                                         self.settings_txt,
-                                        'threshold')
+                                        'edges')
+        cv2.setTrackbarPos(self.save_tb_name,
+                           self.settings_win,
+                           1)
+        sleep(0.5)
 
     def adjust_contrast(self) -> None:
         """
