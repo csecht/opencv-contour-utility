@@ -45,7 +45,7 @@ List command line options: `python3 -m thresh_it --help`
 
 Basic information, author, version, license, etc.: `python3 -m thresh_it --about`
 
- All image windows can be dragged to resize (except the Histograms window in `equalize_it.py`).
+ All windows, except for Settings, can be dragged to resize.
  
 The Esc or Q key will quit any running module (except if "Histograms" window in `equalize_it.py` is currently selected; then just select one of the other windows to use a Quit key). From the command line, the usual Ctrl-C will also exit a module.
 
