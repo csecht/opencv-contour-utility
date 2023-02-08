@@ -7,13 +7,11 @@ https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-
 
 The intention is to help OpenCV users understand the pertinent parameters and value ranges needed to identify objects.
 
-## Operating Platform Compatibility (as of 3 Feb 2023):
+## Operating Platform Compatibility (as of 7 Feb 2023):
 Implementation in Windows10 has problems with the system gui window manager, so running in Windows is not recommended at this time. Not tested on Windows11 or later. 
 
-Has not yet been tested in macOS 11; dependencies are not compatible with macOS 10.
-
-Everything should work fine in Linux distros.
-Development environment was Linux Ubuntu 20.04.
+Everything should work fine in Linux and macOS distros.
+Development environment was Linux Ubuntu 20.04, macOS 13.2, Windows10
 
 ## edge_it.py
 The module `edge_it.py` uses Canny edge detection, cv2.Canny, as the basis to identify contours.
@@ -22,7 +20,7 @@ The module `thresh_it.py` uses thresholding, cv2.threshold, as the basis to iden
 ## equalize_it.py
 The module `equalize_it.py` does not involve contours, but explores parameters for automatic histogram equalization as an optional pre-processing step for object detections. Equalization is done with cv2.createCLAHE. CLAHE is a contrast-limited adaptive histogram equalization method. Live updates of the CLAHE histogram are controlled by slide bars for the clipLimit and tileGridSize parameter values. All processing is carried out on a grayscale version of the input file. The grayscale equalized image can be saved to use as input for `thresh_it.py` or `equalize_it.py`. For most contour operations, however, the contrast and brightness controls provided in the these two modules should be sufficient.
 
-Be aware that CLAHE works best on images that have a full range of pixel values across the image, as in sample2.jpg (shells). In other words, it does not work well with images that have large areas of similar colors, as in sample1.jpg (pills) or sample3.jpg (rumikub). Nonetheless, this module can be fun to play with.
+Be aware that CLAHE works best on images that have a full range of pixel values across the image, as in sample2.jpg (shells). In other words, it does not work well with images that have large areas of similar colors, as in sample1.jpg (pills) or sample3.jpg (rumikub). Nonetheless, this module can be fun to play with. Live histogram updating is slower with larger image files.
 ### Usage examples:
 From within the program's folder, use one of these Terminal or Command Prompt command formats, depending on your system. Note that with no input argument, as in the first example, the default sample1.jpg from the `images` folder is used for input. Three sample input files are provided in the `images` folder.
 
