@@ -78,6 +78,8 @@ class ProcessImage:
         self.save_tb_name = ''
 
         plt.ion()
+        plt.style.use(('bmh', 'fast'))
+
         self.manage_input()
         self.setup_trackbars()
         # NOTE that setup_trackbars sets starting pos other than zero,
@@ -252,13 +254,13 @@ class ProcessImage:
         #   both are patches.Polygon artists that provide faster rendering
         #   than the default 'bar', which is a BarContainer object of
         #   Rectangle artists.
-
+        # Here use 'step' for better performance.
         plt.hist(self.gray_img.ravel(),
                  bins=255,
                  range=[0, 256],
-                 color='gray',
-                 alpha=0.4,
-                 histtype='stepfilled',
+                 color='black',
+                 alpha=1,
+                 histtype='step',
                  label='Input grayscale'
                  )
 
@@ -272,7 +274,6 @@ class ProcessImage:
         """
 
         plt.cla()
-
         self.show_input_histogram()
 
         # Need to clear prior histograms before drawing new ones.
@@ -280,8 +281,8 @@ class ProcessImage:
                  bins=255,
                  range=[0, 256],
                  color='orange',
-                 alpha=0.6,
-                 histtype='stepfilled',  # 'step' draws a line.
+                 alpha=1,
+                 histtype='stepfilled',
                  label='CLAHE adjusted'
                  )
         plt.title('Histograms')
