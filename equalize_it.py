@@ -24,6 +24,8 @@ import sys
 from pathlib import Path
 from time import sleep
 
+import numpy as np
+
 # Third party imports.
 try:
     import cv2
@@ -47,7 +49,9 @@ except (ImportError, ModuleNotFoundError) as import_err:
     sys.exit(1)
 
 # Local application imports
-from contour_utils import (vcheck, utils)
+from contour_utils import (vcheck,
+                           utils,
+                           )
 
 
 class ProcessImage:
@@ -55,7 +59,8 @@ class ProcessImage:
                  'flat_gray_array', 'gray_img', 'orig_img', 'orig_mean',
                  'orig_sd', 'settings_txt',
                  'settings_win', 'tile_size',
-                 'save_tb_name', 'clahe_hist')
+                 'save_tb_name', 'clahe_hist',
+                 )
 
     def __init__(self):
 
@@ -99,8 +104,13 @@ class ProcessImage:
         self.gray_img = cv2.cvtColor(self.orig_img, cv2.COLOR_BGR2GRAY)
 
         win_name = 'Input <- | -> Grayscale for processing'
-        cv2.namedWindow(win_name,
-                        flags=cv2.WINDOW_GUI_NORMAL)
+        if utils.MY_OS in 'lin, dar':
+            cv2.namedWindow(win_name,
+                            flags=cv2.WINDOW_GUI_NORMAL)
+        else:
+            cv2.namedWindow(win_name,
+                            flags=cv2.WINDOW_NORMAL)
+            # cv2.resizeWindow(win_name, 500, 800)
 
         # Need to match shapes of the two cv image arrays.
         side_by_side = cv2.hconcat(
@@ -118,7 +128,6 @@ class ProcessImage:
 
         self.settings_win = "Image and cv2.createCLAHE settings"
         self.save_tb_name = 'Save, click on 0'
-        cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
 
         # Move the control window away from the processing windows.
         # Place window at right edge of screen by using an excessive x-coordinate.
@@ -130,8 +139,11 @@ class ProcessImage:
             cv2.moveWindow(self.settings_win, 600, 15)
         else:  # is Windows
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
-            cv2.resizeWindow(self.settings_win, 500, 500)
-            cv2.resizeWindow(self.settings_win, 500, 500)
+            cv2.resizeWindow(self.settings_win, 600, 500)
+            text_img = np.ones((140, 500), dtype='uint8')
+            # Convert the ones array to an image with gray16 (41,41,41) bg.
+            text_img[:] = np.ones((140, 500)) * 41 / 255.0
+            cv2.imshow(self.settings_win, text_img)
 
         cv2.createTrackbar('Clip limit (10X)',
                            self.settings_win,
@@ -240,7 +252,8 @@ class ProcessImage:
                         flags=cv2.WINDOW_GUI_NORMAL)
         cv2.imshow(win_name, self.clahe_img)
 
-        self.show_clahe_histogram()
+        if utils.MY_OS in 'lin, dar':
+            self.show_clahe_histogram()
         # show_clahe_histogram() calls show_input_histogram()
 
     def show_input_histogram(self) -> None:
@@ -317,7 +330,10 @@ class ProcessImage:
 
         # Need to set the dimensions of the settings area to fit all text.
         #   Font style parameters are set in constants.py module.
-        settings_img = utils.text_array((150, 500), the_text)
+        if utils.MY_OS in 'lin, dar':
+            settings_img = utils.text_array((150, 500), the_text)
+        else:  # is Windows
+            settings_img = utils.text_array((140, 500), the_text)
 
         cv2.imshow(self.settings_win, settings_img)
 
@@ -339,7 +355,4 @@ if __name__ == "__main__":
 
     # Set infinite loop with sigint handler to monitor "quit"
     #  keystrokes.
-    utils.quit_keys()
-
-    # Set infinite loop with sigint handler to monitor "quit" keystrokes.
     utils.quit_keys()

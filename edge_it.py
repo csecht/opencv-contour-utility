@@ -153,7 +153,7 @@ class ProcessImage:
             cv2.moveWindow(self.settings_win, 500, 15)
         else:  # is Windows
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
-            cv2.resizeWindow(self.settings_win, 500, 500)
+            cv2.resizeWindow(self.settings_win, 500, 800)
 
         if utils.MY_OS in 'dar, win':
             _contrast = 'Contrast:'
@@ -808,7 +808,7 @@ class ProcessImage:
         elif utils.MY_OS == 'dar':
             settings_img = utils.text_array((330, 600), the_text)
         else:  # is Windows
-            settings_img = utils.text_array((820, 1200), the_text)
+            settings_img = utils.text_array((400, 620), the_text)
 
         cv2.imshow(self.settings_win, settings_img)
 

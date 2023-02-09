@@ -95,14 +95,15 @@ CONTOUR = {
 FONT_TYPE = cv2.FONT_HERSHEY_SIMPLEX
 
 # Settings window text constants used in utils.text_array():
+TEXT_THICKNESS = 1
+TEXT_COLOR = 180, 180, 180  # light gray for a dark gray background
+
 if MY_OS == 'lin':
     TEXT_SCALER = 0.5
 elif MY_OS == 'dar':
     TEXT_SCALER = 0.4
 else:  # is Windows
-    TEXT_SCALER = 1
-TEXT_THICKNESS = 1
-TEXT_COLOR = 180, 180, 180  # light gray for a dark gray background
+    TEXT_SCALER = 0.5
 
 # Scaling factors, empirically determined, for use in manage_input().
 LINE_SCALE = 1e-03

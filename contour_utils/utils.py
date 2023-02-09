@@ -48,8 +48,10 @@ def check_platform() -> None:
         else:
             windll.shcore.SetProcessDpiAwareness(1)
 
-        print('NOTE: Windows is minimally supported. Manual window resizing'
-              'will be needed. Better performance is attained on Linux systems.')
+        print('NOTE: Windows window formatting is poorly supported.\n'
+              'Histogram live updates not currently supported'
+              ' for equalize_it.py.\nManual window resizing may be needed.\n'
+              'Better performance is obtained on Linux or Mac systems.')
 
     print('Quit program with Esc or Q key, or Ctrl-C from Terminal.')
 
@@ -171,10 +173,7 @@ def text_array(text_shape: iter, do_text: str) -> np.ndarray:
                                    const.FONT_TYPE,
                                    const.TEXT_SCALER,
                                    const.TEXT_THICKNESS)
-    if MY_OS in 'lin, dar':
-        line_height = text_size[1] + 9
-    else:  # is Windows
-        line_height = text_size[1] + 30
+    line_height = text_size[1] + 9
 
     _x, y0 = (5, 50)
     for i, line in enumerate(do_text.split("\n")):
