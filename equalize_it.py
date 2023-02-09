@@ -82,8 +82,9 @@ class ProcessImage:
         self.settings_win = ''
         self.save_tb_name = ''
 
-        plt.ion()
-        plt.style.use(('bmh', 'fast'))
+        if utils.MY_OS in 'lin, dar':
+            plt.ion()
+            plt.style.use(('bmh', 'fast'))
 
         self.manage_input()
         self.setup_trackbars()
@@ -104,13 +105,11 @@ class ProcessImage:
         self.gray_img = cv2.cvtColor(self.orig_img, cv2.COLOR_BGR2GRAY)
 
         win_name = 'Input <- | -> Grayscale for processing'
-        if utils.MY_OS in 'lin, dar':
-            cv2.namedWindow(win_name,
-                            flags=cv2.WINDOW_GUI_NORMAL)
-        else:
-            cv2.namedWindow(win_name,
-                            flags=cv2.WINDOW_NORMAL)
-            # cv2.resizeWindow(win_name, 500, 800)
+        cv2.namedWindow(win_name,
+                        flags=cv2.WINDOW_GUI_NORMAL)
+        # NOTE: In Windows, w/o resizing, window is expanded to full screen. Why?
+        if utils.MY_OS == 'win':
+            cv2.resizeWindow(win_name, 1000, 500)
 
         # Need to match shapes of the two cv image arrays.
         side_by_side = cv2.hconcat(
