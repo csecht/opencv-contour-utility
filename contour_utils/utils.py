@@ -51,7 +51,7 @@ def check_platform() -> None:
         print('NOTE: Windows window sizing has issues.\n'
               'Manual window resizing may be needed.\n')
 
-    print('Quit program with Esc or Q key, or Ctrl-C from Terminal.')
+    print('Quit program with Esc or Q key, or Ctrl-C from Terminal.\n')
 
 
 def args_handler() -> dict:

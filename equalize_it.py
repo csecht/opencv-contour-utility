@@ -22,17 +22,16 @@ Developed in Python 3.8-3.9.
 # Standard library imports.
 import sys
 from pathlib import Path
-from time import sleep
-
-import numpy as np
 
 # Third party imports.
 try:
     import cv2
     import matplotlib
+    import numpy as np
+
     from matplotlib import pyplot as plt
 except (ImportError, ModuleNotFoundError) as import_err:
-    print('*** OpenCV or Matplotlib was not found or needs an update:\n\n'
+    print('*** OpenCV, Matplotlib or Numpy  was not found or needs an update:\n\n'
           'To install: from the current folder, run this command'
           ' for the Python package installer (PIP):\n'
           '   python3 -m pip install -r requirements.txt\n\n'
@@ -218,14 +217,14 @@ class ProcessImage:
         # Need a pause to prevent multiple Trackbar event calls.
         # Note that while a click on zero triggers a single call here,
         #  sliding trackbar to zero will trigger 2-3 calls. Need to fix that.
-        if s_val == 0:
+        if s_val < 1:
             utils.save_img_and_settings(self.clahe_img,
                                         self.settings_txt,
                                         'clahe')
-        cv2.setTrackbarPos(self.save_tb_name,
-                           self.settings_win,
-                           1)
-        sleep(0.5)
+            cv2.setTrackbarPos(self.save_tb_name,
+                               self.settings_win,
+                               1)
+        plt.pause(0.5)
 
     def set_clahe(self) -> None:
         """

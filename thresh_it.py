@@ -481,13 +481,13 @@ class ProcessImage:
         # Need a pause to prevent multiple Trackbar event calls.
         # Note that while a click on zero triggers a single call here,
         #  sliding trackbar to zero will trigger 2-3 calls. Need to fix that.
-        if s_val == 0:
+        if s_val < 1:
             utils.save_img_and_settings(self.result_img,
                                         self.settings_txt,
-                                        'edges')
-        cv2.setTrackbarPos(self.save_tb_name,
-                           self.settings_win,
-                           1)
+                                        'thresh')
+            cv2.setTrackbarPos(self.save_tb_name,
+                               self.settings_win,
+                               1)
         sleep(0.5)
 
     def adjust_contrast(self) -> None:
