@@ -103,9 +103,10 @@ if MY_OS == 'lin':
 elif MY_OS == 'dar':
     TEXT_SCALER = 0.4
 else:  # is Windows
-    TEXT_SCALER = 0.5
+    TEXT_SCALER = 0.6
 
-# Scaling factors, empirically determined, for use in manage_input().
+# Scaling factors for contour texts, empirically determined,
+#  to use in manage_input().
 LINE_SCALE = 1e-03
 FONT_SCALE = 7.7e-04
 CENTER_XSCALE = 0.035

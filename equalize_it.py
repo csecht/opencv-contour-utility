@@ -29,6 +29,7 @@ import numpy as np
 # Third party imports.
 try:
     import cv2
+    import matplotlib
     from matplotlib import pyplot as plt
 except (ImportError, ModuleNotFoundError) as import_err:
     print('*** OpenCV or Matplotlib was not found or needs an update:\n\n'
@@ -82,9 +83,10 @@ class ProcessImage:
         self.settings_win = ''
         self.save_tb_name = ''
 
-        if utils.MY_OS in 'lin, dar':
-            plt.ion()
-            plt.style.use(('bmh', 'fast'))
+        # Need to get_backend for Windows.
+        matplotlib.get_backend()
+        plt.ion()
+        plt.style.use(('bmh', 'fast'))
 
         self.manage_input()
         self.setup_trackbars()
@@ -251,8 +253,7 @@ class ProcessImage:
                         flags=cv2.WINDOW_GUI_NORMAL)
         cv2.imshow(win_name, self.clahe_img)
 
-        if utils.MY_OS in 'lin, dar':
-            self.show_clahe_histogram()
+        self.show_clahe_histogram()
         # show_clahe_histogram() calls show_input_histogram()
 
     def show_input_histogram(self) -> None:
@@ -329,10 +330,7 @@ class ProcessImage:
 
         # Need to set the dimensions of the settings area to fit all text.
         #   Font style parameters are set in constants.py module.
-        if utils.MY_OS in 'lin, dar':
-            settings_img = utils.text_array((150, 500), the_text)
-        else:  # is Windows
-            settings_img = utils.text_array((140, 500), the_text)
+        settings_img = utils.text_array((150, 500), the_text)
 
         cv2.imshow(self.settings_win, settings_img)
 

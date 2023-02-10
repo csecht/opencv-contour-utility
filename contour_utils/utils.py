@@ -48,10 +48,8 @@ def check_platform() -> None:
         else:
             windll.shcore.SetProcessDpiAwareness(1)
 
-        print('NOTE: Windows window formatting is poorly supported.\n'
-              'Histogram live updates not currently supported'
-              ' for equalize_it.py.\nManual window resizing may be needed.\n'
-              'Better performance is obtained on Linux or Mac systems.')
+        print('NOTE: Windows window sizing has issues.\n'
+              'Manual window resizing may be needed.\n')
 
     print('Quit program with Esc or Q key, or Ctrl-C from Terminal.')
 
