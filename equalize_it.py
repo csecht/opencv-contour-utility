@@ -160,7 +160,6 @@ class ProcessImage:
             clip_tb_name = 'Clip limit, (10X)'
             tile_tb_name = 'Tile size, (N, N)'
 
-
         # Set trackbar mininum to 1 b/c can't use a zero value in selectors.
         cv2.createTrackbar(clip_tb_name,
                            self.settings_win,
@@ -266,35 +265,10 @@ class ProcessImage:
                         flags=cv2.WINDOW_GUI_NORMAL)
         cv2.imshow(win_name, self.clahe_img)
 
-        self.show_clahe_histogram()
+        self.show_histograms()
         # show_clahe_histogram() calls show_input_histogram()
 
-    def show_input_histogram(self) -> None:
-        """
-        Allows a one-time rendering of the input histogram, thus
-        providing a faster response for updating the CLAHE histogram
-        with Trackbar changes.
-        Called from __init__().
-
-        Returns: None
-        """
-
-        # hist() returns tuple of (counts(n), bins(edges), patches(artists)
-        # histtype='step' draws a line, 'stepfilled' fills under the line;
-        #   both are patches.Polygon artists that provide faster rendering
-        #   than the default 'bar', which is a BarContainer object of
-        #   Rectangle artists.
-        # Here use 'step' for better performance.
-        plt.hist(self.gray_img.ravel(),
-                 bins=255,
-                 range=[0, 256],
-                 color='black',
-                 alpha=1,
-                 histtype='step',
-                 label='Input grayscale'
-                 )
-
-    def show_clahe_histogram(self) -> None:
+    def show_histograms(self) -> None:
         """
         Updates CLAHE adjusted histogram plot with Matplotlib from
         trackbar changes. Called from set_clahe().
@@ -304,7 +278,21 @@ class ProcessImage:
         """
 
         plt.cla()
-        self.show_input_histogram()
+
+        # hist() returns tuple of (counts(n), bins(edges), patches(artists)
+        # histtype='step' draws a line, 'stepfilled' fills under the line;
+        #   both are patches.Polygon artists that provide faster rendering
+        #   than the default 'bar', which is a BarContainer object of
+        #   Rectangle artists.
+        # For input img, use 'step' for better performance.
+        plt.hist(self.gray_img.ravel(),
+                 bins=255,
+                 range=[0, 256],
+                 color='black',
+                 alpha=1,
+                 histtype='step',
+                 label='Input grayscale'
+                 )
 
         # Need to clear prior histograms before drawing new ones.
         plt.hist(self.clahe_img.ravel(),
