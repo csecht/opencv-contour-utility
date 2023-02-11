@@ -822,12 +822,10 @@ class ProcessImage:
 
         # Need to set the dimensions of the settings area to fit all text.
         #   Font style parameters are set in constants.py module.
-        if utils.MY_OS == 'lin':
+        if utils.MY_OS in 'lin, win':
             settings_img = utils.text_array((400, 620), the_text)
-        elif utils.MY_OS == 'dar':
+        else:  # is macOS
             settings_img = utils.text_array((330, 600), the_text)
-        else:  # is Windows
-            settings_img = utils.text_array((400, 620), the_text)
 
         cv2.imshow(self.settings_win, settings_img)
 
