@@ -24,7 +24,6 @@ import numpy as np
 import math
 import sys
 from pathlib import Path
-from time import sleep
 
 # Third party imports
 try:
@@ -60,7 +59,7 @@ class ProcessImage:
                  'settings_txt', 'settings_win',
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
                  'font_scale', 'line_thickness', 'center_xoffset',
-                 'save_tb_name')
+                 )
 
     def __init__(self):
 
@@ -106,7 +105,6 @@ class ProcessImage:
 
         self.settings_txt = ''
         self.settings_win = ''
-        self.save_tb_name = ''
 
         self.manage_input()
         self.setup_trackbars()
@@ -144,7 +142,11 @@ class ProcessImage:
         Returns: None
         """
 
-        self.settings_win = "Settings for images and cv2.Canny"
+        if utils.MY_OS in 'lin, win':
+            self.settings_win = "cv2.Canny settings (dbl-click text to save)"
+        else:  # is macOS
+            self.settings_win = "cv2.Canny settings (rt-click text to save)"
+
         if utils.MY_OS == 'lin':
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow(self.settings_win, 2000, 35)
@@ -155,23 +157,11 @@ class ProcessImage:
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
             cv2.resizeWindow(self.settings_win, 500, 800)
 
-        if utils.MY_OS in 'dar, win':
-            _contrast = 'Contrast:'
-            _bright = 'Brightness:'
-            _morph_op = 'Morph operator:'
-            _morph_shape = 'Morph shape:'
-            _noise_k = 'Lower noise, k:'
-            _noise_i = '   ..iterations:'
-            _border = 'Border type:'
-            _filter = 'Filter type:'
-            _kernel_size = 'Filter k size:'
-            _ratio = 'Edge th ratio:'
-            _thresh_min = '  ..lower thresh:'
-            _contour = 'Contour type:'
-            _contour_min = 'Contour size min:'
-            self.save_tb_name = 'Save, click 0:'
-        else:  # is Linux
-            _contrast = f'{"Contrast/gain/alpha (100x):" : <40}'
+        cv2.setMouseCallback(self.settings_win,
+                             self.save_with_click)
+
+        if utils.MY_OS == 'lin':
+            _contrast = f'{"Contrast/gain/alpha (100X):" : <40}'
             _bright = f"{'Brightness/bias/beta, (-127):' : <40}"
             _morph_op = ("Reduce noise morphology operator: "
                          f'{"0 open, 1 hitmiss, 2 close, 3 gradient" : <45}')
@@ -188,7 +178,36 @@ class ProcessImage:
             _thresh_min = f'{"Edges, lower t-hold:" : <50}'
             _contour = f'{"Contour size type: 0 area, 1 arc length" : <40}'
             _contour_min = f'{"Contour size minimum (pixels):" : <30}'
-            self.save_tb_name = f'{"Save, click on 0" : <45}'
+
+        elif utils.MY_OS == 'dar':
+            _contrast = 'Alpha (100X):'
+            _bright = 'Beta (-127):'
+            _morph_op = 'Morph operator:'
+            _morph_shape = 'Morph shape:'
+            _noise_k = 'Noise redux, k:'
+            _noise_i = ' ...iterations:'
+            _border = 'Border type:'
+            _filter = 'Filter type:'
+            _kernel_size = 'Filter k size:'
+            _ratio = 'Edge th ratio:'
+            _thresh_min = '  ..lower thresh:'
+            _contour = 'Contour type:'
+            _contour_min = 'Contour size min:'
+
+        else:  # is Windows, need to limit to 10 characters.
+            _contrast = 'Alpha 100X'
+            _bright = 'Beta, -127'
+            _morph_op = 'Morph op:'
+            _morph_shape = '   shape:'
+            _noise_k = 'de-noise k'
+            _noise_i = '   iter:'
+            _border = 'Border:'
+            _filter = 'Filter:'
+            _kernel_size = 'Filter, k:'
+            _ratio = 'Th ratio'
+            _thresh_min = 'Th min:'
+            _contour = 'Contour:'
+            _contour_min = 'Cntr size:'
 
         cv2.createTrackbar(_contrast,
                            self.settings_win,
@@ -262,11 +281,6 @@ class ProcessImage:
                            100,
                            1000,
                            self.contour_limit_selector)
-        cv2.createTrackbar(self.save_tb_name,
-                           self.settings_win,
-                           1,
-                           2,
-                           self.save_selector)
 
     def alpha_selector(self, a_val) -> None:
         """
@@ -489,27 +503,32 @@ class ProcessImage:
         self.contour_limit = cl_val
         self.contour_edges()
 
-    def save_selector(self, s_val) -> None:
+    def save_with_click(self, event, *args):
         """
-        The 'save' trackbar handler.
+        Click on the namedWindow calls module that saves the image and
+        settings.
+        Calls utils.save_img_and_settings.
+        Called by cv2.setMouseCallback event.
+
         Args:
-            s_val: The integer value passed from trackbar.
+            event: The implicit mouse event.
+            *args: Return values from setMouseCallback(); not used here.
 
-        Returns: None
-
+        Returns: *event* as a formality.
         """
 
-        # Need a pause to prevent multiple Trackbar event calls.
-        # Note that while a click on zero triggers a single call here,
-        #  sliding trackbar to zero will trigger 2-3 calls. Need to fix that.
-        if s_val < 1:
+        #  For mouse buttons, double click doesn't work in macOS;
+        #    rt-click does Frame menu in Linux, hence different actions.
+        if utils.MY_OS in 'lin, win':
+           mouse_event = cv2.EVENT_LBUTTONDBLCLK
+        else:  # is macOS
+            mouse_event = cv2.EVENT_RBUTTONDOWN
+
+        if event == mouse_event:
             utils.save_img_and_settings(self.result_img,
                                         self.settings_txt,
                                         'edge')
-            cv2.setTrackbarPos(self.save_tb_name,
-                               self.settings_win,
-                               1)
-        sleep(0.5)
+        return event
 
     def adjust_contrast(self) -> None:
         """

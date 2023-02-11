@@ -59,7 +59,7 @@ class ProcessImage:
                  'flat_gray_array', 'gray_img', 'orig_img', 'orig_mean',
                  'orig_sd', 'settings_txt',
                  'settings_win', 'tile_size',
-                 'save_tb_name', 'clahe_hist',
+                 'clahe_hist',
                  )
 
     def __init__(self):
@@ -80,7 +80,6 @@ class ProcessImage:
 
         self.settings_txt = ''
         self.settings_win = ''
-        self.save_tb_name = ''
 
         # Need to get_backend for Windows.
         matplotlib.get_backend()
@@ -126,8 +125,10 @@ class ProcessImage:
         Returns: None
         """
 
-        self.settings_win = "Image and cv2.createCLAHE settings"
-        self.save_tb_name = 'Save, click on 0'
+        if utils.MY_OS in 'lin, win':
+            self.settings_win = "cv2.createCLAHE settings (dbl-click text to save)"
+        else:  # is macOS
+            self.settings_win = "cv2.createCLAHE settings (rt-click text to save)"
 
         # Move the control window away from the processing windows.
         # Place window at right edge of screen by using an excessive x-coordinate.
@@ -138,6 +139,7 @@ class ProcessImage:
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow(self.settings_win, 600, 15)
         else:  # is Windows
+            # Need to compensate for WINDOW_AUTOSIZE not working in Windows10.
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
             cv2.resizeWindow(self.settings_win, 600, 500)
             text_img = np.ones((140, 500), dtype='uint8')
@@ -145,29 +147,63 @@ class ProcessImage:
             text_img[:] = np.ones((140, 500)) * 41 / 255.0
             cv2.imshow(self.settings_win, text_img)
 
-        cv2.createTrackbar('Clip limit (10X)',
+        cv2.setMouseCallback(self.settings_win,
+                             self.save_with_click)
+
+        if utils.MY_OS == 'lin':
+            clip_tb_name = 'Clip limit\n10X'
+            tile_tb_name = 'Tile size (N, N)\n'
+        elif utils.MY_OS == 'win':  # is WindowsS, limited to 10 characters
+            clip_tb_name = 'Clip, 10X'
+            tile_tb_name = 'Tile size'
+        else:
+            clip_tb_name = 'Clip limit, (10X)'
+            tile_tb_name = 'Tile size, (N, N)'
+
+
+        # Set trackbar mininum to 1 b/c can't use a zero value in selectors.
+        cv2.createTrackbar(clip_tb_name,
                            self.settings_win,
                            20,
                            50,
                            self.clip_selector)
-        cv2.setTrackbarMin('Clip limit (10X)',
+        cv2.setTrackbarMin(clip_tb_name,
                            self.settings_win,
                            1)
 
-        cv2.createTrackbar('Tile size (N, N)',
+        cv2.createTrackbar(tile_tb_name,
                            self.settings_win,
                            8,
                            200,
                            self.tile_selector)
-        cv2.setTrackbarMin('Tile size (N, N)',
+        cv2.setTrackbarMin(tile_tb_name,
                            self.settings_win,
                            1)
 
-        cv2.createTrackbar(self.save_tb_name,
-                           self.settings_win,
-                           1,
-                           2,
-                           self.save_selector)
+    def save_with_click(self, event, *args):
+        """
+        Double-click on the namedWindow calls module that saves the image
+        and settings.
+        Calls utils.save_img_and_settings.
+        Called by cv2.setMouseCallback event.
+
+        Args:
+            event: The implicit mouse event.
+            *args: Return values from setMouseCallback(); not used here.
+
+        Returns: *event* as a formality.
+
+        """
+        if utils.MY_OS in 'lin, win':
+           mouse_event = cv2.EVENT_LBUTTONDBLCLK
+        else:
+            mouse_event = cv2.EVENT_RBUTTONDOWN
+
+        if event == mouse_event:
+            utils.save_img_and_settings(self.clahe_img,
+                                        self.settings_txt,
+                                        'clahe')
+        return event
 
     def clip_selector(self, c_val) -> None:
         """
@@ -204,27 +240,6 @@ class ProcessImage:
             self.tile_size = t_val, t_val
 
         self.set_clahe()
-
-    def save_selector(self, s_val) -> None:
-        """
-        The 'Save' trackbar handler.
-        Args:
-            s_val: The integer value passed from trackbar.
-
-        Returns: None
-
-        """
-        # Need a pause to prevent multiple Trackbar event calls.
-        # Note that while a click on zero triggers a single call here,
-        #  sliding trackbar to zero will trigger 2-3 calls. Need to fix that.
-        if s_val < 1:
-            utils.save_img_and_settings(self.clahe_img,
-                                        self.settings_txt,
-                                        'clahe')
-            cv2.setTrackbarPos(self.save_tb_name,
-                               self.settings_win,
-                               1)
-        plt.pause(0.5)
 
     def set_clahe(self) -> None:
         """
