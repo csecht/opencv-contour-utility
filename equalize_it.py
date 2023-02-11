@@ -259,7 +259,6 @@ class ProcessImage:
         self.clahe_sd = int(self.clahe_img.std())
         self.clahe_mean = int(self.clahe_img.mean())
 
-        # A hack to avoid having two settings text windows appear.
         self.show_settings()
 
         win_name = 'CLAHE adjusted'
