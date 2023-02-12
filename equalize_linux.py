@@ -55,7 +55,7 @@ from contour_utils import (vcheck, utils)
 
 class ProcessImage:
     __slots__ = ('clahe_img', 'clahe_mean', 'clahe_sd', 'clip_limit',
-                 'flat_gray_array', 'gray_img', 'orig_img', 'orig_mean',
+                 'gray_img', 'orig_img', 'orig_mean',
                  'orig_sd', 'settings_txt',
                  'settings_win', 'tile_size',
                  'fig', 'ax1', 'ax2')
@@ -65,7 +65,6 @@ class ProcessImage:
         # The np.ndarray arrays for images to be processed.
         self.orig_img = None
         self.gray_img = None
-        self.flat_gray_array = None
         self.clahe_img = None
 
         if utils.MY_OS in 'lin, win':
@@ -269,7 +268,7 @@ class ProcessImage:
         else:
             self.clip_limit = c_val / 10
 
-        self.set_clahe()
+        self.apply_clahe()
 
     def tile_selector(self, t_val) -> None:
         """
@@ -287,9 +286,9 @@ class ProcessImage:
         else:
             self.tile_size = t_val, t_val
 
-        self.set_clahe()
+        self.apply_clahe()
 
-    def set_clahe(self, startup=None) -> None:
+    def apply_clahe(self, startup=None) -> None:
         """
         Applies CLAHE adjustments to image and calculates pixel values
         for reporting.
@@ -309,9 +308,9 @@ class ProcessImage:
         self.clahe_sd = int(self.clahe_img.std())
         self.clahe_mean = int(self.clahe_img.mean())
 
-        # A hack to avoid having two settings text windows appear.
-        if not startup:
-            self.show_settings()
+        if utils.MY_OS in 'lin, win':
+            self.show_clahe_histogram()
+        self.show_settings()
 
         win_name = 'CLAHE adjusted'
         cv2.namedWindow(win_name,
@@ -319,8 +318,6 @@ class ProcessImage:
         # cv2.moveWindow(win_name, 300, 250)
         cv2.imshow(win_name, self.clahe_img)
 
-        if utils.MY_OS in 'lin, win':
-            self.show_clahe_histogram()
 
     def show_input_histogram(self) -> None:
         """
