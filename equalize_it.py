@@ -132,7 +132,6 @@ class ProcessImage:
             self.settings_win = "cv2.createCLAHE settings (rt-click text to save)"
 
         # Move the control window away from the processing windows.
-        # Place window at right edge of screen by using an excessive x-coordinate.
         if utils.MY_OS == 'lin':
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow(self.settings_win, 800, 35)
@@ -142,11 +141,7 @@ class ProcessImage:
         else:  # is Windows
             # Need to compensate for WINDOW_AUTOSIZE not working in Windows10.
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
-            cv2.resizeWindow(self.settings_win, 600, 500)
-            text_img = np.ones((140, 500), dtype='uint8')
-            # Convert the ones array to an image with gray16 (41,41,41) bg.
-            text_img[:] = np.ones((140, 500)) * 41 / 255.0
-            cv2.imshow(self.settings_win, text_img)
+            cv2.resizeWindow(self.settings_win, 900, 500)
 
         cv2.setMouseCallback(self.settings_win,
                              self.save_with_click)

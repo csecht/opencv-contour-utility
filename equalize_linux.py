@@ -30,7 +30,6 @@ try:
     import matplotlib.backends.backend_tkagg as backend
     import tkinter as tk
     from matplotlib import pyplot as plt
-    from matplotlib.widgets import Button
 except (ImportError, ModuleNotFoundError) as import_err:
     print('*** OpenCV, Numpy, Matplotlib or tkinter (tk/tcl) was not found or needs an update:\n\n'
           'To install: from the current folder, run this command'
@@ -67,7 +66,7 @@ class ProcessImage:
         self.gray_img = None
         self.clahe_img = None
 
-        if utils.MY_OS in 'lin, win':
+        if utils.MY_OS == 'lin':
             # Matplotlib plotting with live updates.
             plt.style.use(('bmh', 'fast'))
             self.fig, (self.ax1, self.ax2) = plt.subplots(
@@ -78,11 +77,11 @@ class ProcessImage:
                 clear=True
             )
             # Note that plt.ion() needs to be called
-            # AFTER subplots() is called,
-            #   otherwise a "Segmentation fault (core dumped)" error is raised.
+            # AFTER subplots(), otherwise
+            #   a "Segmentation fault (core dumped)" error is raised.
             # plt.ion() is used with fig.canvas.start_event_loop(0.1);
-            #   not needed if fig.canvas.draw_idle() is used.
-            matplotlib.get_backend()
+            #   it is not needed if fig.canvas.draw_idle() is used.
+            # matplotlib.get_backend()
             plt.ion()
 
         # Image processing parameters amd metrics.
@@ -101,7 +100,7 @@ class ProcessImage:
         #  event issue (where setup_trackbars() triggers an event
         #  that prompts drawing of histogram window).
         self.manage_input()
-        if utils.MY_OS in 'lin, win':
+        if utils.MY_OS == 'lin':
             self.setup_canvas_window()
             self.show_input_histogram()
         self.setup_trackbars()
@@ -190,11 +189,7 @@ class ProcessImage:
         else:  # is Windows
             # Need to compensate for WINDOW_AUTOSIZE not working in Windows10.
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
-            cv2.resizeWindow(self.settings_win, 600, 500)
-            text_img = np.ones((140, 500), dtype='uint8')
-            # Convert the ones array to an image with gray16 (41,41,41) bg.
-            text_img[:] = np.ones((140, 500)) * 41 / 255.0
-            cv2.imshow(self.settings_win, text_img)
+            cv2.resizeWindow(self.settings_win, 900, 500)
 
         cv2.setMouseCallback(self.settings_win,
                              self.save_with_click)
@@ -205,7 +200,7 @@ class ProcessImage:
         elif utils.MY_OS == 'win':  # is WindowsS, limited to 10 characters
             clip_tb_name = 'Clip, 10X'
             tile_tb_name = 'Tile size'
-        else:
+        else:  # is macOS
             clip_tb_name = 'Clip limit, (10X)'
             tile_tb_name = 'Tile size, (N, N)'
 
@@ -300,16 +295,14 @@ class ProcessImage:
         self.clahe_sd = int(self.clahe_img.std())
         self.clahe_mean = int(self.clahe_img.mean())
 
-        if utils.MY_OS in 'lin, win':
+        if utils.MY_OS == 'lin':
             self.show_clahe_histogram()
         self.show_settings()
 
         win_name = 'CLAHE adjusted'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
-        # cv2.moveWindow(win_name, 300, 250)
         cv2.imshow(win_name, self.clahe_img)
-
 
     def show_input_histogram(self) -> None:
         """
