@@ -271,6 +271,9 @@ class ProcessImage:
                            256,
                            self.min_threshold_selector,
                            )
+        cv2.setTrackbarMin(_thresh_min,
+                           self.settings_win,
+                           1)
         cv2.createTrackbar(_contour,
                            self.settings_win,
                            1,
@@ -467,10 +470,7 @@ class ProcessImage:
 
     def min_threshold_selector(self, th_val):
 
-        if th_val > 0:
-            self.min_threshold = th_val
-        else:
-            print('Threshold slider: values of 0 are reset to 1.')
+        self.min_threshold = th_val
 
         self.contour_edges()
 
