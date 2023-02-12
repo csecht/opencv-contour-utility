@@ -21,6 +21,7 @@ Developed in Python 3.8-3.9.
 
 # Standard library imports.
 import sys
+
 from pathlib import Path
 
 # Third party imports.
@@ -55,11 +56,25 @@ from contour_utils import (vcheck,
 
 
 class ProcessImage:
+    """
+    A suite of methods for applying OpenCV histogram equalization with
+    CLAHE.
+
+    Methods:
+        apply_clahe
+        clip_selector
+        manage_input
+        save_with_click
+        setup_trackbars
+        show_histograms
+        show_settings
+        tile_selector
+
+    """
     __slots__ = ('clahe_img', 'clahe_mean', 'clahe_sd', 'clip_limit',
                  'flat_gray_array', 'gray_img', 'orig_img', 'orig_mean',
                  'orig_sd', 'settings_txt',
                  'settings_win', 'tile_size',
-                 'clahe_hist',
                  )
 
     def __init__(self):
@@ -190,7 +205,7 @@ class ProcessImage:
 
         """
         if utils.MY_OS in 'lin, win':
-           mouse_event = cv2.EVENT_LBUTTONDBLCLK
+            mouse_event = cv2.EVENT_LBUTTONDBLCLK
         else:
             mouse_event = cv2.EVENT_RBUTTONDOWN
 

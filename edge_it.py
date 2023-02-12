@@ -20,9 +20,10 @@ Developed in Python 3.8-3.9.
 # Copyright (C) 2022 C.S. Echt, under GNU General Public License
 
 # Standard library imports
-import numpy as np
 import math
 import sys
+import numpy as np
+
 from pathlib import Path
 
 # Third party imports
@@ -48,13 +49,41 @@ from contour_utils import (vcheck,
 
 
 class ProcessImage:
+    """
+    A suite of methods for applying various OpenCV image processing
+    functions involved in on identifying objects in an image file using
+    Canny edges.
+    Methods:
+        adjust_contrast
+        alpha_selector
+        beta_selector
+        border_selector
+        circle_contours
+        contour_edges
+        contour_limit_selector
+        contour_type_selector
+        filter_image
+        filter_kernel_selector
+        filter_type_selector
+        manage_input
+        min_threshold_selector
+        morphology_op_selector
+        noise_redux_iter_selector
+        noise_redux_kernel_selector
+        noise_redux_shape_selector
+        ratio_selector
+        reduce_noise
+        save_with_click
+        setup_trackbars
+        show_settings
+    """
     __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
                  'contour_limit', 'contour_type', 'contrasted',
                  'curr_contrast_sd',
                  'drawn_contours', 'filter_kernel', 'filter_selection',
                  'gray_img', 'morph_op', 'morph_shape',
                  'noise_iter', 'noise_kernel', 'max_threshold', 'min_threshold',
-                 'num_edge_contours_select', 'num_edge_contours_all', 
+                 'num_edge_contours_select', 'num_edge_contours_all',
                  'orig_contrast_sd', 'orig_img', 'ratio', 'result_img',
                  'settings_txt', 'settings_win',
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
@@ -119,8 +148,7 @@ class ProcessImage:
         #   how-to-resize-text-for-cv2-puttext-according-to-the-image-size-in-opencv-python
         size2scale = min(self.orig_img.shape[0], self.orig_img.shape[1])
         self.font_scale = size2scale * const.FONT_SCALE
-        if self.font_scale < 0.5:
-            self.font_scale = 0.5
+        self.font_scale = max(self.font_scale, 0.5)
         self.line_thickness = math.ceil(size2scale * const.LINE_SCALE)
         self.center_xoffset = int(size2scale * const.CENTER_XSCALE)
 
@@ -520,7 +548,7 @@ class ProcessImage:
         #  For mouse buttons, double click doesn't work in macOS;
         #    rt-click does Frame menu in Linux, hence different actions.
         if utils.MY_OS in 'lin, win':
-           mouse_event = cv2.EVENT_LBUTTONDBLCLK
+            mouse_event = cv2.EVENT_LBUTTONDBLCLK
         else:  # is macOS
             mouse_event = cv2.EVENT_RBUTTONDOWN
 
@@ -732,8 +760,8 @@ class ProcessImage:
         self.result_img = self.orig_img.copy()
 
         for _c in contour_list:
-            (x, y), radius = cv2.minEnclosingCircle(_c)
-            center = (int(x), int(y))
+            (_x, _y), radius = cv2.minEnclosingCircle(_c)
+            center = (int(_x), int(_y))
             radius = int(radius)
             cv2.circle(self.result_img,
                        center=center,
@@ -842,4 +870,5 @@ if __name__ == "__main__":
 
     PI = ProcessImage()
     print(f'{Path(__file__).name} is now running...')
+
     utils.quit_keys()
