@@ -136,7 +136,7 @@ class ProcessImage:
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow(self.settings_win, 800, 35)
         elif utils.MY_OS == 'dar':
-            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
+            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
             cv2.moveWindow(self.settings_win, 600, 15)
         else:  # is Windows
             # Need to compensate for WINDOW_AUTOSIZE not working in Windows10.
@@ -173,7 +173,7 @@ class ProcessImage:
         cv2.createTrackbar(tile_tb_name,
                            self.settings_win,
                            8,
-                           200,
+                           300,
                            self.tile_selector)
         cv2.setTrackbarMin(tile_tb_name,
                            self.settings_win,
@@ -277,6 +277,8 @@ class ProcessImage:
         Returns: None
         """
 
+        # Need to clear prior histograms before drawing new ones.
+        #  Inefficient and slow, but it works.
         plt.cla()
 
         # hist() returns tuple of (counts(n), bins(edges), patches(artists)
@@ -294,7 +296,6 @@ class ProcessImage:
                  label='Input grayscale'
                  )
 
-        # Need to clear prior histograms before drawing new ones.
         plt.hist(self.clahe_img.ravel(),
                  bins=255,
                  range=[0, 256],
