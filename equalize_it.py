@@ -89,7 +89,7 @@ class ProcessImage:
         self.manage_input()
         self.setup_trackbars()
         # NOTE that setup_trackbars sets starting pos other than zero,
-        #  which creates a call event for set_clahe()
+        #  which creates a call event for apply_clahe()
 
     def manage_input(self):
         """
@@ -103,6 +103,7 @@ class ProcessImage:
         # utils.args_handler() has verified image path, so read from it.
         self.orig_img = cv2.imread(arguments['input'])
         self.gray_img = cv2.cvtColor(self.orig_img, cv2.COLOR_BGR2GRAY)
+        self.flat_gray_array = self.gray_img.ravel()
 
         win_name = 'Input <- | -> Grayscale for processing'
         cv2.namedWindow(win_name,
@@ -160,7 +161,7 @@ class ProcessImage:
             clip_tb_name = 'Clip limit, (10X)'
             tile_tb_name = 'Tile size, (N, N)'
 
-        # Set trackbar mininum to 1 b/c can't use a zero value in selectors.
+        # Set trackbar minimum to 1 b/c can't use a zero value in selectors.
         cv2.createTrackbar(clip_tb_name,
                            self.settings_win,
                            20,
@@ -220,7 +221,7 @@ class ProcessImage:
         else:
             self.clip_limit = c_val / 10
 
-        self.set_clahe()
+        self.apply_clahe()
 
     def tile_selector(self, t_val) -> None:
         """
@@ -238,9 +239,9 @@ class ProcessImage:
         else:
             self.tile_size = t_val, t_val
 
-        self.set_clahe()
+        self.apply_clahe()
 
-    def set_clahe(self) -> None:
+    def apply_clahe(self) -> None:
         """
         Applies CLAHE adjustments to image and calculates pixel values
         for reporting.
@@ -258,6 +259,8 @@ class ProcessImage:
         self.clahe_sd = int(self.clahe_img.std())
         self.clahe_mean = int(self.clahe_img.mean())
 
+        # This order of calls places the CLAHE image window on top.
+        self.show_histograms()
         self.show_settings()
 
         win_name = 'CLAHE adjusted'
@@ -265,29 +268,27 @@ class ProcessImage:
                         flags=cv2.WINDOW_GUI_NORMAL)
         cv2.imshow(win_name, self.clahe_img)
 
-        self.show_histograms()
-        # show_clahe_histogram() calls show_input_histogram()
 
     def show_histograms(self) -> None:
         """
         Updates CLAHE adjusted histogram plot with Matplotlib from
-        trackbar changes. Called from set_clahe().
+        trackbar changes. Called from apply_clahe().
         Calls show_input_histogram()
 
         Returns: None
         """
 
         # Need to clear prior histograms before drawing new ones.
-        #  Inefficient and slow, but it works.
+        #  Redrawing both histograms is inefficient and slow, but it works.
         plt.cla()
 
         # hist() returns tuple of (counts(n), bins(edges), patches(artists)
         # histtype='step' draws a line, 'stepfilled' fills under the line;
-        #   both are patches.Polygon artists that provide faster rendering
+        #   both are patches. Polygon artists provide faster rendering
         #   than the default 'bar', which is a BarContainer object of
         #   Rectangle artists.
-        # For input img, use 'step' for better performance.
-        plt.hist(self.gray_img.ravel(),
+        # For input img, use 'step' and pre-flattened ndarray for better performance.
+        plt.hist(self.flat_gray_array,
                  bins=255,
                  range=[0, 256],
                  color='black',
@@ -304,6 +305,7 @@ class ProcessImage:
                  histtype='stepfilled',
                  label='CLAHE adjusted'
                  )
+
         plt.title('Histograms')
         plt.xlabel('Pixel value')
         plt.ylabel('Pixel count')

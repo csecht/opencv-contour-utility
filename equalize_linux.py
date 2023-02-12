@@ -351,7 +351,7 @@ class ProcessImage:
     def show_clahe_histogram(self) -> None:
         """
         Updates CLAHE adjusted histogram plot with Matplotlib from
-        trackbar changes. Called from set_clahe().
+        trackbar changes. Called from apply_clahe().
 
         Returns: None
         """
