@@ -215,11 +215,7 @@ class ProcessImage:
         Returns: None
         """
 
-        if c_val == 0:
-            self.clip_limit = 0.1
-            print('CLAHE clip limit of zero was reset to 0.1')
-        else:
-            self.clip_limit = c_val / 10
+        self.clip_limit = c_val / 10
 
         self.apply_clahe()
 
@@ -233,11 +229,7 @@ class ProcessImage:
         Returns: None
         """
 
-        if t_val == 0:
-            self.tile_size = 1, 1
-            print('CLAHE tile size of zero was reset to (1, 1)')
-        else:
-            self.tile_size = t_val, t_val
+        self.tile_size = t_val, t_val
 
         self.apply_clahe()
 
