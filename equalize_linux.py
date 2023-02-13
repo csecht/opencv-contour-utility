@@ -19,6 +19,7 @@ Developed in Python 3.8-3.9.
 
 # Standard library imports.
 import sys
+import threading
 from pathlib import Path
 
 # Third party imports.
@@ -414,6 +415,8 @@ if __name__ == "__main__":
         print(f'{Path(__file__).name} is now running...')
 
         # Set infinite loop with sigint handler to monitor "quit" keystrokes.
-        utils.quit_keys()
+        quit_thread = threading.Thread(
+            target=utils.quit_keys(), daemon=True)
+        quit_thread.start()
 
         canvas_window.mainloop()
