@@ -1,7 +1,6 @@
 """
 General housekeeping utilities.
 Functions:
-handle_exceptions - custom handler, for development.
 check_platform - Exits if not Linux, Windows, or MacOS.
 args_handler - Handles command line arguments; returns dict of args.
 scale_img - Resize displayed images.

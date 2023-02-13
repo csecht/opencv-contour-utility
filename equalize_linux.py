@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
-"""A more responsive version of equalize_it.py that uses two histogram
-plots to update just the CLAHE histogram on a tkinter canvas.
+"""
+A more responsive version of equalize_it.py for Linux that uses two
+histogram plots on a tkinter canvas to update just the CLAHE histogram.
+Uses a matplotlib TkAgg backend and tkinter.
 Currently, fully functional only on Linux systems.
 
 USAGE Example command lines, from within the image-processor-main folder:
@@ -276,12 +278,10 @@ class ProcessImage:
 
         self.apply_clahe()
 
-    def apply_clahe(self, startup=None) -> None:
+    def apply_clahe(self) -> None:
         """
         Applies CLAHE adjustments to image and calculates pixel values
         for reporting.
-        Args:
-            startup: Flag for when call is from program startup.
 
         Returns: None
         """
