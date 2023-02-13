@@ -106,8 +106,7 @@ def args_handler() -> dict:
         if i in sys.argv[:]:
             input_arg += 1
     if input_arg == 0:
-        print('Without the --input argument, the default image is used:'
-              # ' images/sample1.jpg')
+        print('Without the --input argument, the default input image file is: '
               f'{valid_path_to("images/sample1.jpg")}')
 
     arguments = {
