@@ -1,7 +1,10 @@
-numpy==1.23.4
+numpy~=1.24.1
 #opencv-python==4.6.0.66   # may work
-opencv-python==4.5.5.62  # Use if 4.6 doesn't work well in PyCharm.
+opencv-python~=4.7.0.68
 matplotlib==3.6.3
 Pillow==9.4.0
 
 # Note that matplotlib, and it's dependency Pillow, are needed only with `equalize_it.py`.
+
+# pyqt5 is needed only for equalize_mac.py
+#PyQt5~=5.15.9
