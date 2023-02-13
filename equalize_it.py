@@ -262,7 +262,8 @@ class ProcessImage:
         self.clahe_mean = int(self.clahe_img.mean())
 
         # This order of calls places the CLAHE image window on top.
-        self.show_histograms()
+        self.show_histograms(self.clahe_img.ravel())
+
         self.show_settings()
 
         win_name = 'CLAHE adjusted'
@@ -270,16 +271,16 @@ class ProcessImage:
                         flags=cv2.WINDOW_GUI_NORMAL)
         cv2.imshow(win_name, self.clahe_img)
 
-
-    def show_histograms(self) -> None:
+    def show_histograms(self, live_histo: np.ndarray) -> None:
         """
         Updates CLAHE adjusted histogram plot with Matplotlib from
         trackbar changes. Called from apply_clahe().
-        Calls show_input_histogram()
+
+        Args: A flattened (1-D) ndarray of the image so that its
+            histogram can be displayed.
 
         Returns: None
         """
-
         # Need to clear prior histograms before drawing new ones.
         #  Redrawing both histograms is inefficient and slow, but it works.
         plt.cla()
@@ -289,17 +290,18 @@ class ProcessImage:
         #   both are patches. Polygon artists provide faster rendering
         #   than the default 'bar', which is a BarContainer object of
         #   Rectangle artists.
-        # For input img, use 'step' and pre-flattened ndarray for better performance.
+        # For input img, use 'step' and pre-flattened ndarray for better
+        #   performance when overlaying a static histogram.
         plt.hist(self.flat_gray_array,
                  bins=255,
                  range=[0, 256],
                  color='black',
                  alpha=1,
                  histtype='step',
-                 label='Input grayscale'
+                 label='Input, grayscale'
                  )
 
-        plt.hist(self.clahe_img.ravel(),
+        plt.hist(live_histo,
                  bins=255,
                  range=[0, 256],
                  color='orange',
