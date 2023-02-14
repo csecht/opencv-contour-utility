@@ -20,21 +20,22 @@ Developed in Python 3.8-3.9.
 # Copyright (C) 2022 C.S. Echt, under GNU General Public License
 
 # Standard library imports.
-import cv2
 import sys
-# Source: https://www.geeksforgeeks.org/how-to-embed-matplotlib-graph-in-pyqt5/
+
+# Third party imports.
+import cv2
+import matplotlib.pyplot as plt
 from PyQt5.QtWidgets import QDialog, QApplication, QPushButton, QVBoxLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
-import matplotlib.pyplot as plt
 
 # Local application imports
 from contour_utils import (vcheck, utils)
 
-# main window thread,
+
+# noinspection PyUnresolvedReferences
 class PlotWindow(QDialog):
 
-    # constructor
     def __init__(self):
         super().__init__()
 
@@ -62,6 +63,8 @@ class PlotWindow(QDialog):
         self.button = QPushButton('Quit')
         self.button.clicked.connect(self.quit_now)
 
+        # Source for using pyqt5:
+        #  https://www.geeksforgeeks.org/how-to-embed-matplotlib-graph-in-pyqt5/
         # creating a Vertical Box layout
         layout = QVBoxLayout()
 

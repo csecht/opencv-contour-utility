@@ -55,6 +55,7 @@ except (ImportError, ModuleNotFoundError) as import_err:
 from contour_utils import (vcheck, utils)
 
 
+# noinspection PyUnresolvedReferences
 class ProcessImage:
     __slots__ = ('clahe_img', 'clahe_mean', 'clahe_sd', 'clip_limit',
                  'gray_img', 'orig_img', 'orig_mean',
