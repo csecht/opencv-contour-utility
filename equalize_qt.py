@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
-A more responsive version of equalize_it.py fo macOS that uses two
-histogram plots on a PyQt5 canvas but updates just the CLAHE histogram.
+A more responsive version of equalize_it.py for macOS and WIndows that uses
+two histogram plots on a PyQt5 canvas but updates just the CLAHE histogram.
 Uses a PyQt5 GUI, which may require installation: pip3 install -U pyqt5
 Currently, fully functional only on macOS systems.
 
 USAGE Example command lines, from within the image-processor-main folder:
-python3 -m equalize_mac --help
-python3 -m equalize_mac --about
-python3 -m equalize_mac --input images/sample2.jpg
+python3 -m equalize_qt --help
+python3 -m equalize_qt --about
+python3 -m equalize_qt --input images/sample2.jpg
 
 Quit program with Return/Enter key. Quit from command line with Ctrl-C.
 Save any selected window with Ctrl-S or from rt-click menu.
