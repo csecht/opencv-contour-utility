@@ -1,9 +1,13 @@
 #!/usr/bin/env python3
 """
-A more responsive version of equalize_it.py for macOS and WIndows that uses
-two histogram plots on a PyQt5 canvas but updates just the CLAHE histogram.
-Uses a PyQt5 GUI, which may require installation: pip3 install -U pyqt5
-Currently, fully functional only on macOS systems.
+A more responsive version of equalize_it.py that uses two histogram
+subplots on a PyQt5 canvas but updates just the CLAHE histogram.
+Uses a PyQt5 GUI, which may require installation: pip3 install -U pyqt5.
+Currently, fully functional only on macOS and Windows systems.
+
+Works on Linux only if using opencv-python versions from 4.1.1.26 to
+4.2.0.34. Later versions throw a qt.qpa.plugin for 'xcb' error.
+Recommend running equalize_tk.py or equalize_it.py on Linux.
 
 USAGE Example command lines, from within the image-processor-main folder:
 python3 -m equalize_qt --help
