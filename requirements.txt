@@ -1,15 +1,11 @@
-numpy
-opencv-python
-matplotlib
-Pillow
+matplotlib==3.6.3
+numpy==1.24.2
+opencv-python==4.6.0.66
+Pillow==9.4.0
 
-# Note that matplotlib, and it's dependency Pillow, are needed only with `equalize_it.py`.
+# ^^ Development environment, as of February 2023, Linux Ubuntu 20.04:
+# Note that matplotlib, and it's dependency Pillow, are needed only with
+#  the 'equalize*.py' modules.
 
-# Development environment, Linux Ubuntu 20.04; pip freeze:
-# matplotlib==3.7.0
-# numpy==1.24.2
-# opencv-python==4.6.0.66
-# Pillow==9.4.0
-
-# pyqt5 is needed only for equalize_mac.py
+# pyqt5 is needed only for equalize_qt.py
 # PyQt5~=5.15.9
