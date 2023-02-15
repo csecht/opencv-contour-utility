@@ -29,7 +29,6 @@ try:
     import cv2
     import numpy as np
     import matplotlib
-    matplotlib.use('TkAgg')
     import matplotlib.backends.backend_tkagg as backend
     import tkinter as tk
     from matplotlib import pyplot as plt
