@@ -11,10 +11,6 @@ https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-
 
 The intention is to help OpenCV users understand the pertinent parameters and value ranges needed to identify objects.
 
-## Operating Platform Compatibility (as of 7 Feb 2023):
-Implementation in Windows10 has problems with the system gui window manager, so running in Windows is not recommended at this time. Not tested on Windows11 or later. 
-
-Everything should work fine in Linux and macOS distros.
 Development environment was Linux Ubuntu 20.04, macOS 13.2, Windows10
 
 ## edge_it.py
