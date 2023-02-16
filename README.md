@@ -26,7 +26,9 @@ The module `equalize_it.py` does not involve contours, but explores parameters f
 
 Be aware that CLAHE works best on images that have a full range of pixel values across the image, as in sample2.jpg (shells). In other words, it does not work well with images that have large areas of similar colors, as in sample1.jpg (pills), sample3.jpg (rummikub), or sample4.jgp (shapes). Nonetheless, this module can be fun to play with. Live histogram updating may be less responsive with larger image files.
  
-Slightly more responsive versions for updating histograms with trackbars are `equalize_tk.py` for Linux systems and `equalize_qt.py` for macOS and Windows systems. `equalize_tk.py` uses a tkinter GUI. `equalize_qt.py` uses a PyQt5 GUI, which may require installation: `pip3 install -U pyqt5`. The Qt version can run on Linux, but only if an earlier opencv-python version is installed (4.1.1.26 to 4.2.0.34), which is not recommended.
+Slightly more responsive versions for updating histograms with trackbars are `equalize_tk.py` for Linux systems and `equalize_qt.py` for macOS and Windows systems. `equalize_tk.py` uses a tkinter GUI. `equalize_qt.py` uses a PyQt5 GUI, which may require installation: `pip3 install -U pyqt5`. The Qt version can run on Linux, but only if an earlier opencv-python version is installed (4.1.1.26 to 4.2.0.34), which is not recommended. If `equalize_it.py` does not show histograms plots on your system, try one of the other equalize* programs. 
+
+A known issue is that, while `equalize_it.py` should work on all systems, some Linux installations may not show histograms. If that's the case, then run `equalize_tk.py`. The problem may be with the specific version of the required python packages.
 
 ### Usage examples:
 From within the program's folder, use one of these Terminal or Command Prompt command formats, depending on your system. Note that with no input argument, as in the first example, the default sample1.jpg from the `images` folder is used for input. Three sample input files are provided in the `images` folder.
