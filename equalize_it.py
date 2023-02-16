@@ -10,9 +10,11 @@ python3 -m equalize_it --help
 python3 -m equalize_it --about
 python3 -m equalize_it --input images/sample2.jpg
 
-Quit program with Esc or Q key; may need to select a window other than Histograms.
-Or quit from command line with Ctrl-C.
-Save settings and CLAHE image with the Save slide bar.
+If not working as expected, try one of the alternative GUI implementations,
+equalize_tk.py (tkinter) or equalize_qt.py (PyQt5)
+
+Quit program with Esc or Q key; may need to first select a window other
+than Histograms. Or quit from command line with Ctrl-C.
 
 Requires Python3.7 or later and the packages opencv-python and numpy.
 Developed in Python 3.8-3.9.

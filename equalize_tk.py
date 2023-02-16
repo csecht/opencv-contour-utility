@@ -10,9 +10,8 @@ python3 -m equalize_tk --help
 python3 -m equalize_tk --about
 python3 -m equalize_tk --input images/sample2.jpg
 
-Quit program with Return/Enter key. Quit from command line with Ctrl-C.
-Save any selected window with Ctrl-S or from rt-click menu.
-Save settings and CLAHE image with the Save/Print slide bar.
+Quit program with Esc or Q key; may need to first select a window other
+than Histograms. Or quit from command line with Ctrl-C.
 
 Requires Python3.7 or later and the packages opencv-python and numpy.
 Developed in Python 3.8-3.9.
