@@ -60,25 +60,22 @@ class ProcessImage:
         beta_selector
         border_selector
         circle_contours
-        contour_edges
         contour_limit_selector
+        contour_threshold
         contour_type_selector
         filter_image
         filter_kernel_selector
         filter_type_selector
         manage_input
-        min_threshold_selector
         morphology_op_selector
         noise_redux_iter_selector
         noise_redux_kernel_selector
         noise_redux_shape_selector
-        ratio_selector
         reduce_noise
         save_with_click
         setup_trackbars
         show_settings
         thresh_type_selector
-
     """
 
     __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
@@ -92,7 +89,7 @@ class ProcessImage:
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
                  'th_max', 'th_type', 'thresh',
                  'font_scale', 'line_thickness', 'center_xoffset',
-                 'contour_mode', 'contour_method'
+                 'contour_mode', 'contour_method',
                  )
 
     def __init__(self):
@@ -459,7 +456,7 @@ class ProcessImage:
         """
         The "Contour type" trackbar controller that assigns the
         contour type (area or arc length) for selecting contours.
-        Called from setup_trackbars(). Calls contour_edges().
+        Called from setup_trackbars(). Calls contour_threshold().
 
         Args:
             ct_val: The integer value passed from trackbar.
@@ -473,7 +470,7 @@ class ProcessImage:
         """
         The "contour find mode" trackbar controller that assigns the
         mode keyword parameter for cv2.findContours().
-        Called from setup_trackbars(). Calls contour_edges().
+        Called from setup_trackbars(). Calls contour_threshold().
 
         Args:
             mode_val: The integer value passed from trackbar.
@@ -491,7 +488,7 @@ class ProcessImage:
         """
         The "contour find method" trackbar controller that assigns the
         method keyword parameter for cv2.findContours().
-        Called from setup_trackbars(). Calls contour_edges().
+        Called from setup_trackbars(). Calls contour_threshold().
 
         Args:
             meth_val: The integer value passed from trackbar.
@@ -749,8 +746,7 @@ class ProcessImage:
         Draws a circles around contoured objects. Objects are expected
         to be oblong so that circle diameter can represent object length.
         Args:
-            contour_list: List of contours from cv2.findContours;
-                          expected to have some selection criteria applied.
+            contour_list: List of selected contours from cv2.findContours.
 
         Returns: None
         """
