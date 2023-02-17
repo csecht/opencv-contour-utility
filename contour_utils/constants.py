@@ -3,6 +3,69 @@ import sys
 
 MY_OS = sys.platform[:3]
 
+# Assign trackbar names based on OS b/c of name length limitations.
+if MY_OS == 'lin':
+    TBNAME = {
+    '_contrast': f'{"Contrast/gain/alpha (100X):" : <40}',
+    '_bright': f"{'Brightness/bias/beta, (-127):' : <40}",
+    '_morph_op': ("Reduce noise morphology operator: "
+                 f'{"0 open, 1 hitmiss, 2 close, 3 gradient" : <45}'),
+    '_morph_shape': ("Reduce noise morphology shape: "
+                    f'{"0 rectangle, 1 cross, 2 ellipse" : <48}'),
+    '_noise_k': f'{"Reduce noise, kernel size (odd only):" : <40}',
+    '_noise_i': f'{"Reduce noise, iterations:" : <46}',
+    '_border': ("Border type:  "
+               f'{"0 default, 1 reflect, 2 replicate, 3 isolated" : <46}'),
+    '_filter': ("Filter type:  "
+               f'{"0 box, 1 bilateral, 2 Gaussian, 3 median" : <46}'),
+    '_kernel_size': f'{"Filter kernel size (odd only):" : <43}',
+    '_ratio': f'{"Edges, max t-hold ratio (10x):" : <50}',
+    '_thresh_min': f'{"Edges, lower t-hold:" : <50}',
+    '_contour_mode': f'{"Find contour mode: 0 external, 1 list" : <40}',
+    '_contour_method': f'{"Find contour method: 1 none, 2 simple" : <40}',
+    '_contour_type': f'{"Contour size type: 0 area, 1 arc length" : <40}',
+    '_contour_min': f'{"Contour size minimum (pixels):" : <30}',
+    '_thresh_type': f'{"Thresholding type: 0 Otsu, 1 Triangle" : <40}',
+    }
+elif MY_OS == 'dar':
+    TBNAME = {
+    '_contrast': 'Alpha (100X):',
+    '_bright': 'Beta (-127):',
+    '_morph_op': 'Morph operator:',
+    '_morph_shape': 'Morph shape:',
+    '_noise_k': 'Noise redux, k:',
+    '_noise_i': ' ...iterations:',
+    '_border': 'Border type:',
+    '_filter': 'Filter type:',
+    '_kernel_size': 'Filter k size:',
+    '_ratio': 'Edge th ratio:',
+    '_thresh_min': '  ..lower thresh:',
+    '_contour_mode': 'Find C mode:',
+    '_contour_method': 'Find C method',
+    '_contour_type': 'Contour type:',
+    '_contour_min': 'Contour size min:',
+    '_thresh_type': 'Threshold type',
+    }
+else:  # is Windows; names limited to 10 characters.
+    TBNAME = {
+    '_contrast': 'Alpha 100X',
+    '_bright': 'Beta, -127',
+    '_morph_op': 'Morph op:',
+    '_morph_shape': '   shape:',
+    '_noise_k': 'de-noise k',
+    '_noise_i': '...iter:',
+    '_border': 'Border:',
+    '_filter': 'Filter:',
+    '_kernel_size': 'Filter, k',
+    '_ratio': 'Th ratio:',
+    '_thresh_min': 'Th min:',
+    '_contour_mode': 'Cnt mode:',
+    '_contour_method': 'Cnt method',
+    '_contour_type': 'Contour:',
+    '_contour_min': 'Cnt size:',
+    '_thresh_type': 'T-hold type',
+    }
+
 # Set ranges for trackbars used to adjust contrast and brightness for
 #  the cv2.convertScaleAbs method.
 ALPHA_MAX = 400
@@ -73,7 +136,25 @@ MORPH_SHAPE = {
     2: 'cv2.MORPH_ELLIPSE',
 }
 
-CONTOUR = {
+CONTOUR_MODE = {
+    # Key is the trackbar value; also is the constant's integer value
+    #   from the cv2.RETR__* constant.
+    # Value is what to display as descriptive text.
+    # RETR_EXTERNAL, RETR_LIST, RETR_CCOMP, RETR_TREE, RETR_FLOODFILL
+    0: 'cv2.RETR_EXTERNAL',
+    1: 'cv2.RETR_LIST',
+}
+
+CONTOUR_METHOD = {
+    # Key is the trackbar value; also is the constant's integer value
+    #   from the cv2.CHAIN_APPROX_* constant.
+    # Value is what to display as descriptive text.
+    # CHAIN_APPROX_SIMPLE, CHAIN_APPROX_NONE
+    1: 'cv2.CHAIN_APPROX_NONE',
+    2: 'cv2.CHAIN_APPROX_SIMPLE',
+}
+
+CONTOUR_TYPE = {
     # Key is the trackbar value.
     # Value is what to display as descriptive text.
     0: 'cv2.contourArea',

@@ -23,9 +23,10 @@ Developed in Python 3.8-3.9.
 import math
 import sys
 import threading
-from pathlib import Path
 
 import numpy as np
+
+from pathlib import Path
 
 # Third party imports
 try:
@@ -91,6 +92,7 @@ class ProcessImage:
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
                  'th_max', 'th_type', 'thresh',
                  'font_scale', 'line_thickness', 'center_xoffset',
+                 'contour_mode', 'contour_method'
                  )
 
     def __init__(self):
@@ -134,6 +136,8 @@ class ProcessImage:
         # for faster program startup.
         self.noise_kernel = (3, 3)
         self.filter_kernel = (3, 3)
+        self.contour_mode = 0  # cv2.RETR_EXTERNAL
+        self.contour_method = 2  # cv2.CHAIN_APPROX_SIMPLE
 
         self.settings_txt = ''
         self.settings_win = ''
@@ -141,7 +145,14 @@ class ProcessImage:
         self.manage_input()
         self.setup_trackbars()
 
-    def manage_input(self):
+    def manage_input(self) -> None:
+        """
+        Read the image file specified in the --input command line option and
+        assign variable values accordingly. Shows input cv2 image and the
+        grayscale.
+
+        Returns: None
+        """
 
         # utils.args_handler() has verified the image path, so read from it.
         self.orig_img = cv2.imread(arguments['input'])
@@ -192,114 +203,75 @@ class ProcessImage:
         cv2.setMouseCallback(self.settings_win,
                              self.save_with_click)
 
-        if utils.MY_OS == 'lin':
-            _contrast = f'{"Contrast/gain/alpha (100x):" : <40}'
-            _bright = f"{'Brightness/bias/beta, (-127):' : <40}"
-            _morph_op = ("Reduce noise morphology operator: "
-                         f'{"0 open, 1 hitmiss, 2 close, 3 gradient" : <45}')
-            _morph_shape = ("Reduce noise morphology shape: "
-                            f'{"0 rectangle, 1 cross, 2 ellipse" : <48}')
-            _noise_k = f'{"Reduce noise, kernel size (odd only):" : <40}'
-            _noise_i = f'{"Reduce noise, iterations:" : <46}'
-            _border = ("Border type:  "
-                       f'{"0 default, 1 reflect, 2 replicate, 3 isolated" : <46}')
-            _filter = ("Filter type:  "
-                       f'{"0 box, 1 bilateral, 2 Gaussian, 3 median" : <46}')
-            _kernel_size = f'{"Filter kernel size (odd only):" : <43}'
-            _thresh_type = f'{"Thresholding type: 0 Otsu, 1 Triangle" : <40}'
-            _contour = f'{"Contour size type: 0 area, 1 arc length" : <40}'
-            _contour_min = f'{"Contour size minimum (pixels):" : <30}'
-
-        elif utils.MY_OS == 'dar':
-            _contrast = 'Alpha (100X):'
-            _bright = 'Beta (-127):'
-            _morph_op = 'Morph operator:'
-            _morph_shape = 'Morph shape:'
-            _noise_k = 'Lower noise, k:'
-            _noise_i = '   ..iterations:'
-            _border = 'Border type:'
-            _filter = 'Filter type:'
-            _kernel_size = 'Filter k size:'
-            _thresh_type = 'Threshold type'
-            _contour = 'Contour type:'
-            _contour_min = 'Contour size min:'
-
-        else:  # is Windows, need to limit to 10 characters.
-            _contrast = 'Alpha 100X'
-            _bright = 'Beta, -127'
-            _morph_op = 'Morph op:'
-            _morph_shape = '   shape:'
-            _noise_k = 'deNoise k:'
-            _noise_i = '   iter:'
-            _border = 'Border:'
-            _filter = 'Filter:'
-            _kernel_size = 'Filter, k:'
-            _thresh_type = 'T-hold type'
-            _contour = 'Contour:'
-            _contour_min = 'Cntr size:'
-
-        cv2.createTrackbar(_contrast,
+        cv2.createTrackbar(const.TBNAME['_contrast'],
                            self.settings_win,
                            100,
                            const.ALPHA_MAX,
                            self.alpha_selector)
-        cv2.createTrackbar(_bright,
+        cv2.createTrackbar(const.TBNAME['_bright'],
                            self.settings_win,
                            127,
                            const.BETA_MAX,
                            self.beta_selector)
-        cv2.createTrackbar(_morph_op,
+        cv2.createTrackbar(const.TBNAME['_morph_op'],
                            self.settings_win,
                            1,
                            3,
                            self.morphology_op_selector)
-        cv2.createTrackbar(_morph_shape,
+        cv2.createTrackbar(const.TBNAME['_morph_shape'],
                            self.settings_win,
                            2,
                            2,
                            self.noise_redux_shape_selector)
-        cv2.createTrackbar(_noise_k,
+        cv2.createTrackbar(const.TBNAME['_noise_k'],
                            self.settings_win,
                            3,
                            20,
                            self.noise_redux_kernel_selector)
-        cv2.createTrackbar(_noise_i,
+        cv2.createTrackbar(const.TBNAME['_noise_i'],
                            self.settings_win,
                            1,
                            5,
                            self.noise_redux_iter_selector)
-        cv2.setTrackbarMin(_noise_i,
-                           self.settings_win,
-                           1)
-        cv2.createTrackbar(_border,
+        cv2.setTrackbarMin(const.TBNAME['_noise_i'], self.settings_win, 1)
+        cv2.createTrackbar(const.TBNAME['_border'],
                            self.settings_win,
                            2,
                            3,
                            self.border_selector)
-        cv2.createTrackbar(_filter,
+        cv2.createTrackbar(const.TBNAME['_filter'],
                            self.settings_win,
                            2,
                            3,
                            self.filter_type_selector)
-        cv2.createTrackbar(_kernel_size,
+        cv2.createTrackbar(const.TBNAME['_kernel_size'],
                            self.settings_win,
                            3,
                            50,
                            self.filter_kernel_selector)
-        cv2.setTrackbarMin(_kernel_size,
-                           self.settings_win,
-                           1)
-        cv2.createTrackbar(_thresh_type,
+        cv2.setTrackbarMin(const.TBNAME['_kernel_size'], self.settings_win, 1)
+        cv2.createTrackbar(const.TBNAME['_thresh_type'],
                            self.settings_win,
                            0,
                            1,
                            self.thresh_type_selector)
-        cv2.createTrackbar(_contour,
+        cv2.createTrackbar(const.TBNAME['_contour_type'],
                            self.settings_win,
                            1,
                            1,
                            self.contour_type_selector)
-        cv2.createTrackbar(_contour_min,
+        cv2.createTrackbar(const.TBNAME['_contour_mode'],
+                           self.settings_win,
+                           0,
+                           1,
+                           self.contour_mode_selector)
+        cv2.createTrackbar(const.TBNAME['_contour_method'],
+                           self.settings_win,
+                           2,
+                           2,
+                           self.contour_method_selector)
+        cv2.setTrackbarMin(const.TBNAME['_contour_method'], self.settings_win, 1)
+        cv2.createTrackbar(const.TBNAME['_contour_min'],
                            self.settings_win,
                            100,
                            1000,
@@ -487,15 +459,50 @@ class ProcessImage:
         """
         The "Contour type" trackbar controller that assigns the
         contour type (area or arc length) for selecting contours.
-        Called from setup_trackbars(). Calls contour_threshold().
+        Called from setup_trackbars(). Calls contour_edges().
 
         Args:
             ct_val: The integer value passed from trackbar.
 
         Returns: None
         """
+        self.contour_type = const.CONTOUR_TYPE[ct_val]
+        self.contour_threshold()
 
-        self.contour_type = const.CONTOUR[ct_val]
+    def contour_mode_selector(self, mode_val):
+        """
+        The "contour find mode" trackbar controller that assigns the
+        mode keyword parameter for cv2.findContours().
+        Called from setup_trackbars(). Calls contour_edges().
+
+        Args:
+            mode_val: The integer value passed from trackbar.
+
+        Returns: None
+        """
+
+        # This simple assignment works b/c the value for the
+        #  cv2.RETR__* constant matches that for any trackbar value
+        #  (0 or 1).
+        self.contour_mode = mode_val
+        self.contour_threshold()
+
+    def contour_method_selector(self, meth_val):
+        """
+        The "contour find method" trackbar controller that assigns the
+        method keyword parameter for cv2.findContours().
+        Called from setup_trackbars(). Calls contour_edges().
+
+        Args:
+            meth_val: The integer value passed from trackbar.
+
+        Returns: None
+        """
+        # This simple assignment works b/c the value for the
+        #  cv2.CHAIN_APPROX_* constant matches that for any
+        #  trackbar value. Reassign 0 value to 1.
+        # meth_val = 1 if meth_val == 0 else meth_val
+        self.contour_method = meth_val
         self.contour_threshold()
 
     def contour_limit_selector(self, cl_val) -> None:
@@ -700,8 +707,8 @@ class ProcessImage:
                                                         type=self.th_type, )
 
         found_contours, hierarchy = cv2.findContours(image=th_img,
-                                                     mode=cv2.RETR_EXTERNAL,
-                                                     method=cv2.CHAIN_APPROX_SIMPLE)
+                                                     mode=self.contour_mode,
+                                                     method=self.contour_method)
 
         # Values from "Contour size type" trackbar.
         # Note that cv2.arcLength(_c, closed=True) is needed only when
@@ -823,6 +830,8 @@ class ProcessImage:
             f'{" ".ljust(20)}{filter_sigmas}\n'  # is blank line for box and median.
             f'{"cv2.threshold".ljust(20)}type={const.TH_TYPE[self.th_type]},'
             f' thresh={int(self.computed_threshold)}, maxval={self.th_max}\n'
+            f'{"cv2.findContours".ljust(20)}mode={const.CONTOUR_MODE[self.contour_mode]}\n'
+            f'{" ".ljust(20)}method={const.CONTOUR_METHOD[self.contour_method]}\n'
             f'{"Contour size type:".ljust(20)}{self.contour_type}\n'
             f'{"Contour size min.:".ljust(20)}{self.contour_limit} pixels\n'
             f'{"Contours selected:".ljust(20)}{self.num_th_contours_select}'
@@ -835,9 +844,9 @@ class ProcessImage:
         # Need to set the dimensions of the settings area to fit all text.
         #   Font style parameters are set in constants.py module.
         if utils.MY_OS in 'lin, win':
-            settings_img = utils.text_array((380, 620), the_text)
+            settings_img = utils.text_array((420, 620), the_text)
         else:  # is macOS
-            settings_img = utils.text_array((350, 580), the_text)
+            settings_img = utils.text_array((360, 600), the_text)
 
         cv2.imshow(self.settings_win, settings_img)
 
