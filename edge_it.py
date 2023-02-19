@@ -80,7 +80,7 @@ class ProcessImage:
         show_settings
     """
     __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
-                 'contour_limit', 'contour_type', 'contrasted',
+                 'contour_limit', 'contour_type', 'contrasted_img',
                  'curr_contrast_sd',
                  'drawn_contours', 'filter_kernel', 'filter_selection',
                  'gray_img', 'morph_op', 'morph_shape',
@@ -99,7 +99,7 @@ class ProcessImage:
         self.orig_img = None
         self.gray_img = None
         self.result_img = None
-        self.contrasted = None
+        self.contrasted_img = None
         self.drawn_contours = None
         # self.stub_kernel = np.ones((5, 5), 'uint8')
 
@@ -189,7 +189,7 @@ class ProcessImage:
 
         if utils.MY_OS == 'lin':
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.settings_win, 2000, 35)
+            cv2.moveWindow(self.settings_win, 1000, 35)
         elif utils.MY_OS == 'dar':
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
             cv2.moveWindow(self.settings_win, 500, 15)
@@ -447,8 +447,9 @@ class ProcessImage:
 
     def ratio_selector(self, r_val) -> None:
         """
-        The "Edges, max t-hold ratio" trackbar controller. Divides the
-        trackbar value *r_val* by 10 to obtain the self.ratio value.
+        The "Edges, max threshold ratio" trackbar controller to set the
+        Canny() threshold2 parameter. Divides the trackbar value *r_val*
+        by 10 to obtain the self.ratio value used to compute the param.
         Called from setup_trackbars(). Calls contour_edges().
 
         Args:
@@ -464,6 +465,16 @@ class ProcessImage:
         self.contour_edges()
 
     def min_threshold_selector(self, th_val):
+        """
+        The "Edges, lower threshold" trackbar controller to set the
+        Canny() threshold1 parameter.
+        Called from setup_trackbars(). Calls contour_edges().
+
+        Args:
+            th_val: The integer value passed from trackbar.
+
+        Returns:
+        """
 
         self.min_threshold = th_val
 
@@ -557,7 +568,7 @@ class ProcessImage:
         if event == mouse_event:
             utils.save_img_and_settings(self.result_img,
                                         self.settings_txt,
-                                        'edge')
+                                        f'{Path(__file__).stem}')
         return event
 
     def adjust_contrast(self) -> None:
@@ -574,18 +585,18 @@ class ProcessImage:
 
         self.orig_contrast_sd = int(self.gray_img.std())
 
-        self.contrasted = cv2.convertScaleAbs(src=self.gray_img,
-                                              alpha=self.alpha,
-                                              beta=self.beta)
+        self.contrasted_img = cv2.convertScaleAbs(src=self.gray_img,
+                                                  alpha=self.alpha,
+                                                  beta=self.beta)
 
-        self.curr_contrast_sd = int(self.contrasted.std())
+        self.curr_contrast_sd = int(self.contrasted_img.std())
 
         win_name = 'Adjusted contrast <- | -> Reduced noise'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
-            [self.contrasted, self.reduce_noise()])
+            [self.contrasted_img, self.reduce_noise()])
 
         cv2.imshow(win_name, side_by_side)
 
@@ -599,7 +610,7 @@ class ProcessImage:
         kernel=<local structuring element>, iterations=self.noise_iter,
         borderType=self.border_type.
 
-        Returns: The array defined in adjust_contrast(), self.contrasted,
+        Returns: The array defined in adjust_contrast(), self.contrasted_img,
                 with noise reduction.
         """
 
@@ -614,7 +625,7 @@ class ProcessImage:
         #   MORPH_HITMISS helps to separate close objects by shrinking them.
         # Read https://docs.opencv.org/3.4/db/df6/tutorial_erosion_dilatation.html
         # https://theailearner.com/tag/cv2-morphologyex/
-        morphed = cv2.morphologyEx(src=self.contrasted,
+        morphed = cv2.morphologyEx(src=self.contrasted_img,
                                    op=self.morph_op,
                                    kernel=element,
                                    iterations=self.noise_iter,
@@ -807,7 +818,7 @@ class ProcessImage:
     def show_settings(self) -> None:
         """
         Display name of file and processing parameters in settings_win
-        window. Displays real-time parameter changes.
+        window. Displays real-time changes to parameter values.
         Calls module utils.text_array() in contour_utils directory.
 
         Returns: None
@@ -835,7 +846,7 @@ class ProcessImage:
             f'{" ".ljust(20)}cv2.morphologyEx iterations={self.noise_iter}\n'
             f'{" ".ljust(20)}cv2.morphologyEx op={const.MORPH_TYPE[self.morph_op]},\n'
             f'{" ".ljust(20)}cv2.morphologyEx borderType={const.BORDER_NAME[self.border_type]}\n'
-            f'{"Filter:".ljust(20)}{self.filter_selection}, ksize={self.filter_kernel}\n'
+            f'{"Filter:".ljust(20)}{self.filter_selection}ksize={self.filter_kernel}\n'
             f'{" ".ljust(20)}borderType={const.BORDER_NAME[self.border_type]}\n'
             f'{" ".ljust(20)}{filter_sigmas}\n'  # is blank line for box and median.
             f'{"cv2.Canny".ljust(20)}threshold1={self.min_threshold},'

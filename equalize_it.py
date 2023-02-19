@@ -215,7 +215,7 @@ class ProcessImage:
         if event == mouse_event:
             utils.save_img_and_settings(self.clahe_img,
                                         self.settings_txt,
-                                        'clahe')
+                                        f'{Path(__file__).stem}')
         return event
 
     def clip_selector(self, c_val) -> None:

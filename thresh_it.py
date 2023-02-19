@@ -79,7 +79,7 @@ class ProcessImage:
     """
 
     __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
-                 'contour_limit', 'contour_type', 'contrasted',
+                 'contour_limit', 'contour_type', 'contrasted_img',
                  'curr_contrast_sd',
                  'drawn_contours', 'filter_kernel', 'filter_selection',
                  'gray_img', 'morph_op', 'morph_shape',
@@ -98,7 +98,7 @@ class ProcessImage:
         self.orig_img = None
         self.gray_img = None
         self.result_img = None
-        self.contrasted = None
+        self.contrasted_img = None
         self.thresh = None
         self.drawn_contours = None
         # self.stub_kernel = np.ones((5, 5), 'uint8')
@@ -180,16 +180,17 @@ class ProcessImage:
         Returns: None
         """
 
+        # Define names used in namedWindow().
         if utils.MY_OS in 'lin, win':
-            self.settings_win = "cv2.threshold settings (dbl-click text to save)"
+            self.settings_win = "Threshold & contour settings (dbl-click text to save)"
         else:  # is macOS
-            self.settings_win = "cv2.threshold settings (rt-click text to save)"
+            self.settings_win = "Threshold & contour settings (rt-click text to save)"
 
         # Move the control window away from the processing windows.
-        # Linux Ubuntu: Place window at right edge of screen with excessive x-coordinate.
+        # Linux Ubuntu: Place window near right edge of screen.
         if utils.MY_OS == 'lin':
             cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.settings_win, 2000, 35)
+            cv2.moveWindow(self.settings_win, 1000, 35)
         elif utils.MY_OS == 'dar':
             cv2.namedWindow(self.settings_win)
             cv2.moveWindow(self.settings_win, 500, 35)
@@ -540,7 +541,7 @@ class ProcessImage:
         if event == mouse_event:
             utils.save_img_and_settings(self.result_img,
                                         self.settings_txt,
-                                        'thresh')
+                                        f'{Path(__file__).stem}')
         return event
 
     def adjust_contrast(self) -> None:
@@ -557,18 +558,18 @@ class ProcessImage:
 
         self.orig_contrast_sd = int(self.gray_img.std())
 
-        self.contrasted = cv2.convertScaleAbs(src=self.gray_img,
-                                              alpha=self.alpha,
-                                              beta=self.beta)
+        self.contrasted_img = cv2.convertScaleAbs(src=self.gray_img,
+                                                  alpha=self.alpha,
+                                                  beta=self.beta)
 
-        self.curr_contrast_sd = int(self.contrasted.std())
+        self.curr_contrast_sd = int(self.contrasted_img.std())
 
         win_name = 'Adjusted contrast <- | -> Reduced noise'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
-            [self.contrasted, self.reduce_noise()])
+            [self.contrasted_img, self.reduce_noise()])
 
         cv2.imshow(win_name, side_by_side)
 
@@ -582,10 +583,9 @@ class ProcessImage:
         kernel=<local structuring element>, iterations=self.noise_iter,
         borderType=self.border_type.
 
-        Returns: The array defined in adjust_contrast(), self.contrasted,
+        Returns: The array defined in adjust_contrast(), self.contrasted_img,
                 with noise reduction.
         """
-
         # See: https://docs.opencv2.org/3.0-beta/modules/imgproc/doc/filtering.html
         #  on page, see: cv2.getStructuringElement(shape, ksize[, anchor])
         # see: https://docs.opencv.org/4.x/d9/d61/tutorial_py_morphological_ops.html
@@ -597,7 +597,7 @@ class ProcessImage:
         #   MORPH_HITMISS helps to separate close objects by shrinking them.
         # Read https://docs.opencv.org/3.4/db/df6/tutorial_erosion_dilatation.html
         # https://theailearner.com/tag/cv2-morphologyex/
-        morphed = cv2.morphologyEx(src=self.contrasted,
+        morphed = cv2.morphologyEx(src=self.contrasted_img,
                                    op=self.morph_op,
                                    kernel=element,
                                    iterations=self.noise_iter,
@@ -776,7 +776,7 @@ class ProcessImage:
                         org=(center[0] - self.center_xoffset, center[1] + 5),
                         fontFace=const.FONT_TYPE,
                         fontScale=self.font_scale,
-                        color=(0, 255, 0),
+                        color=(0, 255, 0),  # green
                         thickness=self.line_thickness,
                         lineType=cv2.LINE_AA)   # LINE_AA is anti-aliased
 
@@ -793,7 +793,7 @@ class ProcessImage:
     def show_settings(self) -> None:
         """
         Display name of file and processing parameters in settings_win
-        window. Displays real-time parameter changes.
+        window. Displays real-time changes to parameter values.
         Calls module utils.text_array() in contour_utils directory.
 
         Returns: None
@@ -821,7 +821,7 @@ class ProcessImage:
             f'{" ".ljust(20)}cv2.morphologyEx iterations={self.noise_iter}\n'
             f'{" ".ljust(20)}cv2.morphologyEx op={const.MORPH_TYPE[self.morph_op]},\n'
             f'{" ".ljust(20)}cv2.morphologyEx borderType={const.BORDER_NAME[self.border_type]}\n'
-            f'{"Filter:".ljust(20)}{self.filter_selection}, ksize={self.filter_kernel}\n'
+            f'{"Filter:".ljust(20)}{self.filter_selection}ksize={self.filter_kernel}\n'
             f'{" ".ljust(20)}borderType={const.BORDER_NAME[self.border_type]}\n'
             f'{" ".ljust(20)}{filter_sigmas}\n'  # is blank line for box and median.
             f'{"cv2.threshold".ljust(20)}type={const.TH_TYPE[self.th_type]},'

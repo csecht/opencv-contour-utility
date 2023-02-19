@@ -239,14 +239,14 @@ class ProcessImage:
 
         """
         if utils.MY_OS in 'lin, win':
-           mouse_event = cv2.EVENT_LBUTTONDBLCLK
+            mouse_event = cv2.EVENT_LBUTTONDBLCLK
         else:
             mouse_event = cv2.EVENT_RBUTTONDOWN
 
         if event == mouse_event:
             utils.save_img_and_settings(self.clahe_img,
                                         self.settings_txt,
-                                        'clahe')
+                                        f'{Path(__file__).stem}')
         return event
 
     def clip_selector(self, c_val) -> None:
