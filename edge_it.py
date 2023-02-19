@@ -743,7 +743,7 @@ class ProcessImage:
                                                contours=select_cnts,
                                                contourIdx=-1,  # all contours.
                                                color=(0, 255, 0),
-                                               thickness=2,
+                                               thickness=self.line_thickness * 2,
                                                lineType=cv2.LINE_AA)
 
         win_name = 'Edges <- | -> Selected edged contours'
@@ -779,7 +779,7 @@ class ProcessImage:
                        center=center,
                        radius=radius,
                        color=(0, 255, 0),
-                       thickness=self.line_thickness)
+                       thickness=self.line_thickness * 2)
 
             # Display pixel diameter of each circled contour.
             #  Draw a filled black circle to use for text background.
@@ -797,17 +797,7 @@ class ProcessImage:
                         fontScale=self.font_scale,
                         color=(0, 255, 0),
                         thickness=self.line_thickness,
-                        lineType=cv2.LINE_AA)   # LINE_AA is anti-aliased
-
-            cv2.putText(img=self.result_img,
-                        text=f'{radius * 2}px',
-                        # Center text in the enclosing circle, scaled by px size.
-                        org=(center[0] - self.center_xoffset, center[1] + 5),
-                        fontFace=const.FONT_TYPE,
-                        fontScale=self.font_scale,
-                        color=(0, 255, 0),
-                        thickness=self.line_thickness,
-                        lineType=cv2.LINE_AA)   # LINE_AA is anti-aliased
+                        lineType=cv2.LINE_AA)  # LINE_AA is anti-aliased
 
         win_name = 'Identified objects, with sizes'
         cv2.namedWindow(win_name,

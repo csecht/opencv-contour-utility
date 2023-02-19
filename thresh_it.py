@@ -726,7 +726,7 @@ class ProcessImage:
                                                contours=select_cnts,
                                                contourIdx=-1,  # all contours.
                                                color=(0, 255, 0),
-                                               thickness=2,
+                                               thickness=self.line_thickness * 2,
                                                lineType=cv2.LINE_AA)
 
         win_name = 'Threshold <- | -> Selected threshold contours'
@@ -760,7 +760,7 @@ class ProcessImage:
                        center=center,
                        radius=radius,
                        color=(0, 255, 0),
-                       thickness=self.line_thickness)
+                       thickness=self.line_thickness * 2)
 
             # Display pixel diameter of each circled contour.
             #  Draw a filled black circle to use for text background.
