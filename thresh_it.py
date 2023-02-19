@@ -86,7 +86,7 @@ class ProcessImage:
                  'num_th_contours_select', 'orig_contrast_sd', 'orig_img',
                  'result_img', 'settings_txt', 'settings_win',
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
-                 'th_max', 'th_type', 'thresh',
+                 'th_type', 'thresh',
                  'font_scale', 'line_thickness', 'center_xoffset',
                  'contour_mode', 'contour_method',
                  )
@@ -117,7 +117,6 @@ class ProcessImage:
         self.sigma_x = 1
         self.sigma_y = 1
         self.border_type = 4  # cv2.BORDER_DEFAULT == cv2.BORDER_REFLECT_101
-        self.th_max = 0
         self.th_type = 8  # cv2.threshold type cv2.THRESH_OTSU.
         self.computed_threshold = 0
         self.num_th_contours_all = 0
@@ -688,20 +687,16 @@ class ProcessImage:
         # see: https://towardsdatascience.com/image-segmentation-part-1-6e0ddb5f7f8a
         # see: https://docs.opencv.org/3.4/d7/d1b/group__imgproc__misc.html
 
-        # OTSU & TRIANGLE computes thresh value, hence thresh=0 is replaced
-        #   with the self.computed_threshold; for other cv2.THRESH_*,
-        #   thresh needs to be manually provided.
-        thresh = 0
-        # Convert values above thresh to white, th_max.
-        self.th_max = 255
-
         # Note from doc: Currently, the Otsu's and Triangle methods
         #   are implemented only for 8-bit single-channel images.
-        # Use class attributes here to report values in settings_win & print.
+        # OTSU & TRIANGLE computes thresh value, hence thresh=0 is replaced
+        #   with the self.computed_threshold;
+        #   for other cv2.THRESH_*, thresh needs to be manually provided.
+        # Convert values above thresh to white.
         self.computed_threshold, th_img = cv2.threshold(src=self.filter_image(),
-                                                        thresh=thresh,
-                                                        maxval=self.th_max,
-                                                        type=self.th_type, )
+                                                        thresh=0,
+                                                        maxval=255,
+                                                        type=self.th_type)
 
         found_contours, hierarchy = cv2.findContours(image=th_img,
                                                      mode=self.contour_mode,
