@@ -24,9 +24,8 @@ import math
 import sys
 import threading
 
-import numpy as np
-
 from pathlib import Path
+import numpy as np
 
 # Third party imports
 try:
@@ -81,7 +80,7 @@ class ProcessImage:
     """
     __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
                  'contour_limit', 'contour_type', 'contrasted_img',
-                 'curr_contrast_sd',
+                 'curr_contrast_sd', 'reduced_noise_img',
                  'drawn_contours', 'filter_kernel', 'filter_selection',
                  'gray_img', 'morph_op', 'morph_shape',
                  'noise_iter', 'noise_kernel', 'max_threshold', 'min_threshold',
@@ -100,6 +99,7 @@ class ProcessImage:
         self.gray_img = None
         self.result_img = None
         self.contrasted_img = None
+        self.reduced_noise_img = None
         self.drawn_contours = None
         # self.stub_kernel = np.ones((5, 5), 'uint8')
 
@@ -625,12 +625,12 @@ class ProcessImage:
         #   MORPH_HITMISS helps to separate close objects by shrinking them.
         # Read https://docs.opencv.org/3.4/db/df6/tutorial_erosion_dilatation.html
         # https://theailearner.com/tag/cv2-morphologyex/
-        morphed = cv2.morphologyEx(src=self.contrasted_img,
-                                   op=self.morph_op,
-                                   kernel=element,
-                                   iterations=self.noise_iter,
-                                   borderType=self.border_type)
-        return morphed
+        self.reduced_noise_img = cv2.morphologyEx(src=self.contrasted_img,
+                                                  op=self.morph_op,
+                                                  kernel=element,
+                                                  iterations=self.noise_iter,
+                                                  borderType=self.border_type)
+        return self.reduced_noise_img
 
     def filter_image(self) -> np.ndarray:
         """
@@ -641,7 +641,6 @@ class ProcessImage:
                  reduce_noise().
 
         """
-        img2filter = self.reduce_noise()
 
         # Bilateral parameters:
         # https://docs.opencv.org/3.4/d4/d86/group__imgproc__filter.html
@@ -650,19 +649,19 @@ class ProcessImage:
         #  will not have much effect, whereas if they are large (> 150),
         #  they will have a very strong effect, making the image look "cartoonish".
         # NOTE: The larger the sigma the greater the effect of kernel size d.
-        self.sigma_color = int(np.std(img2filter))
+        self.sigma_color = int(np.std(self.reduced_noise_img))
         self.sigma_space = self.sigma_color
 
         # Gaussian parameters:
         # see: https://theailearner.com/tag/cv2-gaussianblur/
-        self.sigma_x = int(img2filter.std())
+        self.sigma_x = int(self.reduced_noise_img.std())
         # NOTE: The larger the sigma the greater the effect of kernel size d.
         # sigmaY=0 also uses sigmaX. Matches Space to d if d>0.
         self.sigma_y = self.sigma_x
 
         # Apply a filter to blur edges:
         if self.filter_selection == 'cv2.bilateralFilter':
-            filtered_img = cv2.bilateralFilter(src=img2filter,
+            filtered_img = cv2.bilateralFilter(src=self.reduced_noise_img,
                                                # d=-1 or 0, is very CPU intensive.
                                                d=self.filter_kernel[0],
                                                sigmaColor=self.sigma_color,
@@ -671,20 +670,20 @@ class ProcessImage:
         elif self.filter_selection == 'cv2.GaussianBlur':
             # see: https://dsp.stackexchange.com/questions/32273/
             #  how-to-get-rid-of-ripples-from-a-gradient-image-of-a-smoothed-image
-            filtered_img = cv2.GaussianBlur(src=img2filter,
+            filtered_img = cv2.GaussianBlur(src=self.reduced_noise_img,
                                             ksize=self.filter_kernel,
                                             sigmaX=self.sigma_x,
                                             sigmaY=self.sigma_y,
                                             borderType=self.border_type)
         elif self.filter_selection == 'cv2.medianBlur':
-            filtered_img = cv2.medianBlur(src=img2filter,
+            filtered_img = cv2.medianBlur(src=self.reduced_noise_img,
                                           ksize=self.filter_kernel[0])
         elif self.filter_selection == 'cv2.blur':
-            filtered_img = cv2.blur(src=img2filter,
+            filtered_img = cv2.blur(src=self.reduced_noise_img,
                                     ksize=self.filter_kernel,
                                     borderType=self.border_type)
         else:
-            filtered_img = cv2.blur(src=img2filter,
+            filtered_img = cv2.blur(src=self.reduced_noise_img,
                                     ksize=self.filter_kernel,
                                     borderType=self.border_type)
 
