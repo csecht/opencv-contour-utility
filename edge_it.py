@@ -81,7 +81,7 @@ class ProcessImage:
     __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
                  'contour_limit', 'contour_type', 'contrasted_img',
                  'curr_contrast_sd', 'reduced_noise_img',
-                 'drawn_contours', 'filter_kernel', 'filter_selection',
+                 'filter_kernel', 'filter_selection',
                  'gray_img', 'morph_op', 'morph_shape',
                  'noise_iter', 'noise_kernel', 'max_threshold', 'min_threshold',
                  'num_edge_contours_select', 'num_edge_contours_all',
@@ -100,7 +100,6 @@ class ProcessImage:
         self.result_img = None
         self.contrasted_img = None
         self.reduced_noise_img = None
-        self.drawn_contours = None
         # self.stub_kernel = np.ones((5, 5), 'uint8')
 
         # Image processing parameters.
@@ -280,6 +279,7 @@ class ProcessImage:
                            100,
                            1000,
                            self.contour_limit_selector)
+        cv2.setTrackbarMin(const.TBNAME['_contour_min'], self.settings_win, 1)
 
     def alpha_selector(self, a_val) -> None:
         """
@@ -739,19 +739,19 @@ class ProcessImage:
         self.num_edge_contours_select = len(select_cnts)
 
         self.result_img = self.orig_img.copy()
-        self.drawn_contours = cv2.drawContours(self.result_img,
-                                               contours=select_cnts,
-                                               contourIdx=-1,  # all contours.
-                                               color=(0, 255, 0),
-                                               thickness=self.line_thickness * 2,
-                                               lineType=cv2.LINE_AA)
+        drawn_contours = cv2.drawContours(self.result_img,
+                                          contours=select_cnts,
+                                          contourIdx=-1,  # all contours.
+                                          color=(0, 255, 0),
+                                          thickness=self.line_thickness * 2,
+                                          lineType=cv2.LINE_AA)
 
         win_name = 'Edges <- | -> Selected edged contours'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
-            [cv2.cvtColor(edged_img, cv2.COLOR_GRAY2RGB), self.drawn_contours])
+            [cv2.cvtColor(edged_img, cv2.COLOR_GRAY2RGB), drawn_contours])
 
         cv2.imshow(win_name, side_by_side)
 

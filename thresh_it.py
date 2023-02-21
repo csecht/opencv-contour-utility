@@ -80,7 +80,7 @@ class ProcessImage:
     __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
                  'contour_limit', 'contour_type', 'contrasted_img',
                  'curr_contrast_sd', 'reduced_noise_img',
-                 'drawn_contours', 'filter_kernel', 'filter_selection',
+                 'filter_kernel', 'filter_selection',
                  'gray_img', 'morph_op', 'morph_shape',
                  'noise_iter', 'noise_kernel', 'num_th_contours_all',
                  'num_th_contours_select', 'orig_contrast_sd', 'orig_img',
@@ -100,7 +100,6 @@ class ProcessImage:
         self.contrasted_img = None
         self.reduced_noise_img = None
         self.thresh = None
-        self.drawn_contours = None
         # self.stub_kernel = np.ones((5, 5), 'uint8')
 
         # Image processing parameters.
@@ -273,6 +272,7 @@ class ProcessImage:
                            100,
                            1000,
                            self.contour_limit_selector)
+        cv2.setTrackbarMin(const.TBNAME['_contour_min'], self.settings_win, 1)
 
     def alpha_selector(self, a_val) -> None:
         """
@@ -717,19 +717,19 @@ class ProcessImage:
         self.num_th_contours_select = len(select_cnts)
 
         self.result_img = self.orig_img.copy()
-        self.drawn_contours = cv2.drawContours(self.result_img,
-                                               contours=select_cnts,
-                                               contourIdx=-1,  # all contours.
-                                               color=(0, 255, 0),
-                                               thickness=self.line_thickness * 2,
-                                               lineType=cv2.LINE_AA)
+        drawn_contours = cv2.drawContours(self.result_img,
+                                          contours=select_cnts,
+                                          contourIdx=-1,  # all contours.
+                                          color=(0, 255, 0),
+                                          thickness=self.line_thickness * 2,
+                                          lineType=cv2.LINE_AA)
 
         win_name = 'Threshold <- | -> Selected threshold contours'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
-            [cv2.cvtColor(th_img, cv2.COLOR_GRAY2RGB), self.drawn_contours])
+            [cv2.cvtColor(th_img, cv2.COLOR_GRAY2RGB), drawn_contours])
 
         cv2.imshow(win_name, side_by_side)
 
@@ -820,7 +820,7 @@ class ProcessImage:
             f'{" ".ljust(20)}borderType={const.BORDER_NAME[self.border_type]}\n'
             f'{" ".ljust(20)}{filter_sigmas}\n'  # is blank line for box and median.
             f'{"cv2.threshold".ljust(20)}type={const.TH_TYPE[self.th_type]},'
-            f' thresh={int(self.computed_threshold)}, maxval={self.th_max}\n'
+            f' thresh={int(self.computed_threshold)}, maxval=255\n'
             f'{"cv2.findContours".ljust(20)}mode={const.CONTOUR_MODE[self.contour_mode]}\n'
             f'{" ".ljust(20)}method={const.CONTOUR_METHOD[self.contour_method]}\n'
             f'{"Contour size type:".ljust(20)}{self.contour_type}\n'

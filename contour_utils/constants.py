@@ -26,8 +26,8 @@ if MY_OS == 'lin':
         '_contour_type': f'{"Contour size type: 0 area, 1 arc length" : <40}',
         '_contour_min': f'{"Contour size minimum (pixels):" : <30}',
         '_thresh_type': f'{"Thresholding type: 0 Otsu, 1 Triangle" : <40}',
-        '_epsilon': f'{"% contour length for polygon approx.:" : <40}',
-        '_shape': "Number of sides to define a polygon:",
+        '_epsilon': f'{"% polygon contour length (300x):" : <40}',
+        '_shape': "Number sides to define polygon (11 is circle):",
     }
 elif MY_OS == 'dar':
     TBNAME = {
@@ -47,7 +47,7 @@ elif MY_OS == 'dar':
         '_contour_type': 'Contour type:',
         '_contour_min': 'Contour size min:',
         '_thresh_type': 'Threshold type',
-        '_epsilon': '% contour len',
+        '_epsilon': '300X contour len',
         '_shape': "Polygon sides"
     }
 else:  # is Windows; names limited to 10 characters.
@@ -68,7 +68,7 @@ else:  # is Windows; names limited to 10 characters.
         '_contour_type': 'Contour:',
         '_contour_min': 'Cnt size:',
         '_thresh_type': 'T-hold type',
-        '_epsilon': '% contour',
+        '_epsilon': '300X % len',
         '_shape': "Polygon:"
     }
 # Set ranges for trackbars used to adjust contrast and brightness for
