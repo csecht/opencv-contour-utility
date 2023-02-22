@@ -91,7 +91,7 @@ class ProcessImage:
                  'contoured_txt', 'contour_tb_win',
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
                  'font_scale', 'line_thickness', 'center_xoffset',
-                 'contour_mode', 'contour_method'
+                 'contour_mode', 'contour_method',
                  )
 
     def __init__(self):
@@ -702,6 +702,11 @@ class ProcessImage:
 
         Returns: None
         """
+        # TODO: Need to exclude edges that may include contrasted image borders;
+        #   as in sample4.jpg.
+        #   Try https://stackoverflow.com/questions/40127252/how-to-remove-long-edges-in-a-canny-edge-image
+        #   with cv2.minAreaRectangle on the contour iter.
+        #  https://stackoverflow.com/questions/18207181/opencv-python-draw-minarearect-rotatedrect-not-implemented
 
         # Source of coding ideas:
         # https://docs.opencv.org/4.x/d4/d73/tutorial_py_contours_begin.html
@@ -726,15 +731,20 @@ class ProcessImage:
                                               mode=self.contour_mode,
                                               method=self.contour_method)
 
-        # Values from "Contour size type" trackbar.
-        # Note that cv2.arcLength(_c, closed=True) is needed only when
-        #  approximating contour shape with cv2.approxPolyDP().
+        # Set values to exclude edge contours that may take in
+        #  contrasting borders on the image; use 80% exclusion limit.
+        max_area = self.gray_img.shape[0] * self.gray_img.shape[1] * 0.64
+        max_length = self.gray_img.shape[0] * 0.8
+
+        # 'contour_type' values are from "Contour size type" trackbar.
         if self.contour_type == 'cv2.contourArea':
             select_cnts = [_c for _c in found_contours
-                           if cv2.contourArea(_c) >= self.contour_limit]
+                           if max_area > cv2.contourArea(_c) >= self.contour_limit]
         else:  # is cv2.arcLength; aka "perimeter"
-            select_cnts = [_c for _c in found_contours
-                           if cv2.arcLength(_c, closed=False) >= self.contour_limit]
+            select_cnts = [
+                _c for _c in found_contours
+                if max_length > cv2.arcLength(_c, closed=False) >= self.contour_limit
+            ]
 
         # Used only for reporting.
         self.num_edge_contours_all = len(found_contours)
