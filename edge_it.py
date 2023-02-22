@@ -55,27 +55,29 @@ class ProcessImage:
     functions involved in on identifying objects in an image file using
     Canny edges.
     Methods:
-        adjust_contrast
+        manage_input
+        setup_trackbars
         alpha_selector
         beta_selector
-        border_selector
-        circle_contours
-        contour_edges
-        contour_limit_selector
-        contour_type_selector
-        filter_image
-        filter_kernel_selector
-        filter_type_selector
-        manage_input
-        min_threshold_selector
         morphology_op_selector
         noise_redux_iter_selector
-        noise_redux_kernel_selector
         noise_redux_shape_selector
+        noise_redux_kernel_selector
+        border_selector
+        filter_type_selector
+        filter_kernel_selector
         ratio_selector
-        reduce_noise
+        min_threshold_selector
+        contour_type_selector
+        contour_mode_selector
+        contour_method_selector
+        contour_limit_selector
         save_with_click
-        setup_trackbars
+        adjust_contrast
+        reduce_noise
+        filter_image
+        contour_edges
+        circle_contours
         show_settings
     """
     __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
@@ -85,8 +87,8 @@ class ProcessImage:
                  'gray_img', 'morph_op', 'morph_shape',
                  'noise_iter', 'noise_kernel', 'max_threshold', 'min_threshold',
                  'num_edge_contours_select', 'num_edge_contours_all',
-                 'orig_contrast_sd', 'orig_img', 'ratio', 'result_img',
-                 'settings_txt', 'settings_win',
+                 'input_contrast_sd', 'input_img', 'ratio', 'contoured_img',
+                 'contoured_txt', 'contour_tb_win',
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
                  'font_scale', 'line_thickness', 'center_xoffset',
                  'contour_mode', 'contour_method'
@@ -95,9 +97,9 @@ class ProcessImage:
     def __init__(self):
 
         # The np.ndarray arrays for images to be processed.
-        self.orig_img = None
+        self.input_img = None
         self.gray_img = None
-        self.result_img = None
+        self.contoured_img = None
         self.contrasted_img = None
         self.reduced_noise_img = None
         # self.stub_kernel = np.ones((5, 5), 'uint8')
@@ -105,7 +107,7 @@ class ProcessImage:
         # Image processing parameters.
         self.alpha = 1.0
         self.beta = 0
-        self.orig_contrast_sd = 0
+        self.input_contrast_sd = 0
         self.curr_contrast_sd = 0
         self.noise_iter = 0
         self.morph_op = 2  # default cv2.MORPH_OPEN.
@@ -136,8 +138,8 @@ class ProcessImage:
         self.contour_mode = 0  # cv2.RETR_EXTERNAL
         self.contour_method = 2  # cv2.CHAIN_APPROX_SIMPLE
 
-        self.settings_txt = ''
-        self.settings_win = ''
+        self.contoured_txt = ''
+        self.contour_tb_win = ''
 
         self.manage_input()
         self.setup_trackbars()
@@ -152,12 +154,12 @@ class ProcessImage:
         """
 
         # utils.args_handler() has verified the image path, so read from it.
-        self.orig_img = cv2.imread(arguments['input'])
-        self.gray_img = cv2.cvtColor(self.orig_img, cv2.COLOR_BGR2GRAY)
+        self.input_img = cv2.imread(arguments['input'])
+        self.gray_img = cv2.cvtColor(self.input_img, cv2.COLOR_BGR2GRAY)
 
         # Ideas for scaling: https://stackoverflow.com/questions/52846474/
         #   how-to-resize-text-for-cv2-puttext-according-to-the-image-size-in-opencv-python
-        size2scale = min(self.orig_img.shape[0], self.orig_img.shape[1])
+        size2scale = min(self.input_img.shape[0], self.input_img.shape[1])
         self.font_scale = size2scale * const.FONT_SCALE
         self.font_scale = max(self.font_scale, 0.5)
         self.line_thickness = math.ceil(size2scale * const.LINE_SCALE)
@@ -169,7 +171,7 @@ class ProcessImage:
                         flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
-            [self.orig_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
+            [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
 
         cv2.imshow(win_name, side_by_side)
 
@@ -182,104 +184,104 @@ class ProcessImage:
         """
 
         if utils.MY_OS in 'lin, win':
-            self.settings_win = "cv2.Canny settings (dbl-click text to save)"
+            self.contour_tb_win = "cv2.Canny settings (dbl-click text to save)"
         else:  # is macOS
-            self.settings_win = "cv2.Canny settings (rt-click text to save)"
+            self.contour_tb_win = "cv2.Canny settings (rt-click text to save)"
 
         if utils.MY_OS == 'lin':
-            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.settings_win, 1000, 35)
+            cv2.namedWindow(self.contour_tb_win, flags=cv2.WINDOW_AUTOSIZE)
+            cv2.moveWindow(self.contour_tb_win, 1000, 35)
         elif utils.MY_OS == 'dar':
-            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.settings_win, 500, 15)
+            cv2.namedWindow(self.contour_tb_win, flags=cv2.WINDOW_AUTOSIZE)
+            cv2.moveWindow(self.contour_tb_win, 500, 15)
         else:  # is Windows
-            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
-            cv2.resizeWindow(self.settings_win, 500, 800)
+            cv2.namedWindow(self.contour_tb_win, flags=cv2.WINDOW_GUI_NORMAL)
+            cv2.resizeWindow(self.contour_tb_win, 500, 800)
 
-        cv2.setMouseCallback(self.settings_win,
+        cv2.setMouseCallback(self.contour_tb_win,
                              self.save_with_click)
 
         cv2.createTrackbar(const.TBNAME['_contrast'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            100,
                            const.ALPHA_MAX,
                            self.alpha_selector)
         cv2.createTrackbar(const.TBNAME['_bright'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            127,
                            const.BETA_MAX,
                            self.beta_selector)
         cv2.createTrackbar(const.TBNAME['_morph_op'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            1,
                            3,
                            self.morphology_op_selector)
         cv2.createTrackbar(const.TBNAME['_morph_shape'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            2,
                            2,
                            self.noise_redux_shape_selector)
         cv2.createTrackbar(const.TBNAME['_noise_k'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            3,
                            20,
                            self.noise_redux_kernel_selector)
         cv2.createTrackbar(const.TBNAME['_noise_i'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            1,
                            5,
                            self.noise_redux_iter_selector)
-        cv2.setTrackbarMin(const.TBNAME['_noise_i'], self.settings_win, 1)
+        cv2.setTrackbarMin(const.TBNAME['_noise_i'], self.contour_tb_win, 1)
         cv2.createTrackbar(const.TBNAME['_border'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            2,
                            3,
                            self.border_selector)
         cv2.createTrackbar(const.TBNAME['_filter'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            2,
                            3,
                            self.filter_type_selector)
         cv2.createTrackbar(const.TBNAME['_kernel_size'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            3,
                            50,
                            self.filter_kernel_selector)
-        cv2.setTrackbarMin(const.TBNAME['_kernel_size'], self.settings_win, 1)
+        cv2.setTrackbarMin(const.TBNAME['_kernel_size'], self.contour_tb_win, 1)
         cv2.createTrackbar(const.TBNAME['_ratio'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            25,
                            50,
                            self.ratio_selector)
         cv2.createTrackbar(const.TBNAME['_thresh_min'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            50,
                            256,
                            self.min_threshold_selector,
                            )
-        cv2.setTrackbarMin(const.TBNAME['_thresh_min'], self.settings_win, 1)
+        cv2.setTrackbarMin(const.TBNAME['_thresh_min'], self.contour_tb_win, 1)
         cv2.createTrackbar(const.TBNAME['_contour_type'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            1,
                            1,
                            self.contour_type_selector)
         cv2.createTrackbar(const.TBNAME['_contour_mode'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            0,
                            1,
                            self.contour_mode_selector)
         cv2.createTrackbar(const.TBNAME['_contour_method'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            2,
                            2,
                            self.contour_method_selector)
-        cv2.setTrackbarMin(const.TBNAME['_contour_method'], self.settings_win, 1)
+        cv2.setTrackbarMin(const.TBNAME['_contour_method'], self.contour_tb_win, 1)
         cv2.createTrackbar(const.TBNAME['_contour_min'],
-                           self.settings_win,
+                           self.contour_tb_win,
                            100,
                            1000,
                            self.contour_limit_selector)
-        cv2.setTrackbarMin(const.TBNAME['_contour_min'], self.settings_win, 1)
+        cv2.setTrackbarMin(const.TBNAME['_contour_min'], self.contour_tb_win, 1)
 
     def alpha_selector(self, a_val) -> None:
         """
@@ -566,9 +568,9 @@ class ProcessImage:
             mouse_event = cv2.EVENT_RBUTTONDOWN
 
         if event == mouse_event:
-            utils.save_img_and_settings(self.result_img,
-                                        self.settings_txt,
-                                        f'{Path(__file__).stem}')
+            utils.save_img_and_settings(img2save=self.contoured_img,
+                                        txt2save=self.contoured_txt,
+                                        caller=f'{Path(__file__).stem}')
         return event
 
     def adjust_contrast(self) -> None:
@@ -583,7 +585,7 @@ class ProcessImage:
         # https://stackoverflow.com/questions/39308030/
         #   how-do-i-increase-the-contrast-of-an-image-in-python-opencv
 
-        self.orig_contrast_sd = int(self.gray_img.std())
+        self.input_contrast_sd = int(self.gray_img.std())
 
         self.contrasted_img = cv2.convertScaleAbs(src=self.gray_img,
                                                   alpha=self.alpha,
@@ -738,11 +740,11 @@ class ProcessImage:
         self.num_edge_contours_all = len(found_contours)
         self.num_edge_contours_select = len(select_cnts)
 
-        self.result_img = self.orig_img.copy()
-        drawn_contours = cv2.drawContours(self.result_img,
+        self.contoured_img = self.input_img.copy()
+        drawn_contours = cv2.drawContours(self.contoured_img,
                                           contours=select_cnts,
                                           contourIdx=-1,  # all contours.
-                                          color=(0, 255, 0),
+                                          color=const.CBLIND_COLOR_CV['yellow'],
                                           thickness=self.line_thickness * 2,
                                           lineType=cv2.LINE_AA)
 
@@ -769,44 +771,46 @@ class ProcessImage:
         Returns: None
         """
 
-        self.result_img = self.orig_img.copy()
+        self.contoured_img = self.input_img.copy()
 
         for _c in contour_list:
             (_x, _y), radius = cv2.minEnclosingCircle(_c)
             center = (int(_x), int(_y))
             radius = int(radius)
-            cv2.circle(self.result_img,
+            cv2.circle(self.contoured_img,
                        center=center,
                        radius=radius,
-                       color=(0, 255, 0),
-                       thickness=self.line_thickness * 2)
+                       color=const.CBLIND_COLOR_CV['yellow'],
+                       thickness=self.line_thickness * 2,
+                       lineType=cv2.LINE_AA)
 
             # Display pixel diameter of each circled contour.
             #  Draw a filled black circle to use for text background.
-            cv2.circle(self.result_img,
+            cv2.circle(self.contoured_img,
                        center=center,
                        radius=int(radius * 0.5),
                        color=(0, 0, 0),
-                       thickness=-1)
+                       thickness=-1,
+                       lineType=cv2.LINE_AA)
 
-            cv2.putText(img=self.result_img,
+            cv2.putText(img=self.contoured_img,
                         text=f'{radius * 2}px',
                         # Center text in the enclosing circle, scaled by px size.
                         org=(center[0] - self.center_xoffset, center[1] + 5),
                         fontFace=const.FONT_TYPE,
                         fontScale=self.font_scale,
-                        color=(0, 255, 0),
+                        color=const.CBLIND_COLOR_CV['yellow'],
                         thickness=self.line_thickness,
                         lineType=cv2.LINE_AA)  # LINE_AA is anti-aliased
 
         win_name = 'Identified objects, with sizes'
         cv2.namedWindow(win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(win_name, self.result_img)
+        cv2.imshow(win_name, self.contoured_img)
 
     def show_settings(self) -> None:
         """
-        Display name of file and processing parameters in settings_win
+        Display name of file and processing parameters in contour_tb_win
         window. Displays real-time changes to parameter values.
         Calls module utils.text_array() in contour_utils directory.
 
@@ -826,7 +830,7 @@ class ProcessImage:
 
         # Text is formatted for clarity in window, terminal, and saved file.
         the_text = (
-            f'Image: {arguments["input"]} (alpha SD: {self.orig_contrast_sd})\n'
+            f'Image: {arguments["input"]} (alpha SD: {self.input_contrast_sd})\n'
             f'{"Contrast:".ljust(20)}convertScaleAbs alpha={self.alpha},'
             f' beta={self.beta}\n'
             f'{" ".ljust(20)}(adjusted alpha SD {self.curr_contrast_sd})\n'
@@ -849,8 +853,8 @@ class ProcessImage:
             f' (from {self.num_edge_contours_all} total)'
         )
 
-        # Put text into settings_txt for printing and saving to file.
-        self.settings_txt = the_text
+        # Put text into contoured_txt for printing and saving to file.
+        self.contoured_txt = the_text
 
         # Need to set the dimensions of the settings area to fit all text.
         #   Font style parameters are set in constants.py module.
@@ -859,7 +863,7 @@ class ProcessImage:
         else:  # is macOS
             settings_img = utils.text_array((360, 600), the_text)
 
-        cv2.imshow(self.settings_win, settings_img)
+        cv2.imshow(self.contour_tb_win, settings_img)
 
 
 if __name__ == "__main__":
@@ -879,5 +883,4 @@ if __name__ == "__main__":
     #  keystrokes.
     quit_thread = threading.Thread(
         target= utils.quit_keys(), daemon=True)
-
     quit_thread.start()

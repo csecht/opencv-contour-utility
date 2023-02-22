@@ -92,9 +92,8 @@ Histograms and CLAHE windows will live update with CLAHE parameter sliders.
 Source of sample1.jpg image file:
 Adrian Rosebrock at https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-opencv/
 
-
 Source of sample2.jpg image file:
 http://sunrisekauai.blogspot.com/2012/06/new-group-of-sunrise-shells.html
 
-Source of sample3.jpg image file:
-author C.S. Echt
+Source of other image files:
+author, C.S. Echt

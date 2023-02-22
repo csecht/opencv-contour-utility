@@ -75,15 +75,15 @@ class ProcessImage:
 
     """
     __slots__ = ('clahe_img', 'clahe_mean', 'clahe_sd', 'clip_limit',
-                 'flat_gray_array', 'gray_img', 'orig_img', 'orig_mean',
-                 'orig_sd', 'settings_txt',
+                 'flat_gray_array', 'gray_img', 'input_img', 'input_mean',
+                 'input_sd', 'settings_txt',
                  'settings_win', 'tile_size',
                  )
 
     def __init__(self):
 
         # The np.ndarray arrays for images to be processed.
-        self.orig_img = None
+        self.input_img = None
         self.gray_img = None
         self.flat_gray_array = None
         self.clahe_img = None
@@ -91,8 +91,8 @@ class ProcessImage:
         # Image processing parameters amd metrics.
         self.clip_limit = 2.0  # Default trackbar value.
         self.tile_size = (8, 8)  # Default trackbar value.
-        self.orig_sd = 0
-        self.orig_mean = 0
+        self.input_sd = 0
+        self.input_mean = 0
         self.clahe_sd = 0
         self.clahe_mean = 0
 
@@ -119,8 +119,8 @@ class ProcessImage:
         """
 
         # utils.args_handler() has verified image path, so read from it.
-        self.orig_img = cv2.imread(arguments['input'])
-        self.gray_img = cv2.cvtColor(self.orig_img, cv2.COLOR_BGR2GRAY)
+        self.input_img = cv2.imread(arguments['input'])
+        self.gray_img = cv2.cvtColor(self.input_img, cv2.COLOR_BGR2GRAY)
         self.flat_gray_array = self.gray_img.ravel()
 
         win_name = 'Input <- | -> Grayscale for processing'
@@ -132,7 +132,7 @@ class ProcessImage:
 
         # Need to match shapes of the two cv image arrays.
         side_by_side = cv2.hconcat(
-            [self.orig_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
+            [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
 
         cv2.imshow(win_name, side_by_side)
 
@@ -259,8 +259,8 @@ class ProcessImage:
                                 )
         self.clahe_img = clahe.apply(self.gray_img)
 
-        self.orig_sd = int(self.gray_img.std())
-        self.orig_mean = int(self.gray_img.mean())
+        self.input_sd = int(self.gray_img.std())
+        self.input_mean = int(self.gray_img.mean())
         self.clahe_sd = int(self.clahe_img.std())
         self.clahe_mean = int(self.clahe_img.mean())
 
@@ -320,7 +320,7 @@ class ProcessImage:
 
     def show_settings(self) -> None:
         """
-        Display name of file and processing parameters in settings_win
+        Display name of file and processing parameters in contour_tb_win
         window. Displays real-time parameter changes.
         Calls module utils.text_array() in contour_utils directory.
 
@@ -329,14 +329,14 @@ class ProcessImage:
 
         the_text = (
             f'Input image: {arguments["input"]}\n'
-            f'Input grayscale pixel value: mean {self.orig_mean},'
-            f' stdev {self.orig_sd}\n'
+            f'Input grayscale pixel value: mean {self.input_mean},'
+            f' stdev {self.input_sd}\n'
             f'cv2.createCLAHE cliplimit={self.clip_limit}, tileGridSize{self.tile_size}\n'
             f'CLAHE grayscale pixel value: mean {self.clahe_mean},'
             f' stdev {self.clahe_sd}'
         )
 
-        # Put text into settings_txt for printing and saving to file.
+        # Put text into contoured_txt for printing and saving to file.
         self.settings_txt = the_text
 
         # Need to set the dimensions of the settings area to fit all text.

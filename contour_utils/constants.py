@@ -19,15 +19,20 @@ if MY_OS == 'lin':
         '_filter': ("Filter type:  "
                     f'{"0 box, 1 bilateral, 2 Gaussian, 3 median" : <46}'),
         '_kernel_size': f'{"Filter kernel size (odd only):" : <43}',
-        '_ratio': f'{"Edges, max threshold ratio (10x):" : <43}',
+        '_ratio': f'{"Edges, max threshold ratio (10X):" : <43}',
         '_thresh_min': f'{"Edges, lower threshold:" : <43}',
         '_contour_mode': f'{"Find contour mode: 0 external, 1 list" : <40}',
         '_contour_method': f'{"Find contour method: 1 none, 2 simple" : <40}',
         '_contour_type': f'{"Contour size type: 0 area, 1 arc length" : <40}',
         '_contour_min': f'{"Contour size minimum (pixels):" : <30}',
         '_thresh_type': f'{"Thresholding type: 0 Otsu, 1 Triangle" : <40}',
-        '_epsilon': f'{"% polygon contour length (300x):" : <40}',
-        '_shape': "Number sides to define polygon (11 is circle):",
+        '_shape': "Shape, # sides (11 is circle):",
+        '_epsilon': f'{"% polygon contour length (300X):" : <40}',
+        '_mindist': f'{"cv2.HoughCircles, min dist between (10X):" : <40}',
+        '_param1': f'{"cv2.HoughCircles, param1 (100X):" : <40}',
+        '_param2': f'{"cv2.HoughCircles, param2 (0.1X):" : <40}',
+        '_minradius': f'{"cv2.HoughCircles, min radius (10X):" : <40}',
+        '_maxradius': f'{"cv2.HoughCircles, max radius (10X):" : <40}',
     }
 elif MY_OS == 'dar':
     TBNAME = {
@@ -47,8 +52,13 @@ elif MY_OS == 'dar':
         '_contour_type': 'Contour type:',
         '_contour_min': 'Contour size min:',
         '_thresh_type': 'Threshold type',
-        '_epsilon': '300X contour len',
-        '_shape': "Polygon sides"
+        '_shape': "Shape, # sides:",
+        '_epsilon': 'Cntr len, 300X',
+        '_mindist': 'Min dist btwn (10X)',
+        '_param1': 'param1 (100X):',
+        '_param2': 'param2 (0.1X):',
+        '_minradius': 'Min radius 10X',
+        '_maxradius': 'Max radius 10X',
     }
 else:  # is Windows; names limited to 10 characters.
     TBNAME = {
@@ -68,9 +78,28 @@ else:  # is Windows; names limited to 10 characters.
         '_contour_type': 'Contour:',
         '_contour_min': 'Cnt size:',
         '_thresh_type': 'T-hold type',
-        '_epsilon': '300X % len',
-        '_shape': "Polygon:"
+        '_shape': "# vertices",
+        '_epsilon': 'C len 300',
+        '_mindist': 'Cir sep 10X',
+        '_param1': 'p1, 100X',
+        '_param2': 'p2, 0.1X',
+        '_minradius': 'Min r 10X',
+        '_maxradius': 'Max r 10X',
     }
+
+# Set polygon name depending on the 'shape' trackbar's value.
+SHAPE_NAME = {
+    3: 'triangle',
+    4: 'rectangle',
+    5: 'pentagon',
+    6: 'hexagon',
+    7: 'heptagon',
+    8: 'octagon',
+    9: 'nonagon',
+    10: 'star',
+    11: 'circle',
+}
+
 # Set ranges for trackbars used to adjust contrast and brightness for
 #  the cv2.convertScaleAbs method.
 ALPHA_MAX = 400
@@ -167,6 +196,30 @@ CONTOUR_TYPE = {
     # Value is what to display as descriptive text.
     0: 'cv2.contourArea',
     1: 'cv2.arcLength',
+}
+
+CONTOUR_COLOR = {
+    'green': (0, 255, 0),
+}
+
+"""
+Colorblind color pallet source:
+  Wong, B. Points of view: Color blindness. Nat Methods 8, 441 (2011).
+  https://doi.org/10.1038/nmeth.1618
+Hex values source: https://www.rgbtohex.net/
+See also: https://matplotlib.org/stable/tutorials/colors/colormaps.html
+"""
+# Colors are (B, R, G)
+CBLIND_COLOR_CV = {
+    'blue': (178, 114, 0),
+    'orange': (0, 159, 230),
+    'sky blue': (233, 180, 86),
+    'blueish green': (115, 158, 0),
+    'vermilion': (0, 94, 213),
+    'reddish purple': (167, 121, 204),
+    'yellow': (66, 228, 240),
+    'black': (0, 0, 0),
+    'white': (255, 255, 255),
 }
 
 # 	cv::HersheyFonts {
