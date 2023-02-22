@@ -702,11 +702,6 @@ class ProcessImage:
 
         Returns: None
         """
-        # TODO: Need to exclude edges that may include contrasted image borders;
-        #   as in sample4.jpg.
-        #   Try https://stackoverflow.com/questions/40127252/how-to-remove-long-edges-in-a-canny-edge-image
-        #   with cv2.minAreaRectangle on the contour iter.
-        #  https://stackoverflow.com/questions/18207181/opencv-python-draw-minarearect-rotatedrect-not-implemented
 
         # Source of coding ideas:
         # https://docs.opencv.org/4.x/d4/d73/tutorial_py_contours_begin.html
