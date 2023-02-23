@@ -69,7 +69,7 @@ Alternative commands (system dependent):
     py -m pip install -r requirements.txt (Windows)
 
 ### Known Issues:
-Waiting for user comments...
+In macOS, proper scaling of windows is not automatic. All windows will need to be manually resized to have a useful program. Any ideas for configuring the GUI backend are welcome.
 
 ### Screenshots:
 ![opening_thresh_it_windows](images/thresh_it_screenshot.png)
