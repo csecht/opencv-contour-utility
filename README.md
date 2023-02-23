@@ -11,12 +11,14 @@ https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-
 
 The intention is to help OpenCV users understand the pertinent parameters and value ranges needed to identify objects.
 
-Development environment was Linux Ubuntu 20.04, macOS 13.2, Windows10
+Development environment was Linux Ubuntu 20.04 with PyQt5 API. Has been tested in macOS 13.2 and Windows10 for basic functionality, but window formatting on those platforms still needs work.
 
 ## edge_it.py
 The module `edge_it.py` uses Canny edge detection, cv2.Canny, as the basis to identify contours.
 ## thresh_it.py
 The module `thresh_it.py` uses thresholding, cv2.threshold, as the basis to identify contours.
+## shape_it.py
+The module `shape_it.py`, also uses thresholding, but adds detection of specific shapes with the functions cv2.approxPolyDP() for polygons and cv2.HoughCircles() for circles. Shape detection works in conjunction with all the threshold contour trackbars. Using the `sample4.jpg` file for input provides a good example of parameter settings needed to detect different shapes.
 ## equalize_it.py
 The module `equalize_it.py` does not involve contours, but explores parameters for automatic histogram equalization as an optional pre-processing step for object detections. Equalization is done with cv2.createCLAHE. CLAHE is a contrast-limited adaptive histogram equalization method. Live updates of the CLAHE histogram are controlled by slide bars for the clipLimit and tileGridSize parameter values. All processing is carried out on a grayscale version of the input file. The grayscale equalized image can be saved to use as input for `thresh_it.py` or `equalize_it.py`. For most contour operations, however, the contrast and brightness controls provided in the these two modules should be sufficient.
 
@@ -69,7 +71,7 @@ Alternative commands (system dependent):
     py -m pip install -r requirements.txt (Windows)
 
 ### Known Issues:
-In macOS, proper scaling of windows is not automatic. All windows will need to be manually resized to have a useful program. Any ideas for configuring the GUI backend are welcome.
+In macOS 13 and Windows10, proper scaling of windows is not automatic. All windows will need to be manually resized to have a useful program. Any ideas for configuring window management are welcome.
 
 ### Screenshots:
 ![opening_thresh_it_windows](images/thresh_it_screenshot.png)
