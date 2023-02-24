@@ -844,7 +844,7 @@ class ProcessImage:
             f'{" ".ljust(20)}cv2.morphologyEx iterations={self.noise_iter}\n'
             f'{" ".ljust(20)}cv2.morphologyEx op={const.MORPH_TYPE[self.morph_op]},\n'
             f'{" ".ljust(20)}cv2.morphologyEx borderType={const.BORDER_NAME[self.border_type]}\n'
-            f'{"Filter:".ljust(20)}{self.filter_selection}ksize={self.filter_kernel}\n'
+            f'{"Filter:".ljust(20)}{self.filter_selection} ksize={self.filter_kernel}\n'
             f'{" ".ljust(20)}borderType={const.BORDER_NAME[self.border_type]}\n'
             f'{" ".ljust(20)}{filter_sigmas}\n'  # is blank line for box and median.
             f'{"cv2.Canny".ljust(20)}threshold1={self.min_threshold},'

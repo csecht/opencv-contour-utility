@@ -944,8 +944,9 @@ class ProcessImage:
 
         Args:
             contour_list: List of selected contours from cv2.findContours.
-        """
 
+        Returns: None
+        """
         # inspiration: Adrian Rosebrock
         #  https://pyimagesearch.com/2016/02/08/opencv-shape-detection/
 
@@ -982,7 +983,6 @@ class ProcessImage:
                     selected_polygon_contours.append(_c)
                 elif len(approx_poly) == self.num_sides == 8 and cv2.isContourConvex(_c):
                     selected_polygon_contours.append(_c)
-                    # NOTE: This finds other shapes depending on polygon contour length setting.
                 elif len(approx_poly) == self.num_sides == 9:
                     selected_polygon_contours.append(_c)
                 elif len(approx_poly) == self.num_sides == 10 and not cv2.isContourConvex(_c):
@@ -1002,8 +1002,7 @@ class ProcessImage:
         Calls show_settings(). Called from select_shape()
 
         Args:
-            contours: selected contours, based on number of vertices,
-                      or circles.
+            contours: Contour list of polygons or circles.
 
         Returns: None
         """
@@ -1097,7 +1096,7 @@ class ProcessImage:
             f'{" ".ljust(20)}cv2.morphologyEx iterations={self.noise_iter}\n'
             f'{" ".ljust(20)}cv2.morphologyEx op={const.MORPH_TYPE[self.morph_op]},\n'
             f'{" ".ljust(20)}cv2.morphologyEx borderType={const.BORDER_NAME[self.border_type]}\n'
-            f'{"Filter:".ljust(20)}{self.filter_selection}ksize={self.filter_kernel}\n'
+            f'{"Filter:".ljust(20)}{self.filter_selection} ksize={self.filter_kernel}\n'
             f'{" ".ljust(20)}borderType={const.BORDER_NAME[self.border_type]}\n'
             f'{" ".ljust(20)}{filter_sigmas}\n'  # is blank line for box and median.
             f'{"cv2.threshold".ljust(20)}type={const.TH_TYPE[self.th_type]},'
