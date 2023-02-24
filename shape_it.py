@@ -86,22 +86,20 @@ class ProcessImage:
         contour_shapes
         show_settings
     """
-    __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
-                 'contour_limit', 'contrasted_img', 'curr_contrast_sd',
-                 'filtered_img', 'filter_kernel', 'filter_selection',
-                 'gray_img', 'morph_op', 'morph_shape',
-                 'noise_iter', 'noise_kernel', 'num_th_contours_all',
-                 'num_th_contours_select', 'input_contrast_sd', 'input_img',
-                 'contoured_img', 'contoured_txt', 'contour_tb_win',
-                 'shaped_img', 'shape_tb_win', 'shaped_txt',
-                 'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
-                 'th_type', 'thresh', 'th_img',
-                 'font_scale', 'line_thickness', 'center_xoffset',
-                 'contour_mode', 'contour_method',
-                 'num_sides', 'polygon', 'num_shapes', 'e_factor',
-                 'reduced_noise_img', 'blob_min_size',
+    __slots__ = ('input_img', 'gray_img', 'contoured_img', 'contrasted_img',
+                 'reduced_noise_img', 'filtered_img', 'th_img', 'shaped_img',
+                 'thresh', 'alpha', 'beta', 'input_contrast_sd',
+                 'curr_contrast_sd', 'noise_iter', 'morph_op', 'morph_shape',
+                 'filter_selection', 'sigma_color', 'sigma_space', 'sigma_x',
+                 'sigma_y', 'border_type', 'th_type', 'computed_threshold',
+                 'num_th_contours_all', 'num_th_contours_select',
+                 'contour_limit', 'polygon', 'num_shapes', 'e_factor',
                  'circles_mindist', 'circles_param1', 'circles_param2',
-                 'circles_min_radius', 'circles_max_radius',
+                 'circles_min_radius', 'circles_max_radius', 'font_scale',
+                 'line_thickness', 'center_xoffset', 'noise_kernel',
+                 'filter_kernel', 'contour_mode', 'contour_method',
+                 'num_sides', 'contoured_txt', 'contour_tb_win',
+                 'shaped_txt', 'shape_tb_win',
                  )
 
     def __init__(self):
