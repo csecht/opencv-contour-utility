@@ -95,11 +95,11 @@ class ProcessImage:
                  'contoured_img', 'contoured_txt', 'contour_tb_win',
                  'shaped_img', 'shape_tb_win', 'shaped_txt',
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
-                 'th_type', 'thresh',
+                 'th_type', 'thresh', 'th_img',
                  'font_scale', 'line_thickness', 'center_xoffset',
                  'contour_mode', 'contour_method',
                  'num_sides', 'polygon', 'num_shapes', 'e_factor',
-                 'reduced_noise_img', 'selected_contours', 'blob_min_size',
+                 'reduced_noise_img', 'blob_min_size',
                  'circles_mindist', 'circles_param1', 'circles_param2',
                  'circles_min_radius', 'circles_max_radius',
                  )
@@ -113,9 +113,9 @@ class ProcessImage:
         self.contrasted_img = None
         self.reduced_noise_img = None
         self.filtered_img = None
+        self.th_img = None
         self.shaped_img = None
         self.thresh = None
-        self.selected_contours = None
         # self.stub_kernel = np.ones((5, 5), 'uint8')
 
         # Image processing parameters.
@@ -867,31 +867,34 @@ class ProcessImage:
         #   with the self.computed_threshold;
         #   for other cv2.THRESH_*, thresh needs to be manually provided.
         # Convert values above thresh to white.
-        self.computed_threshold, th_img = cv2.threshold(self.filter_image(),
-                                                        # src=self.filtered_img,
-                                                        thresh=0,
-                                                        maxval=255,
-                                                        type=self.th_type)
+        self.computed_threshold, self.th_img = cv2.threshold(self.filter_image(),
+                                                             thresh=0,
+                                                             maxval=255,
+                                                             type=self.th_type)
 
-        # found_contours, hierarchy = cv2.findContours(image=th_img,
-        #                                              mode=cv2.RETR_EXTERNAL,
-        #                                              method=cv2.CHAIN_APPROX_SIMPLE)
-        found_contours, hierarchy = cv2.findContours(image=th_img,
+        found_contours, hierarchy = cv2.findContours(image=self.th_img,
                                                      mode=self.contour_mode,
                                                      method=self.contour_method)
 
-        self.selected_contours = [_c for _c in found_contours
-                                  if cv2.arcLength(_c, closed=True) >= self.contour_limit]
+        # Set values to exclude edge contours that may take in
+        #  contrasting borders on the image; an arbitrary 80% exclusion limit.
+        max_area = self.gray_img.shape[0] * self.gray_img.shape[1] * 0.64
+        max_length = self.gray_img.shape[0] * 0.8
+
+        selected_contours = [
+            _c for _c in found_contours
+            if max_length > cv2.arcLength(_c, closed=True) >= self.contour_limit
+        ]
         # Or use cv2.contourArea(_c)?
 
         # Used only for reporting.
         self.num_th_contours_all = len(found_contours)
 
-        self.num_th_contours_select = len(self.selected_contours)
+        self.num_th_contours_select = len(selected_contours)
 
         self.contoured_img = self.input_img.copy()
         drawn_contours = cv2.drawContours(self.contoured_img,
-                                          contours=self.selected_contours,
+                                          contours=selected_contours,
                                           contourIdx=-1,  # all contours.
                                           color=const.CBLIND_COLOR_CV['yellow'],
                                           thickness=self.line_thickness * 3,
@@ -902,11 +905,11 @@ class ProcessImage:
                         flags=cv2.WINDOW_GUI_NORMAL)
 
         side_by_side = cv2.hconcat(
-            [cv2.cvtColor(th_img, cv2.COLOR_GRAY2RGB), drawn_contours])
+            [cv2.cvtColor(self.th_img, cv2.COLOR_GRAY2RGB), drawn_contours])
 
         cv2.imshow(win_name, side_by_side)
 
-        self.select_shape()
+        self.select_shape(selected_contours)
 
     def find_circles(self) -> np.ndarray:
         """
@@ -921,7 +924,7 @@ class ProcessImage:
         # Apply Hough transform on the filtered (blured) image.
         # General recommendations for HOUGH_GRADIENT_ALT with good image contrast:
         #    param1=300, param2=0.9, minRadius=20, maxRadius=400
-        found_circles = cv2.HoughCircles(self.filtered_img,
+        found_circles = cv2.HoughCircles(self.th_img,
                                          method=cv2.HOUGH_GRADIENT_ALT,
                                          dp=1.5,
                                          minDist=self.circles_mindist,
@@ -933,13 +936,14 @@ class ProcessImage:
         if found_circles is not None:
             return found_circles
 
-    def select_shape(self) -> None:
+    def select_shape(self, contour_list: list) -> None:
         """
-        Filter specifically shaped contoured objects.
+        Filter contoured objects of a specific approximated shape.
         Called from contour_threshold().
         Calls contour_shapes() with selected polygon contours.
 
-        Returns: List of selected contours based on polygon shape.
+        Args:
+            contour_list: List of selected contours from cv2.findContours.
         """
 
         # inspiration: Adrian Rosebrock
@@ -951,8 +955,8 @@ class ProcessImage:
         # Need to set a condition to limit which contours to draw b/c sometimes
         #  small image artifacts approximate a shape from cv2.approxPolyDP.
         #  Why these small contours are not filtered out in contour_threshold()
-        #  self.selected_contours by self.contour_limit, I do not know.
-        for _c in self.selected_contours:
+        #  selected_contours by self.contour_limit, I do not know.
+        for _c in contour_list:
             if len(_c) > self.noise_kernel[0]:
                 len_contour = cv2.arcLength(_c, True)
                 approx_poly = cv2.approxPolyDP(curve=_c,
