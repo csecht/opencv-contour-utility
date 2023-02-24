@@ -1004,7 +1004,7 @@ class ProcessImage:
                     selected_polygon_contours.append(_c)
                 elif len(approx_poly) == self.num_sides == 7:
                     selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_sides == 8 and cv2.isContourConvex(_c):
+                elif len(approx_poly) == self.num_sides == 8: # and cv2.isContourConvex(_c):
                     selected_polygon_contours.append(_c)
                 elif len(approx_poly) == self.num_sides == 9:
                     selected_polygon_contours.append(_c)
