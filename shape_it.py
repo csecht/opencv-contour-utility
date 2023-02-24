@@ -93,7 +93,8 @@ class ProcessImage:
                  'filter_selection', 'sigma_color', 'sigma_space', 'sigma_x',
                  'sigma_y', 'border_type', 'th_type', 'computed_threshold',
                  'num_th_contours_all', 'num_th_contours_select',
-                 'contour_limit', 'polygon', 'num_shapes', 'e_factor',
+                 'contour_type', 'contour_limit',
+                 'polygon', 'num_shapes', 'e_factor',
                  'circles_mindist', 'circles_param1', 'circles_param2',
                  'circles_min_radius', 'circles_max_radius', 'font_scale',
                  'line_thickness', 'center_xoffset', 'noise_kernel',
@@ -134,6 +135,7 @@ class ProcessImage:
         self.computed_threshold = 0
         self.num_th_contours_all = 0
         self.num_th_contours_select = 0
+        self.contour_type = ''
         self.contour_limit = 0
 
         # Shape finding variables.
@@ -282,6 +284,11 @@ class ProcessImage:
                            0,
                            1,
                            self.thresh_type_selector)
+        cv2.createTrackbar(const.TBNAME['_contour_type'],
+                           self.contour_tb_win,
+                           1,
+                           1,
+                           self.contour_type_selector)
         cv2.createTrackbar(const.TBNAME['_contour_mode'],
                            self.contour_tb_win,
                            0,
@@ -537,6 +544,20 @@ class ProcessImage:
         """
         # The Ostu integer constant is 8, triangle is 16.
         self.th_type = cv2.THRESH_OTSU if t_val == 0 else cv2.THRESH_TRIANGLE
+        self.contour_threshold()
+
+    def contour_type_selector(self, ct_val) -> None:
+        """
+        The "Contour type" trackbar controller that assigns the
+        contour type (area or arc length) for selecting contours.
+        Called from setup_trackbars(). Calls contour_threshold().
+
+        Args:
+            ct_val: The integer value passed from trackbar.
+
+        Returns: None
+        """
+        self.contour_type = const.CONTOUR_TYPE[ct_val]
         self.contour_threshold()
 
     def contour_mode_selector(self, mode_val):
@@ -879,11 +900,15 @@ class ProcessImage:
         max_area = self.gray_img.shape[0] * self.gray_img.shape[1] * 0.64
         max_length = self.gray_img.shape[0] * 0.8
 
-        selected_contours = [
-            _c for _c in found_contours
-            if max_length > cv2.arcLength(_c, closed=True) >= self.contour_limit
-        ]
-        # Or use cv2.contourArea(_c)?
+        # 'contour_type' values are from "Contour size type" trackbar.
+        if self.contour_type == 'cv2.contourArea':
+            selected_contours = [_c for _c in found_contours
+                                 if max_area > cv2.contourArea(_c) >= self.contour_limit]
+        else:  # is cv2.arcLength; aka "perimeter"
+            selected_contours = [
+                _c for _c in found_contours
+                if max_length > cv2.arcLength(_c, closed=False) >= self.contour_limit
+            ]
 
         # Used only for reporting.
         self.num_th_contours_all = len(found_contours)
@@ -1101,6 +1126,7 @@ class ProcessImage:
             f' thresh={int(self.computed_threshold)}, maxval=255\n'
             f'{"cv2.findContours".ljust(20)}mode={const.CONTOUR_MODE[self.contour_mode]}\n'
             f'{" ".ljust(20)}method={const.CONTOUR_METHOD[self.contour_method]}\n'
+            f'{"Contour size type:".ljust(20)}{self.contour_type}\n'
             f'{"Contour size min.:".ljust(20)}{self.contour_limit} pixels\n'
             f'{"Contours selected:".ljust(20)}{self.num_th_contours_select}'
             f' (from {self.num_th_contours_all} total)'
