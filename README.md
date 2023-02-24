@@ -1,5 +1,5 @@
 # Project: opencv-contour-util
-A set of Python utilities to easily explore OpenCV parameters involved in drawing contours for object detection. A variety of parameter values can be adjusted with OpenCV trackbars (see figures below). Live image updates are displayed in multiple windows for each processing step leading to object detection and sizing. 
+A set of Python utilities to easily explore OpenCV parameters involved in drawing contours for object and shape detection. A variety of parameter values can be adjusted with OpenCV trackbars (see figures below). Live image updates are displayed in multiple windows for each processing step leading to object detection.
 
 A utility is also provided to explore parameters for automatic histogram equalization.
 
@@ -74,6 +74,8 @@ Alternative commands (system dependent):
 In macOS 13 and Windows10, proper scaling of windows is not automatic. All windows will need to be manually resized to have a useful program. Any ideas for configuring window management are welcome.
 
 ### Screenshots:
+All screenshots are from a Ubuntu Linux platform. For Windows and macOS platforms, trackbar names are much shorter, but text reporting of current settings is the same for all platforms.
+
 ![opening_thresh_it_windows](images/thresh_it_screenshot.png)
 
 Opening windows for `thresh_it.py` with the `sample3.jpg` input file.
@@ -90,6 +92,12 @@ Expanded window for identified threshold objects and their comparative pixel siz
 
 Histograms and CLAHE windows will live update with CLAHE parameter sliders.
 
+![found_histogram_shape](images/shapes_screenshot.png)
+
+Identified hstogram shapes in `sample4.jpg` are outlined in yellow with `shape_it.py` (above) using "Shape" trackbar set for a six-sided object (below).
+
+![shape_settings_window](images/shape_settings_screenshot.png)
+
 ### Attributions
 Source of sample1.jpg image file:
 Adrian Rosebrock at https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-opencv/
@@ -97,5 +105,4 @@ Adrian Rosebrock at https://pyimagesearch.com/2016/03/28/measuring-size-of-objec
 Source of sample2.jpg image file:
 http://sunrisekauai.blogspot.com/2012/06/new-group-of-sunrise-shells.html
 
-Source of other image files:
-author, C.S. Echt
+All other image files are from the author, C.S. Echt.
