@@ -218,6 +218,7 @@ def save_img_and_settings(img2save: np.ndarray,
     img_ext = Path(Path(args_handler()['input']).suffix)
     img_stem = Path(Path(args_handler()['input']).stem)
     first_word = txt2save.split()[0]
+    print('first word', first_word)
 
     # Note: What's happening here is that separate files are saved for
     #   the contoured and shape images, while the one settings text file
@@ -226,11 +227,11 @@ def save_img_and_settings(img2save: np.ndarray,
     #   BECAUSE first_word match is hard coded, need to keep the
     #   same first word in the contour settings text in all modules
     #   that use it.
-    if first_word == 'Image':  # text is from contoured_txt
-        file_name = f'{img_stem}_{caller}_contours_{curr_time}{img_ext}'
+    if first_word == 'Image:':  # text is from contoured_txt
+        file_name = f'{img_stem}_{caller}_contoured_{curr_time}{img_ext}'
         cv2.imwrite(file_name, img2save)
     else:  # text is from shaped_txt
-        file_name = f'{img_stem}_{caller}_shapes_{curr_time}{img_ext}'
+        file_name = f'{img_stem}_{caller}_shaped_{curr_time}{img_ext}'
         cv2.imwrite(file_name, img2save)
 
     settings2save = (f'\n\nTime saved: {time2print}\n'
