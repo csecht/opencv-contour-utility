@@ -77,7 +77,7 @@ class ProcessImage:
         reduce_noise
         filter_image
         contour_edges
-        circle_contours
+        circle_the_contours
         show_settings
     """
     __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
@@ -727,30 +727,30 @@ class ProcessImage:
                                               method=self.contour_method)
 
         # Set values to exclude edge contours that may take in
-        #  contrasting borders on the image; use 80% exclusion limit.
+        #  contrasting borders on the image; an arbitrary 80% exclusion limit.
         max_area = self.gray_img.shape[0] * self.gray_img.shape[1] * 0.64
         max_length = self.gray_img.shape[0] * 0.8
 
         # 'contour_type' values are from "Contour size type" trackbar.
         if self.contour_type == 'cv2.contourArea':
-            select_cnts = [_c for _c in found_contours
-                           if max_area > cv2.contourArea(_c) >= self.contour_limit]
+            selected_contours = [_c for _c in found_contours
+                                 if max_area > cv2.contourArea(_c) >= self.contour_limit]
         else:  # is cv2.arcLength; aka "perimeter"
-            select_cnts = [
+            selected_contours = [
                 _c for _c in found_contours
                 if max_length > cv2.arcLength(_c, closed=False) >= self.contour_limit
             ]
 
         # Used only for reporting.
         self.num_edge_contours_all = len(found_contours)
-        self.num_edge_contours_select = len(select_cnts)
+        self.num_edge_contours_select = len(selected_contours)
 
         self.contoured_img = self.input_img.copy()
         drawn_contours = cv2.drawContours(self.contoured_img,
-                                          contours=select_cnts,
+                                          contours=selected_contours,
                                           contourIdx=-1,  # all contours.
                                           color=const.CBLIND_COLOR_CV['yellow'],
-                                          thickness=self.line_thickness * 2,
+                                          thickness=self.line_thickness * 3,
                                           lineType=cv2.LINE_AA)
 
         win_name = 'Edges <- | -> Selected edged contours'
@@ -762,10 +762,10 @@ class ProcessImage:
 
         cv2.imshow(win_name, side_by_side)
 
-        self.circle_contours(select_cnts)
+        self.circle_the_contours(selected_contours)
         self.show_settings()
 
-    def circle_contours(self, contour_list: list) -> None:
+    def circle_the_contours(self, contour_list: list) -> None:
         """
         Draws a circles around contoured objects. Objects are expected
         to be oblong so that circle diameter can represent object length.
