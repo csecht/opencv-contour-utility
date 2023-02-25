@@ -42,10 +42,10 @@ except (ImportError, ModuleNotFoundError) as err:
     sys.exit(1)
 
 # Local application imports
-from contour_utils import (vcheck,
-                           utils,
-                           constants as const
-                           )
+from contour_modules import (vcheck,
+                             utils,
+                             constants as const
+                             )
 
 
 class ProcessImage:
@@ -1089,7 +1089,7 @@ class ProcessImage:
         """
         Display name of file and processing parameters in contour_tb_win
         window. Displays real-time changes to parameter values.
-        Calls module utils.text_array() in contour_utils directory.
+        Calls module utils.text_array() in contour_modules directory.
         Called from select_shape().
 
         Returns: None

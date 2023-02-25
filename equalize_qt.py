@@ -33,7 +33,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 # Local application imports
-from contour_utils import (vcheck, utils)
+from contour_modules import (vcheck, utils)
 
 
 # noinspection PyUnresolvedReferences
@@ -328,7 +328,7 @@ class PlotWindow(QDialog):
         """
         Display name of file and processing parameters in contour_tb_win
         window. Displays real-time parameter changes.
-        Calls module utils.text_array() in contour_utils directory.
+        Calls module utils.text_array() in contour_modules directory.
 
         Returns: None
         """

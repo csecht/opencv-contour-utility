@@ -28,8 +28,8 @@ import cv2
 import numpy as np
 
 # Local application imports.
-import contour_utils
-from contour_utils import constants as const
+import contour_modules
+from contour_modules import constants as const
 
 MY_OS = sys.platform[:3]
 
@@ -78,12 +78,12 @@ def args_handler() -> dict:
     args = parser.parse_args()
 
     about_text = (f'{__doc__}\n'
-                  f'{"Author:".ljust(13)}{contour_utils.__author__}\n'
-                  f'{"Version:".ljust(13)}{contour_utils.__version__}\n'
-                  f'{"Status:".ljust(13)}{contour_utils.__status__}\n'
-                  f'{"URL:".ljust(13)}{contour_utils.URL}\n'
-                  f'{contour_utils.__copyright__}'
-                  f'{contour_utils.__license__}\n'
+                  f'{"Author:".ljust(13)}{contour_modules.__author__}\n'
+                  f'{"Version:".ljust(13)}{contour_modules.__version__}\n'
+                  f'{"Status:".ljust(13)}{contour_modules.__status__}\n'
+                  f'{"URL:".ljust(13)}{contour_modules.URL}\n'
+                  f'{contour_modules.__copyright__}'
+                  f'{contour_modules.__license__}\n'
                   )
 
     if args.about:
