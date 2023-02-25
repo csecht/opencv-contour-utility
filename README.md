@@ -84,6 +84,7 @@ All screenshots are from a Ubuntu Linux platform. For Windows and macOS platform
 ![opening_thresh_it_windows](images/thresh_it_screenshot.png)
 
 Opening windows for `thresh_it.py` with the `sample3.jpg` input file.
+(Note: As of 25/02/2023 all contour and identification marking are now yellow, not green. )
 
 ![thresh_it_settings_window](images/settings_screenshot.png)
 
@@ -97,7 +98,7 @@ Expanded window for identified threshold objects and their comparative pixel siz
 
 Histograms and CLAHE windows will live update with CLAHE parameter sliders.
 
-![found_histogram_shape](images/shapes_screenshot.png)
+![found_histogram_shape](images/found_hexagon_screenshot.png)
 
 Identified hstogram shapes in `sample4.jpg` are outlined in yellow with `shape_it.py` (above) using "Shape" trackbar set for a six-sided object (below).
 
