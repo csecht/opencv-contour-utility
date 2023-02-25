@@ -37,18 +37,21 @@ From within the program's folder, use one of these Terminal or Command Prompt co
 
        python3 -m equalize_it -i images/sample2.jpg
 
-List command line options: `python3 -m thresh_it --help`
+       python3 -m  shape_it -i images/sample4.jpg
+
+List command line options, ex: `python3 -m thresh_it --help`
        
        Explore Image Processing Parameters.
        optional arguments:
          -h, --help            show this help message and exit
-         --about               Provide description, version, GNU license
+         --about               Provide description, version, GNU license.
          --input PATH/FILE, -i PATH/FILE
                                Path to input image (PNG or JPG file).
+         --scale X, -s X       Factor to change displayed image size (default: 1.0).
 
 Basic information, author, version, license, etc.: `python3 -m thresh_it --about`
 
- All windows, except for Settings, can be dragged to resize.
+All windows, except for Settings, can be dragged to resize. In Ubuntu Linux, windows automatically size to easily fit on the screen. In macOS and Windows, however, image windows display their native sizes. For larger images, therefore, it is recommended to use the --scale (or -s) command line option to reduce window sizes to easily fit everything on the screen. For example, on a 13-inch MacBook Pro, the command `python3 -m  shape_it -i images/sample4.jpg -s 0.3` will make all image windows small enough so they can be easily rearranged (or manually resized). The scale option does not change the export size of any saved image files. 
  
 The Esc or Q key will quit any running module (except if "Histograms" window in `equalize_it.py` is currently selected; then just select one of the other windows to use a Quit key). From the command line, the usual Ctrl-C will also exit a module.
 
@@ -56,9 +59,11 @@ Sample image files are provided in the `images` folder:
 * sample1.jpg (pills, 800x600 692 kB),
 * sample2.jpg (shells, 1050x750, 438 kB),
 * sample3.jpg (rummikub, 4032x3024, 2.94 MB)
+* sample4.jpg (shapes, 1245x1532, 137 kB)
 
 ### Requirements:
-Python 3.7 or later, plus the packages OpenCV Matplotlib, Pandas, Numpy, and tkinter (included with 3.7 and above).
+Python 3.7 or later, plus the packages OpenCV and Numpy. Additionally, Matplotlib, and it's dependency Pillow, are needed only with
+the `equalize_*.py` modules; tkinter (included with Python 3.7 and above) is required with `equalize_tk.py`.
 This program was developed in Python 3.8.
 
 For quick installation of the required Python PIP packages:
@@ -71,7 +76,7 @@ Alternative commands (system dependent):
     py -m pip install -r requirements.txt (Windows)
 
 ### Known Issues:
-In macOS 13 and Windows10, proper scaling of windows is not automatic. All windows will need to be manually resized to have a useful program. Any ideas for configuring window management are welcome.
+In macOS 13 and Windows10, proper scaling of image windows is not automatic. All windows may need to be manually resized it they are too large to easly navigate, or use the `--scale` command line option as explained above. Ideas for configuring window management in Mac or Windows are welcome.
 
 ### Screenshots:
 All screenshots are from a Ubuntu Linux platform. For Windows and macOS platforms, trackbar names are much shorter, but text reporting of current settings is the same for all platforms.

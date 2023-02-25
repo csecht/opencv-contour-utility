@@ -69,12 +69,12 @@ def args_handler() -> dict:
                         help='Path to input image.',
                         default='images/sample1.jpg',
                         metavar='PATH/FILE')
-    # parser.add_argument('--scale', '-s',
-    #                     help='Factor to change displayed image size (default: 1.0).',
-    #                     default=1.0,
-    #                     type=float,
-    #                     required=False,
-    #                     metavar='X')
+    parser.add_argument('--scale', '-s',
+                        help='Factor to change displayed image size (default: 1.0).',
+                        default=1.0,
+                        type=float,
+                        required=False,
+                        metavar='X')
     args = parser.parse_args()
 
     about_text = (f'{__doc__}\n'
@@ -97,9 +97,9 @@ def args_handler() -> dict:
         print('Could not open the image (check spelling and path):', args.input)
         sys.exit()
 
-    # if args.scale <= 0:
-    #     args.scale = 1
-    #     print('--scale X: X must be greater than zero. Resetting to 1.')
+    if args.scale <= 0:
+        args.scale = 1
+        print('--scale X: X must be greater than zero. Resetting to 1.')
 
     input_arg = 0
     for i in ('--input', '--i', '-i'):
@@ -112,7 +112,7 @@ def args_handler() -> dict:
     arguments = {
         'about': args.about,
         'input': args.input,
-        # 'scale': args.scale,
+        'scale': args.scale,
     }
     return arguments
 

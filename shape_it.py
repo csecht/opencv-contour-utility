@@ -187,8 +187,15 @@ class ProcessImage:
         size2scale = min(self.input_img.shape[0], self.input_img.shape[1])
         self.font_scale = size2scale * const.FONT_SCALE
         self.font_scale = max(self.font_scale, 0.5)
-        self.line_thickness = math.ceil(size2scale * const.LINE_SCALE)
-        self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE)
+
+        if arguments['scale'] != 1:  # Default optional --scale arg is 1.
+            self.input_img = utils.scale_img(self.input_img, arguments['scale'])
+            self.gray_img = utils.scale_img(self.gray_img, arguments['scale'])
+            self.line_thickness = math.ceil(size2scale * const.LINE_SCALE * arguments['scale'])
+            self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE * arguments['scale'])
+        else:
+            self.line_thickness = math.ceil(size2scale * const.LINE_SCALE)
+            self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE)
 
         # Display starting images. Use WINDOW_GUI_NORMAL to fit any size
         #   image on screen and allow manual resizing of window.
@@ -197,6 +204,8 @@ class ProcessImage:
                         flags=cv2.WINDOW_GUI_NORMAL)
         side_by_side = cv2.hconcat(
             [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
+
+
         cv2.imshow(win_name, side_by_side)
 
     def setup_trackbars(self) -> None:
@@ -920,7 +929,7 @@ class ProcessImage:
                                           contours=selected_contours,
                                           contourIdx=-1,  # all contours.
                                           color=const.CBLIND_COLOR_CV['yellow'],
-                                          thickness=self.line_thickness * 3,
+                                          thickness=self.line_thickness * 2,
                                           lineType=cv2.LINE_AA)
 
         win_name = 'Threshold <- | -> Selected threshold contours'
@@ -1050,7 +1059,7 @@ class ProcessImage:
                            center=(_x, _y),
                            radius=_r,
                            color=const.CBLIND_COLOR_CV['yellow'],
-                           thickness=self.line_thickness * 3,
+                           thickness=self.line_thickness * 2,
                            lineType=cv2.LINE_AA
                            )
 
@@ -1073,7 +1082,7 @@ class ProcessImage:
                                  contours=[_c],
                                  contourIdx=-1,
                                  color=const.CBLIND_COLOR_CV['yellow'],
-                                 thickness=self.line_thickness * 3,
+                                 thickness=self.line_thickness * 2,
                                  lineType=cv2.LINE_AA
                                  )
 
