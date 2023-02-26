@@ -33,6 +33,7 @@ if MY_OS == 'lin':
         '_param2': f'{"cv2.HoughCircles, param2 (0.1X):" : <40}',
         '_minradius': f'{"cv2.HoughCircles, min radius (10X):" : <40}',
         '_maxradius': f'{"cv2.HoughCircles, max radius (10X):" : <40}',
+        '_circle_it': f'{"Find circles with: 0 threshold, 1 filtered" : <40}',
     }
 elif MY_OS == 'dar':
     TBNAME = {
@@ -59,6 +60,8 @@ elif MY_OS == 'dar':
         '_param2': 'param2 (0.1X):',
         '_minradius': 'Min radius 10X',
         '_maxradius': 'Max radius 10X',
+        '_circle_it': 'Find circle img',
+
     }
 else:  # is Windows; names limited to 10 characters.
     TBNAME = {
@@ -85,6 +88,7 @@ else:  # is Windows; names limited to 10 characters.
         '_param2': 'p2, 0.1X',
         '_minradius': 'Min r 10X',
         '_maxradius': 'Max r 10X',
+        '_circle_it': 'Find circ.',
     }
 
 # Set polygon name depending on the 'shape' trackbar's value.

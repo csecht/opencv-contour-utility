@@ -96,7 +96,8 @@ class ProcessImage:
                  'contour_type', 'contour_limit',
                  'polygon', 'num_shapes', 'e_factor',
                  'circles_mindist', 'circles_param1', 'circles_param2',
-                 'circles_min_radius', 'circles_max_radius', 'font_scale',
+                 'circles_min_radius', 'circles_max_radius', 'circle_img2use',
+                 'font_scale',
                  'line_thickness', 'center_xoffset', 'noise_kernel',
                  'filter_kernel', 'contour_mode', 'contour_method',
                  'num_sides', 'contoured_txt', 'contour_tb_win',
@@ -147,6 +148,7 @@ class ProcessImage:
         self.circles_param2 = 1
         self.circles_min_radius = 1
         self.circles_max_radius = 1
+        self.circle_img2use = 0
 
         self.font_scale = 0
         self.line_thickness = 0
@@ -347,6 +349,12 @@ class ProcessImage:
         cv2.setTrackbarMin(const.TBNAME['_epsilon'], self.shape_tb_win, 1)
 
         # Trackbars for cv2.HoughCircles parameters:
+        cv2.createTrackbar(const.TBNAME['_circle_it'],
+                           self.shape_tb_win,
+                           1,
+                           1,
+                           self.circle_img_selector)
+
         cv2.createTrackbar(const.TBNAME['_mindist'],
                            self.shape_tb_win,
                            1,
@@ -722,6 +730,26 @@ class ProcessImage:
         self.circles_max_radius = maxr_val * 10
         self.contour_threshold()
 
+    def circle_img_selector(self, c_val) -> None:
+        """
+        The "Find circles" trackbar controller that assigns the switch
+        for which image array used by cv2.HoughCircles().
+        Called from setup_trackbars(). Calls contour_threshold().
+
+        Args:
+            c_val: The integer value passed from trackbar.
+
+        Returns: None
+        """
+        # Note: these strings need to match those used for conditions in
+        #  find_circles().
+        if c_val == 0:
+            self.circle_img2use = 'threshold image'
+        else:
+            self.circle_img2use = 'filtered image'
+
+        self.contour_threshold()
+
     def save_with_click(self, event, *args):
         """
         Click event in the namedWindow calls module that saves the image
@@ -949,21 +977,39 @@ class ProcessImage:
 
         Returns: An array of HoughCircles contours.
         """
-        # Here HoughCircles works on the threshold image, not found
-        #  contours, so need to replace selected threshold contours image
-        #  with the non-contoured input image so the user knows that
-        #  the contour trackbars will do nothing to help find circles.
+
+        # _, self.th_img = cv2.threshold(self.filter_image(),
+        #                                thresh=0,
+        #                                maxval=255,
+        #                                type=self.th_type)
+
+        # Note: This name needs to match that used in contour_threshold().
         win_name = 'Threshold <- | -> Selected threshold contours'
-        side_by_side = cv2.hconcat(
-            [cv2.cvtColor(self.th_img, cv2.COLOR_GRAY2RGB), self.input_img])
-        cv2.imshow(win_name, side_by_side)
+
+        # Note: these strings need to match those used in circle_img_selector().
+        if self.circle_img2use == 'threshold image':
+            circle_this_img = self.th_img
+            # Here HoughCircles works on the threshold image, not found
+            #  contours, so need to replace selected threshold contours image
+            #  with a blank image so the user knows that contour trackbars
+            #  do nothing to find circles.
+            side_by_side = cv2.hconcat([self.th_img,
+                                        np.ones(self.th_img.shape, dtype='uint8')])
+            cv2.imshow(win_name, side_by_side)
+
+        else:  # is "filtered image"
+            circle_this_img = self.filtered_img
+            # Here HoughCircles works on the filtered image, not threshold,
+            #  so replace the threshold and contour images with a message.
+            text_msg = "Now using filtered,\n not threshold,\nimage to find circles."
+            cv2.imshow(win_name, utils.text_array((220, 350), text_msg))
 
         # source: https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
         # https://docs.opencv.org/4.x/dd/d1a/group__imgproc__feature.html#ga47849c3be0d0406ad3ca45db65a25d2d
         # Apply Hough transform on the filtered (blured) image.
         # General recommendations for HOUGH_GRADIENT_ALT with good image contrast:
         #    param1=300, param2=0.9, minRadius=20, maxRadius=400
-        found_circles = cv2.HoughCircles(self.th_img,
+        found_circles = cv2.HoughCircles(image=circle_this_img,
                                          method=cv2.HOUGH_GRADIENT_ALT,
                                          dp=1.5,
                                          minDist=self.circles_mindist,
@@ -1151,7 +1197,8 @@ class ProcessImage:
         shape_txt = (
             f'{"cv2.approxPolyDP".ljust(20)}epsilon={epsilon_pct}% contour length\n'
             f'{" ".ljust(20)}closed=True\n'
-            f'{"cv2.HoughCircles".ljust(20)}method=cv2.HOUGH_GRADIENT_ALT\n'
+            f'{"cv2.HoughCircles".ljust(20)}image={self.circle_img2use}\n'
+            f'{" ".ljust(20)}method=cv2.HOUGH_GRADIENT_ALT\n'
             f'{" ".ljust(20)}dp=1.5\n'
             f'{" ".ljust(20)}minDist={self.circles_mindist}\n'
             f'{" ".ljust(20)}param1={self.circles_param1}\n'
@@ -1175,11 +1222,11 @@ class ProcessImage:
             settings_img = utils.text_array((820, 1200), the_text)
 
         if utils.MY_OS == 'lin':
-            shape_settings_img = utils.text_array((260, 460), shape_txt)
+            shape_settings_img = utils.text_array((280, 460), shape_txt)
         elif utils.MY_OS == 'dar':
-            shape_settings_img = utils.text_array((225, 430), shape_txt)
+            shape_settings_img = utils.text_array((240, 430), shape_txt)
         else:  # is Windows
-            shape_settings_img = utils.text_array((460, 700), shape_txt)
+            shape_settings_img = utils.text_array((490, 700), shape_txt)
 
         cv2.imshow(self.contour_tb_win, settings_img)
         cv2.imshow(self.shape_tb_win, shape_settings_img)
