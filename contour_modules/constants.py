@@ -198,10 +198,6 @@ CONTOUR_TYPE = {
     1: 'cv2.arcLength',
 }
 
-CONTOUR_COLOR = {
-    'green': (0, 255, 0),
-}
-
 """
 Colorblind color pallet source:
   Wong, B. Points of view: Color blindness. Nat Methods 8, 441 (2011).
@@ -209,7 +205,7 @@ Colorblind color pallet source:
 Hex values source: https://www.rgbtohex.net/
 See also: https://matplotlib.org/stable/tutorials/colors/colormaps.html
 """
-# Colors are (B, R, G)
+# OpenCV uses a BGR (B, G, R) color convention, instead of RGB.
 CBLIND_COLOR_CV = {
     'blue': (178, 114, 0),
     'orange': (0, 159, 230),
@@ -221,6 +217,8 @@ CBLIND_COLOR_CV = {
     'black': (0, 0, 0),
     'white': (255, 255, 255),
 }
+
+STD_CONTOUR_COLOR = {'green': (0, 255, 0)}
 
 # 	cv::HersheyFonts {
 #   cv::FONT_HERSHEY_SIMPLEX = 0,
