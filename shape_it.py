@@ -945,10 +945,18 @@ class ProcessImage:
     def find_circles(self) -> np.ndarray:
         """
         Implements the cv2.HOUGH_GRADIENT_ALT method of cv2.HoughCircles()
-        to identify circular shapes in a filtered/blured image.
+        to approximate circles in a filtered/blured threshold image.
 
         Returns: An array of HoughCircles contours.
         """
+        # Here HoughCircles works on the threshold image, not found
+        #  contours, so need to replace selected threshold contours image
+        #  with the non-contoured input image so the user knows that
+        #  the contour trackbars will do nothing to help find circles.
+        win_name = 'Threshold <- | -> Selected threshold contours'
+        side_by_side = cv2.hconcat(
+            [cv2.cvtColor(self.th_img, cv2.COLOR_GRAY2RGB), self.input_img])
+        cv2.imshow(win_name, side_by_side)
 
         # source: https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
         # https://docs.opencv.org/4.x/dd/d1a/group__imgproc__feature.html#ga47849c3be0d0406ad3ca45db65a25d2d
