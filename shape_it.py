@@ -205,7 +205,6 @@ class ProcessImage:
         side_by_side = cv2.hconcat(
             [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
 
-
         cv2.imshow(win_name, side_by_side)
 
     def setup_trackbars(self) -> None:
@@ -1143,11 +1142,14 @@ class ProcessImage:
 
         shape_txt = (
             f'{"cv2.approxPolyDP".ljust(20)}epsilon={epsilon_pct}% contour length\n'
-            f'{"cv2.HoughCircles".ljust(20)}minDist={self.circles_mindist}\n'
-            f'{"cv2.HoughCircles".ljust(20)}param1={self.circles_param1}\n'
-            f'{"cv2.HoughCircles".ljust(20)}param2={self.circles_param2}\n'
-            f'{"cv2.HoughCircles".ljust(20)}minRadius={self.circles_min_radius}\n'
-            f'{"cv2.HoughCircles".ljust(20)}maxRadius={self.circles_max_radius}\n'
+            f'{" ".ljust(20)}closed=True\n'
+            f'{"cv2.HoughCircles".ljust(20)}method=cv2.HOUGH_GRADIENT_ALT\n'
+            f'{" ".ljust(20)}dp=1.5\n'
+            f'{" ".ljust(20)}minDist={self.circles_mindist}\n'
+            f'{" ".ljust(20)}param1={self.circles_param1}\n'
+            f'{" ".ljust(20)}param2={self.circles_param2}\n'
+            f'{" ".ljust(20)}minRadius={self.circles_min_radius}\n'
+            f'{" ".ljust(20)}maxRadius={self.circles_max_radius}\n'
             f'{"Shape selected:".ljust(20)}{self.polygon}, found: {self.num_shapes}\n'
         )
 
@@ -1165,11 +1167,11 @@ class ProcessImage:
             settings_img = utils.text_array((820, 1200), the_text)
 
         if utils.MY_OS == 'lin':
-            shape_settings_img = utils.text_array((200, 450), shape_txt)
+            shape_settings_img = utils.text_array((260, 460), shape_txt)
         elif utils.MY_OS == 'dar':
-            shape_settings_img = utils.text_array((175, 420), shape_txt)
+            shape_settings_img = utils.text_array((225, 430), shape_txt)
         else:  # is Windows
-            shape_settings_img = utils.text_array((410, 700), shape_txt)
+            shape_settings_img = utils.text_array((460, 700), shape_txt)
 
         cv2.imshow(self.contour_tb_win, settings_img)
         cv2.imshow(self.shape_tb_win, shape_settings_img)

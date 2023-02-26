@@ -90,21 +90,28 @@ Opening windows for `thresh_it.py` with the `sample3.jpg` input file.
 
 All available threshold parameters.
 
+![edge_it_settings_window](images/edges_settings_screenshot.png)
+
+All available Canny edges parameters.
+
 ![ID_objects_window](images/objects_screenshot.png)
 
 Expanded window for identified threshold objects and their comparative pixel sizes with default `thresh_it.py` settings. Input file is `sample3.jpg`.
+
+![found_hexagon_shapes](images/found_hexagon_screenshot.png)
+
+Identified hexagon shapes in `sample4.jpg` are outlined in yellow with `shape_it.py`.
+
+![shape_settings_window](images/shape_settings_screenshot.png)
+
+Shape approximation parameters used to identify hexagons.
 
 ![clahe_histograms](images/clahe_screenshot.png)
 
 Histograms and CLAHE windows will live update with CLAHE parameter sliders.
 
-![found_histogram_shape](images/found_hexagon_screenshot.png)
-
-Identified hstogram shapes in `sample4.jpg` are outlined in yellow with `shape_it.py` (above) using "Shape" trackbar set for a six-sided object (below).
-
-![shape_settings_window](images/shape_settings_screenshot.png)
-
 ### Attributions
+
 Source of sample1.jpg image file:
 Adrian Rosebrock at https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-opencv/
 
