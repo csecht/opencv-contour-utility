@@ -978,11 +978,6 @@ class ProcessImage:
         Returns: An array of HoughCircles contours.
         """
 
-        # _, self.th_img = cv2.threshold(self.filter_image(),
-        #                                thresh=0,
-        #                                maxval=255,
-        #                                type=self.th_type)
-
         # Note: This name needs to match that used in contour_threshold().
         win_name = 'Threshold <- | -> Selected threshold contours'
 
