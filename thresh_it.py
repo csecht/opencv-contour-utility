@@ -790,7 +790,7 @@ class ProcessImage:
                         lineType=cv2.LINE_AA)  # LINE_AA is anti-aliased
 
         # cv2.mEC returns circled radius of contour as last element.
-        # dia_list = [cv2.minEnclosingCircle(_c)[-1] * 2 for _c in contour_list]
+        # dia_list = [cv2.minEnclosingCircle(_c)[-1] * 2 for _c in selected_contour_list]
         # mean_size = round(mean(dia_list), 1) if dia_list else 0
         # print('mean threshold dia', mean_size)
 

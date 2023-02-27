@@ -70,7 +70,7 @@ class ProcessImage:
         contour_method_selector
         contour_limit_selector
         epsilon_selector
-        num_sides_selector
+        num_vertices_selector
         mindist_selector
         param1_selector
         param2_selector
@@ -94,13 +94,13 @@ class ProcessImage:
                  'sigma_y', 'border_type', 'th_type', 'computed_threshold',
                  'num_th_contours_all', 'num_th_contours_select',
                  'contour_type', 'contour_limit',
-                 'polygon', 'num_shapes', 'e_factor',
+                 'shape_win_name', 'polygon', 'num_shapes', 'e_factor',
                  'circles_mindist', 'circles_param1', 'circles_param2',
                  'circles_min_radius', 'circles_max_radius', 'circle_img2use',
-                 'font_scale',
-                 'line_thickness', 'center_xoffset', 'noise_kernel',
-                 'filter_kernel', 'contour_mode', 'contour_method',
-                 'num_sides', 'contoured_txt', 'contour_tb_win',
+                 'font_scale', 'line_thickness', 'center_xoffset',
+                 'noise_kernel', 'filter_kernel',
+                 'contour_mode', 'contour_method',
+                 'num_vertices', 'contoured_txt', 'contour_tb_win',
                  'shaped_txt', 'shape_tb_win',
                  )
 
@@ -140,6 +140,7 @@ class ProcessImage:
         self.contour_limit = 0
 
         # Shape finding variables.
+        self.shape_win_name = ''
         self.polygon = ''
         self.num_shapes = 0
         self.e_factor = 0
@@ -160,7 +161,7 @@ class ProcessImage:
         self.filter_kernel = (3, 3)
         self.contour_mode = 0  # cv2.RETR_EXTERNAL
         self.contour_method = 2  # cv2.CHAIN_APPROX_SIMPLE
-        self.num_sides = 3
+        self.num_vertices = 3
 
         self.contoured_txt = ''
         self.contour_tb_win = ''
@@ -332,12 +333,12 @@ class ProcessImage:
         cv2.setMouseCallback(self.shape_tb_win,
                              self.save_with_click)
 
-        # Trackbar to set num_sides in select_shape().
+        # Trackbar to set num_vertices in select_shape().
         cv2.createTrackbar(const.TBNAME['_shape'],
                            self.shape_tb_win,
                            3,
                            11,
-                           self.num_sides_selector)
+                           self.num_vertices_selector)
         cv2.setTrackbarMin(const.TBNAME['_shape'], self.shape_tb_win, 3)
 
         # Trackbar for cv2.approxPolyDP parameter.
@@ -641,7 +642,7 @@ class ProcessImage:
         self.e_factor = e_val / 100 / 3
         self.contour_threshold()
 
-    def num_sides_selector(self, sh_val) -> None:
+    def num_vertices_selector(self, sh_val) -> None:
         """
         The "shape" trackbar controller that assigns the number of
         vertices to be found in a polygon from cv2.approxPolyDP().
@@ -652,7 +653,7 @@ class ProcessImage:
 
         Returns: None
         """
-        self.num_sides = sh_val
+        self.num_vertices = sh_val
         self.contour_threshold()
 
     def mindist_selector(self, mind_val) -> None:
@@ -748,7 +749,16 @@ class ProcessImage:
         else:
             self.circle_img2use = 'filtered image'
 
-        self.contour_threshold()
+        # Best to bypass the extra work done by contour_threshold() and
+        #   go directrly to find_circles() when available.
+        if c_val == 11:  # is for 'circle'
+            _, self.th_img = cv2.threshold(self.filter_image(),
+                                           thresh=0,
+                                           maxval=255,
+                                           type=self.th_type)
+            self.find_circles()
+        else:
+            self.contour_threshold()
 
     def save_with_click(self, event, *args):
         """
@@ -892,10 +902,6 @@ class ProcessImage:
         elif self.filter_selection == 'cv2.medianBlur':
             self.filtered_img = cv2.medianBlur(src=self.reduced_noise_img,
                                                ksize=self.filter_kernel[0])
-        # elif self.filter_selection == 'cv2.blur':
-        #     self.filtered_img = cv2.blur(src=self.reduced_noise_img,
-        #                             ksize=self.filter_kernel,
-        #                             borderType=self.border_type)
         else:
             self.filtered_img = cv2.blur(src=self.reduced_noise_img,
                                          ksize=self.filter_kernel,
@@ -912,7 +918,7 @@ class ProcessImage:
         """
         Identify object contours with cv2.threshold() and
         cv2.drawContours(). Threshold types limited to Otsu and Triangle.
-        Called from all *_selector methods.
+        Called from all *_selector methods. Calls filter_image().
 
         Returns: None
         """
@@ -921,7 +927,7 @@ class ProcessImage:
         # OTSU & TRIANGLE computes thresh value, hence thresh=0 is replaced
         #   with the self.computed_threshold;
         #   for other cv2.THRESH_*, thresh needs to be manually provided.
-        # Convert values above thresh to white.
+        # Convert values above thresh (maxval) to white.
         self.computed_threshold, self.th_img = cv2.threshold(self.filter_image(),
                                                              thresh=0,
                                                              maxval=255,
@@ -970,60 +976,14 @@ class ProcessImage:
 
         self.select_shape(selected_contours)
 
-    def find_circles(self) -> np.ndarray:
-        """
-        Implements the cv2.HOUGH_GRADIENT_ALT method of cv2.HoughCircles()
-        to approximate circles in a filtered/blured threshold image.
-
-        Returns: An array of HoughCircles contours.
-        """
-
-        # Note: This name needs to match that used in contour_threshold().
-        win_name = 'Threshold <- | -> Selected threshold contours'
-
-        # Note: these strings need to match those used in circle_img_selector().
-        if self.circle_img2use == 'threshold image':
-            circle_this_img = self.th_img
-            # Here HoughCircles works on the threshold image, not found
-            #  contours, so need to replace selected threshold contours image
-            #  with a blank image so the user knows that contour trackbars
-            #  do nothing to find circles.
-            side_by_side = cv2.hconcat([self.th_img,
-                                        np.ones(self.th_img.shape, dtype='uint8')])
-            cv2.imshow(win_name, side_by_side)
-
-        else:  # is "filtered image"
-            circle_this_img = self.filtered_img
-            # Here HoughCircles works on the filtered image, not threshold,
-            #  so replace the threshold and contour images with a message.
-            text_msg = "Now using filtered,\n not threshold,\nimage to find circles."
-            cv2.imshow(win_name, utils.text_array((220, 350), text_msg))
-
-        # source: https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
-        # https://docs.opencv.org/4.x/dd/d1a/group__imgproc__feature.html#ga47849c3be0d0406ad3ca45db65a25d2d
-        # Apply Hough transform on the filtered (blured) image.
-        # General recommendations for HOUGH_GRADIENT_ALT with good image contrast:
-        #    param1=300, param2=0.9, minRadius=20, maxRadius=400
-        found_circles = cv2.HoughCircles(image=circle_this_img,
-                                         method=cv2.HOUGH_GRADIENT_ALT,
-                                         dp=1.5,
-                                         minDist=self.circles_mindist,
-                                         param1=self.circles_param1,
-                                         param2=self.circles_param2,
-                                         minRadius=self.circles_min_radius,
-                                         maxRadius=self.circles_max_radius
-                                         )
-        if found_circles is not None:
-            return found_circles
-
-    def select_shape(self, contour_list: list) -> None:
+    def select_shape(self, selected_contour_list: list) -> None:
         """
         Filter contoured objects of a specific approximated shape.
         Called from contour_threshold().
         Calls contour_shapes() with selected polygon contours.
 
         Args:
-            contour_list: List of selected contours from cv2.findContours.
+            selected_contour_list: List of selected contours from cv2.findContours.
 
         Returns: None
         """
@@ -1033,19 +993,19 @@ class ProcessImage:
         self.polygon = 'None found'
         selected_polygon_contours = []
 
-        # Need to set a condition to limit which contours to draw b/c sometimes
-        #  small image artifacts approximate a shape from cv2.approxPolyDP.
-        #  Why these small contours are not filtered out in contour_threshold()
-        #  selected_contours by self.contour_limit, I do not know.
-        for _c in contour_list:
-            if len(_c) > self.noise_kernel[0]:
+        # Note: num_vertices value is assigned by num_vertices_selector().
+        # Shape trackbar value of 11 is for circles.
+        if self.num_vertices == 11:
+            self.find_circles()
+        else:
+            for _c in selected_contour_list:
                 len_contour = cv2.arcLength(_c, True)
                 approx_poly = cv2.approxPolyDP(curve=_c,
                                                epsilon=self.e_factor * len_contour,
                                                closed=True)
-                if len(approx_poly) == self.num_sides == 3:
+                if len(approx_poly) == self.num_vertices == 3:
                     selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_sides == 4:
+                elif len(approx_poly) == self.num_vertices == 4:
                     # Compute the bounding box of the contour and use the
                     #   bounding box to compute the aspect ratio.
                     # (_x, _y, _w, _h) = cv2.boundingRect(approx_poly)
@@ -1055,26 +1015,25 @@ class ProcessImage:
                     # self.polygon = "square" if 0.95 <= _ar <= 1.05 else "rectangle"
                     # self.polygon = 'rectangle'
                     selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_sides == 5:
+                elif len(approx_poly) == self.num_vertices == 5:
                     selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_sides == 6:
+                elif len(approx_poly) == self.num_vertices == 6:
                     selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_sides == 7:
+                elif len(approx_poly) == self.num_vertices == 7:
                     selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_sides == 8: # and cv2.isContourConvex(_c):
+                elif len(approx_poly) == self.num_vertices == 8: # and cv2.isContourConvex(_c):
                     selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_sides == 9:
+                elif len(approx_poly) == self.num_vertices == 9:
                     selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_sides == 10 and not cv2.isContourConvex(_c):
+                elif len(approx_poly) == self.num_vertices == 10 and not cv2.isContourConvex(_c):
                     selected_polygon_contours.append(_c)
 
-        # self.num_sides = 11 is 'circle'
-        self.polygon = const.SHAPE_NAME[self.num_sides]
+            self.polygon = const.SHAPE_NAME[self.num_vertices]
 
-        # num_shapes is used only for reporting.
-        self.num_shapes = len(selected_polygon_contours)
+            # num_shapes is used only for reporting.
+            self.num_shapes = len(selected_polygon_contours)
 
-        self.contour_shapes(selected_polygon_contours)
+            self.contour_shapes(selected_polygon_contours)
 
     def contour_shapes(self, contours: list) -> None:
         """
@@ -1087,34 +1046,11 @@ class ProcessImage:
         Returns: None
         """
         self.shaped_img = self.input_img.copy()
-        win_name = 'Found specified shape'
-        cv2.namedWindow(win_name,
+        self.shape_win_name = 'Found specified shape'
+        cv2.namedWindow(self.shape_win_name,
                         flags=cv2.WINDOW_GUI_NORMAL)
 
-        # source: https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
-        if self.polygon == 'circle' and self.find_circles() is not None:
-            found_circles = self.find_circles()
-            # Convert the circle parameters to integers.
-            found_circles = np.uint16(np.round(found_circles))
-
-            self.num_shapes = len(found_circles[0, :])
-
-            for _pt in found_circles[0, :]:
-                _x, _y, _r = _pt
-
-                # Draw the circumference of the circle.
-                cv2.circle(self.shaped_img,
-                           center=(_x, _y),
-                           radius=_r,
-                           color=const.CBLIND_COLOR_CV['yellow'],
-                           thickness=self.line_thickness * 2,
-                           lineType=cv2.LINE_AA
-                           )
-
-                # Show the input image with selected circles outlined.
-                cv2.imshow(win_name, self.shaped_img)
-
-        elif contours:
+        if contours:
             for _c in contours:
                 # Compute the center of the contour, as a circle.
                 # (_x, _y), radius = cv2.minEnclosingCircle(_c)
@@ -1135,9 +1071,83 @@ class ProcessImage:
                                  )
 
                 # Show the input image with outline of selected polygon.
-                cv2.imshow(win_name, self.shaped_img)
+                cv2.imshow(self.shape_win_name, self.shaped_img)
         else:  # contours parameter is None, b/c selected_polygon_contours = [].
-            cv2.imshow(win_name, self.input_img)
+            cv2.imshow(self.shape_win_name, self.input_img)
+
+        # Now update the settings text with current values.
+        self.show_settings()
+
+    def find_circles(self):
+        """
+        Implements the cv2.HOUGH_GRADIENT_ALT method of cv2.HoughCircles()
+        to approximate circles in a filtered/blured threshold image, then
+        displays them on the input image.
+        Called from select_shape(). Calls utils.text_array().
+
+        Returns: An array of HoughCircles contours.
+        """
+        self.shaped_img = self.input_img.copy()
+
+        # Note: This name needs to match that used in contour_threshold().
+        th_win_name = 'Threshold <- | -> Selected threshold contours'
+
+        # Note: these strings need to match those used in circle_img_selector().
+        #   defined in contour_threshold().
+        if self.circle_img2use == 'threshold image':
+            circle_this_img = self.th_img
+            # Here HoughCircles works on the threshold image, not found
+            #  contours, so need to replace selected threshold contours image
+            #  with a blank image so the user knows that contour trackbars
+            #  do nothing to find circles.
+            side_by_side = cv2.hconcat([self.th_img,
+                                        np.ones(self.th_img.shape, dtype='uint8')])
+            cv2.imshow(th_win_name, side_by_side)
+
+        else:  # is "filtered image"
+            circle_this_img = self.filtered_img
+            # Here HoughCircles works on the filtered image, not threshold,
+            #  so replace the threshold and contour images with a message.
+            text_msg = ("Circles are now being found\n  using the filtered image,\n"
+                        "  not threshold image.")
+            cv2.imshow(th_win_name, utils.text_array((220, 350), text_msg))
+
+        # source: https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
+        # https://docs.opencv.org/4.x/dd/d1a/group__imgproc__feature.html#ga47849c3be0d0406ad3ca45db65a25d2d
+        # Apply Hough transform on the filtered (blured) image.
+        # Docs general recommendations for HOUGH_GRADIENT_ALT with good image contrast:
+        #    param1=300, param2=0.9, minRadius=20, maxRadius=400
+        found_circles = cv2.HoughCircles(image=circle_this_img,
+                                         method=cv2.HOUGH_GRADIENT_ALT,
+                                         dp=1.5,
+                                         minDist=self.circles_mindist,
+                                         param1=self.circles_param1,
+                                         param2=self.circles_param2,
+                                         minRadius=self.circles_min_radius,
+                                         maxRadius=self.circles_max_radius)
+
+        if found_circles is not None:
+            # Convert the circle parameters to integers to get the right data type.
+            found_circles = np.uint16(np.round(found_circles))
+
+            self.num_shapes = len(found_circles[0, :])
+
+            for _pt in found_circles[0, :]:
+                _x, _y, _r = _pt
+
+                # Draw the circumference of the circle.
+                cv2.circle(self.shaped_img,
+                           center=(_x, _y),
+                           radius=_r,
+                           color=const.CBLIND_COLOR_CV['yellow'],
+                           thickness=self.line_thickness * 2,
+                           lineType=cv2.LINE_AA
+                           )
+
+                # Show the input image (copy) with found circles outlined.
+                cv2.imshow(self.shape_win_name, self.shaped_img)
+        else:
+            cv2.imshow(self.shape_win_name, self.shaped_img)
 
         # Now update the settings text with current values.
         self.show_settings()
