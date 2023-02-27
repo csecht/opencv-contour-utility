@@ -559,7 +559,8 @@ class ProcessImage:
 
         Returns: None
         """
-        # The Ostu integer constant is 8, triangle is 16.
+        # The cv2.THRESH_OTSU integer constant is 8,
+        #   cv2.THRESH_TRIANGLE is 16.
         self.th_type = cv2.THRESH_OTSU if t_val == 0 else cv2.THRESH_TRIANGLE
         self.contour_threshold()
 
@@ -697,7 +698,8 @@ class ProcessImage:
 
         Returns: None
         """
-
+        # NOTE: in opencv_python 4.7, but not 4.6, the cv2.HoughCircles
+        # method param cv2.HOUGH_GRADIENT_ALT does not accept 1.0.
         self.circles_param2 = p2_val / 10
         self.contour_threshold()
 
@@ -735,7 +737,8 @@ class ProcessImage:
         """
         The "Find circles" trackbar controller that assigns the switch
         for which image array used by cv2.HoughCircles().
-        Called from setup_trackbars(). Calls contour_threshold().
+        Called from setup_trackbars(). Calls contour_threshold();
+        alternately calls find_circles() if *c_val* is 11 (circles).
 
         Args:
             c_val: The integer value passed from trackbar.
@@ -750,12 +753,8 @@ class ProcessImage:
             self.circle_img2use = 'filtered image'
 
         # Best to bypass the extra work done by contour_threshold() and
-        #   go directrly to find_circles() when available.
-        if c_val == 11:  # is for 'circle'
-            _, self.th_img = cv2.threshold(self.filter_image(),
-                                           thresh=0,
-                                           maxval=255,
-                                           type=self.th_type)
+        #   go directly to find_circles() when available.
+        if c_val == 11:  # is 'circle'
             self.find_circles()
         else:
             self.contour_threshold()
@@ -996,6 +995,7 @@ class ProcessImage:
         # Note: num_vertices value is assigned by num_vertices_selector().
         # Shape trackbar value of 11 is for circles.
         if self.num_vertices == 11:
+            self.polygon = 'circle'
             self.find_circles()
         else:
             for _c in selected_contour_list:
@@ -1095,21 +1095,28 @@ class ProcessImage:
         # Note: these strings need to match those used in circle_img_selector().
         #   defined in contour_threshold().
         if self.circle_img2use == 'threshold image':
-            circle_this_img = self.th_img
+            _, circle_this_img = cv2.threshold(self.filter_image(),
+                                               thresh=0,
+                                               maxval=255,
+                                               type=self.th_type)
+
+            # circle_this_img = self.th_img
             # Here HoughCircles works on the threshold image, not found
             #  contours, so need to replace selected threshold contours image
             #  with a blank image so the user knows that contour trackbars
             #  do nothing to find circles.
-            side_by_side = cv2.hconcat([self.th_img,
-                                        np.ones(self.th_img.shape, dtype='uint8')])
+            side_by_side = cv2.hconcat([circle_this_img,
+                                        np.ones(circle_this_img.shape,
+                                                dtype='uint8')])
             cv2.imshow(th_win_name, side_by_side)
 
         else:  # is "filtered image"
             circle_this_img = self.filtered_img
             # Here HoughCircles works on the filtered image, not threshold,
             #  so replace the threshold and contour images with a message.
-            text_msg = ("Circles are now being found\n  using the filtered image,\n"
-                        "  not threshold image.")
+            text_msg = ("Circles are now being found\n "
+                        "   using the filtered image,\n"
+                        "   not the threshold image.")
             cv2.imshow(th_win_name, utils.text_array((220, 350), text_msg))
 
         # source: https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
