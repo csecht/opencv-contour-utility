@@ -104,6 +104,18 @@ SHAPE_NAME = {
     11: 'circle',
 }
 
+# Names for cv2.namedWindow(). Does not include trackbar window names.
+WIN_NAME = {
+    'input+gray': 'Input <- | -> Grayscale for processing',
+    'contrast+redux': 'Adjusted contrast <- | -> Reduced noise',
+    'filtered': 'Filtered image',
+    'th+contours': 'Threshold <- | -> Selected threshold contours',
+    'id_objects': 'Identified objects, with sizes',
+    'edges+contours': 'Edges <- | -> Selected edged contours',
+    'shape': 'Found specified shape',
+    'clahe': 'CLAHE adjusted'
+}
+
 # Set ranges for trackbars used to adjust contrast and brightness for
 #  the cv2.convertScaleAbs method.
 ALPHA_MAX = 400

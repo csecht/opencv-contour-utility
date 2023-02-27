@@ -172,12 +172,11 @@ class ProcessImage:
 
         # Display starting images. Use WINDOW_GUI_NORMAL to fit any size
         #   image on screen and allow manual resizing of window.
-        win_name = 'Input <- | -> Grayscale for processing'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
         side_by_side = cv2.hconcat(
             [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
-        cv2.imshow(win_name, side_by_side)
+        cv2.imshow(const.WIN_NAME['input+gray'], side_by_side)
 
     def setup_trackbars(self) -> None:
         """
@@ -569,14 +568,11 @@ class ProcessImage:
 
         self.curr_contrast_sd = int(self.contrasted_img.std())
 
-        win_name = 'Adjusted contrast <- | -> Reduced noise'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['contrast+redux'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-
         side_by_side = cv2.hconcat(
             [self.contrasted_img, self.reduce_noise()])
-
-        cv2.imshow(win_name, side_by_side)
+        cv2.imshow(const.WIN_NAME['contrast+redux'], side_by_side)
 
     def reduce_noise(self) -> np.ndarray:
         """
@@ -665,10 +661,9 @@ class ProcessImage:
                                     ksize=self.filter_kernel,
                                     borderType=self.border_type)
 
-        win_name = 'Filtered image'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['filtered'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(win_name, filtered_img)
+        cv2.imshow(const.WIN_NAME['filtered'], filtered_img)
 
         return filtered_img
 
@@ -735,14 +730,11 @@ class ProcessImage:
                                           thickness=self.line_thickness * 2,
                                           lineType=cv2.LINE_AA)
 
-        win_name = 'Threshold <- | -> Selected threshold contours'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['th+contours'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-
         side_by_side = cv2.hconcat(
             [cv2.cvtColor(th_img, cv2.COLOR_GRAY2RGB), drawn_contours])
-
-        cv2.imshow(win_name, side_by_side)
+        cv2.imshow(const.WIN_NAME['th+contours'], side_by_side)
 
         self.circle_the_contours(selected_contours)
         self.show_settings()
@@ -794,10 +786,9 @@ class ProcessImage:
         # mean_size = round(mean(dia_list), 1) if dia_list else 0
         # print('mean threshold dia', mean_size)
 
-        win_name = 'Identified objects, with sizes'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['id_objects'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(win_name, self.contoured_img)
+        cv2.imshow(const.WIN_NAME['id_objects'], self.contoured_img)
 
     def show_settings(self) -> None:
         """

@@ -94,7 +94,7 @@ class ProcessImage:
                  'sigma_y', 'border_type', 'th_type', 'computed_threshold',
                  'num_th_contours_all', 'num_th_contours_select',
                  'contour_type', 'contour_limit',
-                 'shape_win_name', 'polygon', 'num_shapes', 'e_factor',
+                 'polygon', 'num_shapes', 'e_factor',
                  'circles_mindist', 'circles_param1', 'circles_param2',
                  'circles_min_radius', 'circles_max_radius', 'circle_img2use',
                  'font_scale', 'line_thickness', 'center_xoffset',
@@ -140,7 +140,6 @@ class ProcessImage:
         self.contour_limit = 0
 
         # Shape finding variables.
-        self.shape_win_name = ''
         self.polygon = ''
         self.num_shapes = 0
         self.e_factor = 0
@@ -202,13 +201,11 @@ class ProcessImage:
 
         # Display starting images. Use WINDOW_GUI_NORMAL to fit any size
         #   image on screen and allow manual resizing of window.
-        win_name = 'Input <- | -> Grayscale for processing'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
         side_by_side = cv2.hconcat(
             [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
-
-        cv2.imshow(win_name, side_by_side)
+        cv2.imshow(const.WIN_NAME['input+gray'], side_by_side)
 
     def setup_trackbars(self) -> None:
         """
@@ -812,14 +809,11 @@ class ProcessImage:
 
         self.curr_contrast_sd = int(self.contrasted_img.std())
 
-        win_name = 'Adjusted contrast <- | -> Reduced noise'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['contrast+redux'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-
         side_by_side = cv2.hconcat(
             [self.contrasted_img, self.reduce_noise()])
-
-        cv2.imshow(win_name, side_by_side)
+        cv2.imshow(const.WIN_NAME['contrast+redux'], side_by_side)
 
     def reduce_noise(self) -> np.ndarray:
         """
@@ -906,10 +900,9 @@ class ProcessImage:
                                          ksize=self.filter_kernel,
                                          borderType=self.border_type)
 
-        win_name = 'Filtered image'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['filtered'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(win_name, self.filtered_img)
+        cv2.imshow(const.WIN_NAME['filtered'], self.filtered_img)
 
         return self.filtered_img
 
@@ -964,14 +957,11 @@ class ProcessImage:
                                           thickness=self.line_thickness * 2,
                                           lineType=cv2.LINE_AA)
 
-        win_name = 'Threshold <- | -> Selected threshold contours'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['th+contours'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-
         side_by_side = cv2.hconcat(
             [cv2.cvtColor(self.th_img, cv2.COLOR_GRAY2RGB), drawn_contours])
-
-        cv2.imshow(win_name, side_by_side)
+        cv2.imshow(const.WIN_NAME['th+contours'], side_by_side)
 
         self.select_shape(selected_contours)
 
@@ -1046,8 +1036,7 @@ class ProcessImage:
         Returns: None
         """
         self.shaped_img = self.input_img.copy()
-        self.shape_win_name = 'Found specified shape'
-        cv2.namedWindow(self.shape_win_name,
+        cv2.namedWindow(const.WIN_NAME['shape'],
                         flags=cv2.WINDOW_GUI_NORMAL)
 
         if contours:
@@ -1071,9 +1060,9 @@ class ProcessImage:
                                  )
 
                 # Show the input image with outline of selected polygon.
-                cv2.imshow(self.shape_win_name, self.shaped_img)
+                cv2.imshow(const.WIN_NAME['shape'], self.shaped_img)
         else:  # contours parameter is None, b/c selected_polygon_contours = [].
-            cv2.imshow(self.shape_win_name, self.input_img)
+            cv2.imshow(const.WIN_NAME['shape'], self.input_img)
 
         # Now update the settings text with current values.
         self.show_settings()
@@ -1088,9 +1077,6 @@ class ProcessImage:
         Returns: An array of HoughCircles contours.
         """
         self.shaped_img = self.input_img.copy()
-
-        # Note: This name needs to match that used in contour_threshold().
-        th_win_name = 'Threshold <- | -> Selected threshold contours'
 
         # Note: these strings need to match those used in circle_img_selector().
         #   defined in contour_threshold().
@@ -1108,7 +1094,7 @@ class ProcessImage:
             side_by_side = cv2.hconcat([circle_this_img,
                                         np.ones(circle_this_img.shape,
                                                 dtype='uint8')])
-            cv2.imshow(th_win_name, side_by_side)
+            cv2.imshow(const.WIN_NAME['th+contours'], side_by_side)
 
         else:  # is "filtered image"
             circle_this_img = self.filtered_img
@@ -1117,7 +1103,8 @@ class ProcessImage:
             text_msg = ("Circles are now being found\n "
                         "   using the filtered image,\n"
                         "   not the threshold image.")
-            cv2.imshow(th_win_name, utils.text_array((220, 350), text_msg))
+            cv2.imshow(const.WIN_NAME['th+contours'],
+                       utils.text_array((220, 350), text_msg))
 
         # source: https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
         # https://docs.opencv.org/4.x/dd/d1a/group__imgproc__feature.html#ga47849c3be0d0406ad3ca45db65a25d2d
@@ -1152,9 +1139,9 @@ class ProcessImage:
                            )
 
                 # Show the input image (copy) with found circles outlined.
-                cv2.imshow(self.shape_win_name, self.shaped_img)
+                cv2.imshow(const.WIN_NAME['th+contours'], self.shaped_img)
         else:
-            cv2.imshow(self.shape_win_name, self.shaped_img)
+            cv2.imshow(const.WIN_NAME['th+contours'], self.shaped_img)
 
         # Now update the settings text with current values.
         self.show_settings()

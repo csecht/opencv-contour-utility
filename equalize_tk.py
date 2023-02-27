@@ -124,15 +124,13 @@ class ProcessImage:
             self.input_img = utils.scale_img(self.input_img, arguments['scale'])
             self.gray_img = utils.scale_img(self.gray_img, arguments['scale'])
 
-        win_name = 'Input <- | -> Grayscale for processing'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
 
         # Need to match shapes of the two cv image arrays.
         side_by_side = cv2.hconcat(
             [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
-
-        cv2.imshow(win_name, side_by_side)
+        cv2.imshow(const.WIN_NAME['input+gray'], side_by_side)
 
     @staticmethod
     def setup_canvas_window() -> None:
@@ -303,10 +301,9 @@ class ProcessImage:
             self.show_clahe_histogram()
         self.show_settings()
 
-        win_name = 'CLAHE adjusted'
-        cv2.namedWindow(win_name,
+        cv2.namedWindow(const.WIN_NAME['clahe'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(win_name, self.clahe_img)
+        cv2.imshow(const.WIN_NAME['clahe'], self.clahe_img)
 
     def show_input_histogram(self) -> None:
         """
