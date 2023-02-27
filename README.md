@@ -18,13 +18,13 @@ The module `edge_it.py` uses Canny edge detection, cv2.Canny, as the basis to id
 ## thresh_it.py
 The module `thresh_it.py` uses thresholding, cv2.threshold, as the basis to identify contours.
 ## shape_it.py
-The module `shape_it.py`, also uses thresholding, but adds detection of specific shapes with the functions cv2.approxPolyDP() for polygons and cv2.HoughCircles() for circles. Shape detection works with the threshold contour trackbar set. Using the `sample4.jpg` file for input provides a good example of parameter settings needed to detect different shapes. For example, starting with `sample4.jpg` and default settings, circle shapes ("Shape" trackbar position #11), are identified only if the "Threshold type" trackbar is set to use Triangle ( position #1) instead of the default Otsu (position 0).
+The module `shape_it.py`, also uses thresholding, but adds detection of specific shapes with the functions cv2.approxPolyDP() for polygons and cv2.HoughCircles() for circles. Shape detection works with the threshold trackbar set. When  circle shapes are selected ("Shape" trackbar position #11), however, then the user chooses either the filtered or threshold image which bypasses the use of cv2.findContours(). Using the `sample4.jpg` file as input provides a good example of parameter settings needed to detect various shapes. Using `sample2.jpg` and selecting circle shapes, with all other sliders at their default settings, impressively detects two coins in a group of seashells.
 ## equalize_it.py
-The module `equalize_it.py` does not involve contours, but explores parameters for automatic histogram equalization as an optional pre-processing step for object detections. Equalization is done with cv2.createCLAHE. CLAHE is a contrast-limited adaptive histogram equalization method. Live updates of the CLAHE histogram are controlled by slide bars for the clipLimit and tileGridSize parameter values. All processing is carried out on a grayscale version of the input file. The grayscale equalized image can be saved to use as input for `thresh_it.py` or `equalize_it.py`. For most contour operations, however, the contrast and brightness controls provided in the these two modules should be sufficient.
+The module `equalize_it.py` does not involve contours, but explores parameters for automatic histogram equalization as an optional pre-processing step for object detections. Equalization is done with cv2.createCLAHE. CLAHE is a contrast-limited adaptive histogram equalization method. Live updates of the CLAHE histogram are controlled by slide bars for the clipLimit and tileGridSize parameter values. All processing is carried out on a grayscale version of the input file. The grayscale equalized image can be saved to use as input for `edge_it.py`, `thresh_it.py`, or `equalize_it.py`. For most contour operations, however, the contrast and brightness controls provided in the these modules should be sufficient.
 
 Be aware that CLAHE works best on images that have a full range of pixel values across the image, as in sample2.jpg (shells). In other words, it does not work well with images that have large areas of similar colors, as in sample1.jpg (pills), sample3.jpg (rummikub), or sample4.jgp (shapes). Nonetheless, this module can be fun to play with. Live histogram updating may be less responsive with larger image files.
  
-Slightly more responsive versions for updating histograms with trackbars are `equalize_tk.py` for Linux systems and `equalize_qt.py` for all systems. `equalize_tk.py` uses a tkinter GUI. `equalize_qt.py` uses a PyQt5 GUI, which may require installation: `pip3 install -U pyqt5`. If `equalize_it.py` does not show histograms plots on your system, try one of the other equalize* programs. 
+Slightly more responsive versions for updating histograms with trackbars are `equalize_tk.py` for Linux systems and `equalize_qt.py` for all systems. `equalize_tk.py` uses a tkinter GUI. `equalize_qt.py` uses a PyQt5 GUI, which may require installation: `pip3 install -U pyqt5`. If `equalize_it.py` does not show histograms plots on your system, try one of the other equalize_* modules. 
 
 A known issue is that, while `equalize_it.py` should work on all systems, some Linux installations may not show histograms. If that's the case, then try `equalize_tk.py` or `equalize_qt.py`. The problem may be with the specific version of the required python packages.
 
@@ -70,13 +70,14 @@ For quick installation of the required Python PIP packages:
 from the downloaded GitHub repository folder, run this command
 
     pip install -r requirements.txt
+
 Alternative commands (system dependent):
 
     python3 -m pip install -r requirements.txt (recommended for all systems)
     py -m pip install -r requirements.txt (Windows)
 
 ### Known Issues:
-In macOS 13 and Windows10, proper scaling of image windows is not automatic. All windows may need to be manually resized it they are too large to easly navigate, or use the `--scale` command line option as explained above. Ideas for configuring window management in Mac or Windows are welcome.
+In macOS 13 and Windows10, proper scaling of image windows is not automatic. All windows may need to be manually resized it they are too large to easily navigate, or use the `--scale` command line option as explained above. Ideas for configuring window management in Mac or Windows are welcome.
 
 ### Screenshots:
 All screenshots are from a Ubuntu Linux platform. For Windows and macOS platforms, trackbar names are much shorter, but text reporting of current settings is the same for all platforms.
