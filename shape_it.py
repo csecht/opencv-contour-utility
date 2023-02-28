@@ -940,7 +940,6 @@ class ProcessImage:
 
         # Used only for reporting.
         self.num_th_contours_all = len(found_contours)
-
         self.num_th_contours_select = len(selected_contours)
 
         self.contoured_img = self.input_img.copy()
@@ -1084,7 +1083,6 @@ class ProcessImage:
                                                maxval=255,
                                                type=self.th_type)
 
-            # circle_this_img = self.th_img
             # Here HoughCircles works on the threshold image, not found
             #  contours, so need to replace selected threshold contours image
             #  with a blank image so the user knows that contour trackbars
@@ -1125,10 +1123,10 @@ class ProcessImage:
 
             self.num_shapes = len(found_circles[0, :])
 
-            for _pt in found_circles[0, :]:
-                _x, _y, _r = _pt
+            for _circle in found_circles[0, :]:
+                _x, _y, _r = _circle
 
-                # Draw the circumference of the circle.
+                # Draw the circumference of the found circle.
                 cv2.circle(self.shaped_img,
                            center=(_x, _y),
                            radius=_r,
@@ -1136,12 +1134,20 @@ class ProcessImage:
                            thickness=self.line_thickness * 2,
                            lineType=cv2.LINE_AA
                            )
+                # Draw its center.
+                cv2.circle(self.shaped_img,
+                           center=(_x, _y),
+                           radius=4,
+                           color=const.CBLIND_COLOR_CV['yellow'],
+                           thickness=self.line_thickness * 2,
+                           lineType=cv2.LINE_AA
+                           )
 
-                # Show found circles outlined on the input image.
+                # Show found circles marked on the input image.
                 circles_scaled = utils.scale_img(self.shaped_img, arguments['scale'])
                 cv2.imshow(const.WIN_NAME['shape'], circles_scaled)
         else:
-            shapes_scaled = utils.scale_img(self.shaped_img, arguments['scale'])
+            shapes_scaled = utils.scale_img(self.input_img, arguments['scale'])
             cv2.imshow(const.WIN_NAME['shape'], shapes_scaled)
 
         # Now update the settings text with current values.
