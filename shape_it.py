@@ -97,7 +97,7 @@ class ProcessImage:
                  'polygon', 'num_shapes', 'e_factor',
                  'circles_mindist', 'circles_param1', 'circles_param2',
                  'circles_min_radius', 'circles_max_radius', 'circle_img2use',
-                 'font_scale', 'line_thickness', 'center_xoffset',
+                 'line_thickness',
                  'noise_kernel', 'filter_kernel',
                  'contour_mode', 'contour_method',
                  'num_vertices', 'contoured_txt', 'contour_tb_win',
@@ -150,9 +150,7 @@ class ProcessImage:
         self.circles_max_radius = 1
         self.circle_img2use = 0
 
-        self.font_scale = 0
         self.line_thickness = 0
-        self.center_xoffset = 0
 
         # Need to set starting values for variables set by some trackbars
         # for faster program startup.
@@ -187,24 +185,19 @@ class ProcessImage:
         # Ideas for scaling: https://stackoverflow.com/questions/52846474/
         #   how-to-resize-text-for-cv2-puttext-according-to-the-image-size-in-opencv-python
         size2scale = min(self.input_img.shape[0], self.input_img.shape[1])
-        self.font_scale = size2scale * const.FONT_SCALE
-        self.font_scale = max(self.font_scale, 0.5)
-
-        if arguments['scale'] != 1:  # Default optional --scale arg is 1.
-            self.input_img = utils.scale_img(self.input_img, arguments['scale'])
-            self.gray_img = utils.scale_img(self.gray_img, arguments['scale'])
-            self.line_thickness = math.ceil(size2scale * const.LINE_SCALE * arguments['scale'])
-            self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE * arguments['scale'])
-        else:
-            self.line_thickness = math.ceil(size2scale * const.LINE_SCALE)
-            self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE)
+        self.line_thickness = math.ceil(size2scale * const.LINE_SCALE * arguments['scale'])
 
         # Display starting images. Use WINDOW_GUI_NORMAL to fit any size
         #   image on screen and allow manual resizing of window.
         cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
+
+        # Need to scale only images to display, not those to be processed.
+        #   Default --scale arg is 1.0, so no scaling when option not used.
+        input_img_scaled = utils.scale_img(self.input_img, arguments['scale'])
+        gray_img_scaled = utils.scale_img(self.gray_img, arguments['scale'])
         side_by_side = cv2.hconcat(
-            [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
+            [input_img_scaled, cv2.cvtColor(gray_img_scaled, cv2.COLOR_GRAY2RGB)])
         cv2.imshow(const.WIN_NAME['input+gray'], side_by_side)
 
     def setup_trackbars(self) -> None:
@@ -806,13 +799,13 @@ class ProcessImage:
         self.contrasted_img = cv2.convertScaleAbs(src=self.gray_img,
                                                   alpha=self.alpha,
                                                   beta=self.beta)
-
         self.curr_contrast_sd = int(self.contrasted_img.std())
 
         cv2.namedWindow(const.WIN_NAME['contrast+redux'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        side_by_side = cv2.hconcat(
-            [self.contrasted_img, self.reduce_noise()])
+        contrasted_scaled = utils.scale_img(self.contrasted_img, arguments['scale'])
+        reduced_noise_scaled = utils.scale_img(self.reduce_noise(), arguments['scale'])
+        side_by_side = cv2.hconcat([contrasted_scaled, reduced_noise_scaled])
         cv2.imshow(const.WIN_NAME['contrast+redux'], side_by_side)
 
     def reduce_noise(self) -> np.ndarray:
@@ -851,8 +844,8 @@ class ProcessImage:
 
     def filter_image(self) -> np.ndarray:
         """
-        Applies filter specified in args.filter to blur the image for
-        canny edge detection or threshold contouring.
+        Applies a filter selection to blur the image for Canny edge
+        detection or threshold contouring.
         Called from contour_threshold().
 
         Returns: The filtered (blurred) image array processed by
@@ -902,7 +895,8 @@ class ProcessImage:
 
         cv2.namedWindow(const.WIN_NAME['filtered'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(const.WIN_NAME['filtered'], self.filtered_img)
+        filtered_img_scaled = utils.scale_img(self.filtered_img, arguments['scale'])
+        cv2.imshow(const.WIN_NAME['filtered'], filtered_img_scaled)
 
         return self.filtered_img
 
@@ -959,8 +953,10 @@ class ProcessImage:
 
         cv2.namedWindow(const.WIN_NAME['th+contours'],
                         flags=cv2.WINDOW_GUI_NORMAL)
+        th_img_scaled = utils.scale_img(self.th_img, arguments['scale'])
+        contours_scaled = utils.scale_img(drawn_contours, arguments['scale'])
         side_by_side = cv2.hconcat(
-            [cv2.cvtColor(self.th_img, cv2.COLOR_GRAY2RGB), drawn_contours])
+            [cv2.cvtColor(th_img_scaled, cv2.COLOR_GRAY2RGB), contours_scaled])
         cv2.imshow(const.WIN_NAME['th+contours'], side_by_side)
 
         self.select_shape(selected_contours)
@@ -1060,9 +1056,11 @@ class ProcessImage:
                                  )
 
                 # Show the input image with outline of selected polygon.
-                cv2.imshow(const.WIN_NAME['shape'], self.shaped_img)
+                shapes_scaled = utils.scale_img(self.shaped_img, arguments['scale'])
+                cv2.imshow(const.WIN_NAME['shape'], shapes_scaled)
         else:  # contours parameter is None, b/c selected_polygon_contours = [].
-            cv2.imshow(const.WIN_NAME['shape'], self.input_img)
+            input_img_scaled = utils.scale_img(self.input_img, arguments['scale'])
+            cv2.imshow(const.WIN_NAME['shape'], input_img_scaled)
 
         # Now update the settings text with current values.
         self.show_settings()
@@ -1091,8 +1089,9 @@ class ProcessImage:
             #  contours, so need to replace selected threshold contours image
             #  with a blank image so the user knows that contour trackbars
             #  do nothing to find circles.
-            side_by_side = cv2.hconcat([circle_this_img,
-                                        np.ones(circle_this_img.shape,
+            circle_this_img_scaled = utils.scale_img(circle_this_img, arguments['scale'])
+            side_by_side = cv2.hconcat([circle_this_img_scaled,
+                                        np.ones(circle_this_img_scaled.shape,
                                                 dtype='uint8')])
             cv2.imshow(const.WIN_NAME['th+contours'], side_by_side)
 
@@ -1138,10 +1137,12 @@ class ProcessImage:
                            lineType=cv2.LINE_AA
                            )
 
-                # Show the input image (copy) with found circles outlined.
-                cv2.imshow(const.WIN_NAME['shape'], self.shaped_img)
+                # Show found circles outlined on the input image.
+                circles_scaled = utils.scale_img(self.shaped_img, arguments['scale'])
+                cv2.imshow(const.WIN_NAME['shape'], circles_scaled)
         else:
-            cv2.imshow(const.WIN_NAME['shape'], self.shaped_img)
+            shapes_scaled = utils.scale_img(self.shaped_img, arguments['scale'])
+            cv2.imshow(const.WIN_NAME['shape'], shapes_scaled)
 
         # Now update the settings text with current values.
         self.show_settings()

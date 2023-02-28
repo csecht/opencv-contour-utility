@@ -162,21 +162,20 @@ class ProcessImage:
         size2scale = min(self.input_img.shape[0], self.input_img.shape[1])
         self.font_scale = size2scale * const.FONT_SCALE
         self.font_scale = max(self.font_scale, 0.5)
+        self.line_thickness = math.ceil(size2scale * const.LINE_SCALE * arguments['scale'])
+        self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE * arguments['scale'])
 
-        if arguments['scale'] != 1:  # Default optional --scale arg is 1.
-            self.input_img = utils.scale_img(self.input_img, arguments['scale'])
-            self.gray_img = utils.scale_img(self.gray_img, arguments['scale'])
-            self.line_thickness = math.ceil(size2scale * const.LINE_SCALE * arguments['scale'])
-            self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE * arguments['scale'])
-        else:
-            self.line_thickness = math.ceil(size2scale * const.LINE_SCALE)
-            self.center_xoffset = math.ceil(size2scale * const.CENTER_XSCALE)
-
-        # Display starting images here so that their imshow is called only once.
+        # Display starting images. Use WINDOW_GUI_NORMAL to fit any size
+        #   image on screen and allow manual resizing of window.
         cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
+
+        # Need to scale only images to display, not those to be processed.
+        #   Default --scale arg is 1.0, so no scaling when option not used.
+        input_img_scaled = utils.scale_img(self.input_img, arguments['scale'])
+        gray_img_scaled = utils.scale_img(self.gray_img, arguments['scale'])
         side_by_side = cv2.hconcat(
-            [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
+            [input_img_scaled, cv2.cvtColor(gray_img_scaled, cv2.COLOR_GRAY2RGB)])
         cv2.imshow(const.WIN_NAME['input+gray'], side_by_side)
 
     def setup_trackbars(self) -> None:
@@ -597,12 +596,12 @@ class ProcessImage:
 
         self.curr_contrast_sd = int(self.contrasted_img.std())
 
+        contrasted_scaled = utils.scale_img(self.contrasted_img, arguments['scale'])
+        reduced_noise_scaled = utils.scale_img(self.reduce_noise(), arguments['scale'])
+
         cv2.namedWindow(const.WIN_NAME['contrast+redux'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-
-        side_by_side = cv2.hconcat(
-            [self.contrasted_img, self.reduce_noise()])
-
+        side_by_side = cv2.hconcat([contrasted_scaled, reduced_noise_scaled])
         cv2.imshow(const.WIN_NAME['contrast+redux'], side_by_side)
 
     def reduce_noise(self) -> np.ndarray:
@@ -639,8 +638,9 @@ class ProcessImage:
 
     def filter_image(self) -> np.ndarray:
         """
-        Applies filter specified in args.filter to blur the image for
-        canny edge detection or threshold contouring.
+        Applies a filter selection to blur the image for Canny edge
+        detection or threshold contouring.
+        Called from contour_threshold().
 
         Returns: The filtered (blurred) image array of that returned from
                  reduce_noise().
@@ -694,7 +694,8 @@ class ProcessImage:
 
         cv2.namedWindow(const.WIN_NAME['filtered'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(const.WIN_NAME['filtered'], filtered_img)
+        filtered_img_scaled = utils.scale_img(filtered_img, arguments['scale'])
+        cv2.imshow(const.WIN_NAME['filtered'], filtered_img_scaled)
 
         return filtered_img
 
@@ -757,10 +758,10 @@ class ProcessImage:
 
         cv2.namedWindow(const.WIN_NAME['edges+contours'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-
+        edged_img_scaled = utils.scale_img(edged_img, arguments['scale'])
+        contours_scaled = utils.scale_img(drawn_contours, arguments['scale'])
         side_by_side = cv2.hconcat(
-            [cv2.cvtColor(edged_img, cv2.COLOR_GRAY2RGB), drawn_contours])
-
+            [cv2.cvtColor(edged_img_scaled, cv2.COLOR_GRAY2RGB), contours_scaled])
         cv2.imshow(const.WIN_NAME['edges+contours'], side_by_side)
 
         self.circle_the_contours(selected_contours)
@@ -811,7 +812,9 @@ class ProcessImage:
 
         cv2.namedWindow(const.WIN_NAME['id_objects'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(const.WIN_NAME['id_objects'], self.contoured_img)
+        circled_contours_scaled = utils.scale_img(
+            self.contoured_img, arguments['scale'])
+        cv2.imshow(const.WIN_NAME['id_objects'], circled_contours_scaled)
 
     def show_settings(self) -> None:
         """

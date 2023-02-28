@@ -33,7 +33,7 @@ from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt5agg import NavigationToolbar2QT as NavigationToolbar
 
 # Local application imports
-from contour_modules import (vcheck, utils)
+from contour_modules import (vcheck, utils, constants as const)
 
 
 # noinspection PyUnresolvedReferences
@@ -121,16 +121,20 @@ class PlotWindow(QDialog):
         self.input_img = cv2.imread(arguments['input'])
         self.gray_img = cv2.cvtColor(self.input_img, cv2.COLOR_BGR2GRAY)
 
-        if arguments['scale'] != 1:  # Default optional --scale arg is 1.
-            self.input_img = utils.scale_img(self.input_img, arguments['scale'])
-            self.gray_img = utils.scale_img(self.gray_img, arguments['scale'])
-
         cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
 
-        # Need to match shapes of the two cv image arrays.
+        # NOTE: In Windows, w/o scaling, window may be expanded to full screen
+        #   if system is set to remember window positions.
+        if utils.MY_OS == 'win':
+            cv2.resizeWindow(const.WIN_NAME['input+gray'], 1000, 500)
+
+        # Need to scale only images to display, not those to be processed.
+        #   Default --scale arg is 1.0, so no scaling when option not used.
+        input_img_scaled = utils.scale_img(self.input_img, arguments['scale'])
+        gray_img_scaled = utils.scale_img(self.gray_img, arguments['scale'])
         side_by_side = cv2.hconcat(
-            [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
+            [input_img_scaled, cv2.cvtColor(gray_img_scaled, cv2.COLOR_GRAY2RGB)])
         cv2.imshow(const.WIN_NAME['input+gray'], side_by_side)
 
     def setup_trackbars(self) -> None:
@@ -266,7 +270,8 @@ class PlotWindow(QDialog):
 
         cv2.namedWindow(const.WIN_NAME['clahe'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(const.WIN_NAME['clahe'], self.clahe_img)
+        clahe_img_scaled = utils.scale_img(self.clahe_img, arguments['scale'])
+        cv2.imshow(const.WIN_NAME['clahe'], clahe_img_scaled)
 
     def show_input_histogram(self) -> None:
         """
@@ -324,7 +329,6 @@ class PlotWindow(QDialog):
         # Note that start_event_loop is needed for live updates of clahe histograms.
         # self.fig.canvas.start_event_loop(0.1)
 
-
     def show_settings(self) -> None:
         """
         Display name of file and processing parameters in contour_tb_win
@@ -354,7 +358,6 @@ class PlotWindow(QDialog):
 
 
 if __name__ == '__main__':
-
     # Program exits here if system platform or Python version check fails.
     utils.check_platform()
     vcheck.minversion('3.7')

@@ -50,7 +50,7 @@ except (ImportError, ModuleNotFoundError) as import_err:
     sys.exit(1)
 
 # Local application imports
-from contour_modules import (vcheck, utils)
+from contour_modules import (vcheck, utils, constants as const)
 
 
 # noinspection PyUnresolvedReferences
@@ -120,16 +120,20 @@ class ProcessImage:
         self.input_img = cv2.imread(arguments['input'])
         self.gray_img = cv2.cvtColor(self.input_img, cv2.COLOR_BGR2GRAY)
 
-        if arguments['scale'] != 1:  # Default optional --scale arg is 1.
-            self.input_img = utils.scale_img(self.input_img, arguments['scale'])
-            self.gray_img = utils.scale_img(self.gray_img, arguments['scale'])
-
         cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
 
-        # Need to match shapes of the two cv image arrays.
+        # NOTE: In Windows, w/o scaling, window may be expanded to full screen
+        #   if system is set to remember window positions.
+        if utils.MY_OS == 'win':
+            cv2.resizeWindow(const.WIN_NAME['input+gray'], 1000, 500)
+
+        # Need to scale only images to display, not those to be processed.
+        #   Default --scale arg is 1.0, so no scaling when option not used.
+        input_img_scaled = utils.scale_img(self.input_img, arguments['scale'])
+        gray_img_scaled = utils.scale_img(self.gray_img, arguments['scale'])
         side_by_side = cv2.hconcat(
-            [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
+            [input_img_scaled, cv2.cvtColor(gray_img_scaled, cv2.COLOR_GRAY2RGB)])
         cv2.imshow(const.WIN_NAME['input+gray'], side_by_side)
 
     @staticmethod
@@ -303,7 +307,8 @@ class ProcessImage:
 
         cv2.namedWindow(const.WIN_NAME['clahe'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(const.WIN_NAME['clahe'], self.clahe_img)
+        clahe_img_scaled = utils.scale_img(self.clahe_img, arguments['scale'])
+        cv2.imshow(const.WIN_NAME['clahe'], clahe_img_scaled)
 
     def show_input_histogram(self) -> None:
         """

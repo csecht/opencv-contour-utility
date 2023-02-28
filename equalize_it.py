@@ -124,19 +124,20 @@ class ProcessImage:
         self.gray_img = cv2.cvtColor(self.input_img, cv2.COLOR_BGR2GRAY)
         self.flat_gray_array = self.gray_img.ravel()
 
-        if arguments['scale'] != 1:  # Default optional --scale arg is 1.
-            self.input_img = utils.scale_img(self.input_img, arguments['scale'])
-            self.gray_img = utils.scale_img(self.gray_img, arguments['scale'])
-
         cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        # NOTE: In Windows, w/o resizing, window is expanded to full screen. Why?
+
+        # NOTE: In Windows, w/o scaling, window may be expanded to full screen
+        #   if system is set to remember window positions.
         if utils.MY_OS == 'win':
             cv2.resizeWindow(const.WIN_NAME['input+gray'], 1000, 500)
 
-        # Need to match shapes of the two cv image arrays.
+        # Need to scale only images to display, not those to be processed.
+        #   Default --scale arg is 1.0, so no scaling when option not used.
+        input_img_scaled = utils.scale_img(self.input_img, arguments['scale'])
+        gray_img_scaled = utils.scale_img(self.gray_img, arguments['scale'])
         side_by_side = cv2.hconcat(
-            [self.input_img, cv2.cvtColor(self.gray_img, cv2.COLOR_GRAY2RGB)])
+            [input_img_scaled, cv2.cvtColor(gray_img_scaled, cv2.COLOR_GRAY2RGB)])
         cv2.imshow(const.WIN_NAME['input+gray'], side_by_side)
 
     def setup_trackbars(self) -> None:
@@ -274,7 +275,8 @@ class ProcessImage:
 
         cv2.namedWindow(const.WIN_NAME['clahe'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-        cv2.imshow(const.WIN_NAME['clahe'], self.clahe_img)
+        clahe_img_scaled = utils.scale_img(self.clahe_img, arguments['scale'])
+        cv2.imshow(const.WIN_NAME['clahe'], clahe_img_scaled)
 
     def show_histograms(self, live_histo: np.ndarray) -> None:
         """
