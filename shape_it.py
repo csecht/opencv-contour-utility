@@ -1139,9 +1139,9 @@ class ProcessImage:
                            )
 
                 # Show the input image (copy) with found circles outlined.
-                cv2.imshow(const.WIN_NAME['th+contours'], self.shaped_img)
+                cv2.imshow(const.WIN_NAME['shape'], self.shaped_img)
         else:
-            cv2.imshow(const.WIN_NAME['th+contours'], self.shaped_img)
+            cv2.imshow(const.WIN_NAME['shape'], self.shaped_img)
 
         # Now update the settings text with current values.
         self.show_settings()
