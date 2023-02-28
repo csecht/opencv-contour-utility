@@ -689,8 +689,11 @@ class ProcessImage:
         Returns: None
         """
         # NOTE: in opencv_python 4.7, but not 4.6, the cv2.HoughCircles
-        # method param cv2.HOUGH_GRADIENT_ALT does not accept 1.0.
-        self.circles_param2 = p2_val / 10
+        # method cv2.HOUGH_GRADIENT_ALT does not accept 1.0 for param2.
+        if p2_val < 10:
+            self.circles_param2 = p2_val / 10
+        else:
+            self.circles_param2 = 0.98
         self.contour_threshold()
 
     def minradius_selector(self, minr_val) -> None:
