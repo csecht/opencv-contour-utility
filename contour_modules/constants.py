@@ -6,21 +6,21 @@ MY_OS = sys.platform[:3]
 # Assign trackbar names based on OS b/c of name length limitations.
 if MY_OS == 'lin':
     TBNAME = {
-        '_contrast': f'{"Contrast/gain/alpha (100X):" : <40}',
-        '_bright': f"{'Brightness/bias/beta, (-127):' : <40}",
+        '_contrast': f'{"Contrast/gain/alpha (100X):" : <29}',
+        '_bright': f"{'Brightness/bias/beta, (-127):' : <30}",
         '_morph_op': ("Reduce noise morphology operator: "
-                      f'{"0 open, 1 hitmiss, 2 close, 3 gradient" : <45}'),
+                      f'{"0 open, 1 hitmiss, 2 close, 3 gradient" : <38}'),
         '_morph_shape': ("Reduce noise morphology shape: "
                          f'{"0 rectangle, 1 cross, 2 ellipse" : <48}'),
-        '_noise_k': f'{"Reduce noise, kernel size (odd only):" : <40}',
-        '_noise_i': f'{"Reduce noise, iterations:" : <46}',
+        '_noise_k': f'{"Reduce noise, kernel size (odd only):" : <37}',
+        '_noise_i': f'{"Reduce noise, iterations:" : <48}',
         '_border': ("Border type:  "
                     f'{"0 default, 1 reflect, 2 replicate, 3 isolated" : <46}'),
         '_filter': ("Filter type:  "
                     f'{"0 box, 1 bilateral, 2 Gaussian, 3 median" : <46}'),
         '_kernel_size': f'{"Filter kernel size (odd only):" : <43}',
-        '_ratio': f'{"Edges, max threshold ratio (10X):" : <43}',
-        '_thresh_min': f'{"Edges, lower threshold:" : <43}',
+        '_ratio': f'{"Edges, max threshold ratio (10X):" : <37}',
+        '_thresh_min': f'{"Edges, lower threshold:" : <39}',
         '_contour_mode': f'{"Find contour mode: 0 external, 1 list" : <40}',
         '_contour_method': f'{"Find contour method: 1 none, 2 simple" : <40}',
         '_contour_type': f'{"Contour size type: 0 area, 1 arc length" : <40}',
@@ -110,7 +110,7 @@ WIN_NAME = {
     'contrast+redux': 'Adjusted contrast <- | -> Reduced noise',
     'filtered': 'Filtered image',
     'th+contours': 'Threshold <- | -> Selected threshold contours',
-    'id_objects': 'Identified objects, with sizes',
+    'id_objects': 'Identified objects, with relative sizes',
     'edges+contours': 'Edges <- | -> Selected edged contours',
     'shape': 'Found specified shape',
     'clahe': 'CLAHE adjusted'

@@ -261,7 +261,7 @@ def scale_img(img_array: np.ndarray, scale: float) -> np.ndarray:
                 displayed image. Defined from cmd line arg '--scale'.
                 Default from argparse is 1.0.
 
-    Returns: A scaled np.ndarray object (if size_x != 1).
+    Returns: A scaled np.ndarray object; if *scale* is 1, then no change.
     """
 
     # Is redundant with check of --scale value in args_handler().

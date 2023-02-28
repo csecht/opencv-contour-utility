@@ -923,10 +923,11 @@ class ProcessImage:
                                                      mode=self.contour_mode,
                                                      method=self.contour_method)
 
-        # Set values to exclude edge contours that may take in
-        #  contrasting borders on the image; an arbitrary 80% exclusion limit.
-        max_area = self.gray_img.shape[0] * self.gray_img.shape[1] * 0.64
-        max_length = self.gray_img.shape[0] * 0.8
+        # Set values to exclude threshold contours that may include
+        #  contrasting borders on the image; an arbitrary 90% length
+        #  limit, 81% area limit.
+        max_area = self.gray_img.shape[0] * self.gray_img.shape[1] * 0.9
+        max_length = max(self.gray_img.shape[0], self.gray_img.shape[1]) * 0.9
 
         # 'contour_type' values are from "Contour size type" trackbar.
         if self.contour_type == 'cv2.contourArea':
