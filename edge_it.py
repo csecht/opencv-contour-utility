@@ -773,7 +773,7 @@ class ProcessImage:
         #   when hulls and contours are similar. 10% limit is arbitrary.
         if self.show_hull:
             hull_list = []
-            for i in range(len(selected_contours)):
+            for i, _ in enumerate(selected_contours):
                 hull = cv2.convexHull(selected_contours[i])
                 if cv2.contourArea(hull) >= cv2.contourArea(selected_contours[i]) * 1.1:
                     hull_list.append(hull)
