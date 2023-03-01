@@ -113,6 +113,7 @@ WIN_NAME = {
     'contrast+redux': 'Adjusted contrast <- | -> Reduced noise',
     'filtered': 'Filtered image',
     'th+contours': 'Threshold <- | -> Selected threshold contours',
+    'th+cnt&hull': 'Threshold <- | -> Contours (yellow), hulls (blue)',
     'id_objects': 'Identified objects, with relative sizes',
     'edges+contours': 'Edges <- | -> Selected edged contours',
     'shape': 'Found specified shape',

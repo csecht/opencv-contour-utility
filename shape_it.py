@@ -83,7 +83,7 @@ class ProcessImage:
         contour_threshold
         find_circles
         select_shape
-        contour_shapes
+        draw_shapes
         show_settings
     """
     __slots__ = ('input_img', 'gray_img', 'contoured_img', 'contrasted_img',
@@ -101,7 +101,7 @@ class ProcessImage:
                  'noise_kernel', 'filter_kernel',
                  'contour_mode', 'contour_method',
                  'num_vertices', 'contoured_txt', 'contour_tb_win',
-                 'shaped_txt', 'shape_tb_win',
+                 'shaped_txt', 'shape_tb_win', 'show_hull',
                  )
 
     def __init__(self):
@@ -138,6 +138,7 @@ class ProcessImage:
         self.num_th_contours_select = 0
         self.contour_type = ''
         self.contour_limit = 0
+        self.show_hull = ''
 
         # Shape finding variables.
         self.polygon = ''
@@ -326,6 +327,11 @@ class ProcessImage:
                              self.save_with_click)
 
         # Trackbar to set num_vertices in select_shape().
+        cv2.createTrackbar(const.TBNAME['_hull'],
+                           self.shape_tb_win,
+                           0,
+                           1,
+                           self.hull_selector)
         cv2.createTrackbar(const.TBNAME['_shape'],
                            self.shape_tb_win,
                            3,
@@ -754,6 +760,21 @@ class ProcessImage:
         else:
             self.contour_threshold()
 
+    def hull_selector(self, h_val) -> None:
+        """
+        The "Show hull" trackbar controller that determines whether to
+        draw cv2.convexHull on selected contours.
+        Called from setup_trackbars(). Calls contour_threshold().
+
+        Args:
+            h_val: The integer value passed from trackbar.
+
+        Returns: None
+        """
+
+        self.show_hull = h_val
+        self.contour_threshold()
+
     def save_with_click(self, event, *args):
         """
         Click event in the namedWindow calls module that saves the image
@@ -924,9 +945,9 @@ class ProcessImage:
                                                              maxval=255,
                                                              type=self.th_type)
 
-        found_contours, hierarchy = cv2.findContours(image=self.th_img,
-                                                     mode=self.contour_mode,
-                                                     method=self.contour_method)
+        found_contours, _ = cv2.findContours(image=self.th_img,
+                                             mode=self.contour_mode,
+                                             method=self.contour_method)
 
         # Set values to exclude threshold contours that may include
         #  contrasting borders on the image; an arbitrary 90% length
@@ -936,19 +957,37 @@ class ProcessImage:
 
         # 'contour_type' values are from "Contour size type" trackbar.
         if self.contour_type == 'cv2.contourArea':
-            selected_contours = [_c for _c in found_contours
-                                 if max_area > cv2.contourArea(_c) >= self.contour_limit]
-        else:  # is cv2.arcLength; aka "perimeter"
             selected_contours = [
                 _c for _c in found_contours
-                if max_length > cv2.arcLength(_c, closed=False) >= self.contour_limit
-            ]
+                if max_area > cv2.contourArea(_c) >= self.contour_limit]
+        else:  # type is cv2.arcLength; aka "perimeter"
+            selected_contours = [
+                _c for _c in found_contours
+                if max_length > cv2.arcLength(_c, closed=False) >= self.contour_limit]
 
         # Used only for reporting.
         self.num_th_contours_all = len(found_contours)
         self.num_th_contours_select = len(selected_contours)
 
         self.contoured_img = self.input_img.copy()
+
+        # Draw hulls around selected contours when hull area is more than
+        #   10% of contour area. This prevents obfuscation of drawn lines
+        #   when hulls and contours are similar. 10% limit is arbitrary.
+        hull_list = []
+        # for i in range(len(selected_contours)):
+        for i, _ in enumerate(selected_contours):
+            hull = cv2.convexHull(selected_contours[i])
+            if cv2.contourArea(hull) >= cv2.contourArea(selected_contours[i]) * 1.1:
+                hull_list.append(hull)
+
+        cv2.drawContours(self.contoured_img,
+                         contours=hull_list,
+                         contourIdx=-1,  # all hulls.
+                         color=const.CBLIND_COLOR_CV['sky blue'],
+                         thickness=self.line_thickness * 3,
+                         lineType=cv2.LINE_AA)
+
         drawn_contours = cv2.drawContours(self.contoured_img,
                                           contours=selected_contours,
                                           contourIdx=-1,  # all contours.
@@ -956,24 +995,25 @@ class ProcessImage:
                                           thickness=self.line_thickness * 2,
                                           lineType=cv2.LINE_AA)
 
-        cv2.namedWindow(const.WIN_NAME['th+contours'],
+        cv2.namedWindow(const.WIN_NAME['th+cnt&hull'],
                         flags=cv2.WINDOW_GUI_NORMAL)
         th_img_scaled = utils.scale_img(self.th_img, arguments['scale'])
         contours_scaled = utils.scale_img(drawn_contours, arguments['scale'])
         side_by_side = cv2.hconcat(
             [cv2.cvtColor(th_img_scaled, cv2.COLOR_GRAY2RGB), contours_scaled])
-        cv2.imshow(const.WIN_NAME['th+contours'], side_by_side)
+        cv2.imshow(const.WIN_NAME['th+cnt&hull'], side_by_side)
 
-        self.select_shape(selected_contours)
+        self.select_shape(selected_contours, hull_list)
 
-    def select_shape(self, selected_contour_list: list) -> None:
+    def select_shape(self, contour_list: list, hull_list: list) -> None:
         """
         Filter contoured objects of a specific approximated shape.
         Called from contour_threshold().
-        Calls contour_shapes() with selected polygon contours.
+        Calls draw_shapes() with selected polygon contours.
 
         Args:
-            selected_contour_list: List of selected contours from cv2.findContours.
+            contour_list: List of selected contours from cv2.findContours.
+            hull_list: List of selected hulls from cv2.convexHull.
 
         Returns: None
         """
@@ -982,51 +1022,53 @@ class ProcessImage:
 
         self.polygon = 'None found'
         selected_polygon_contours = []
+        self.num_shapes = len(selected_polygon_contours)
+        self.polygon = const.SHAPE_NAME[self.num_vertices]
+        self.draw_shapes(selected_polygon_contours)
 
         # Note: num_vertices value is assigned by num_vertices_selector().
         # Shape trackbar value of 11 is for circles.
+
+        def find_poly(contour):
+            len_contour = cv2.arcLength(contour, True)
+            approx_poly = cv2.approxPolyDP(curve=contour,
+                                           epsilon=self.e_factor * len_contour,
+                                           closed=True)
+            if len(approx_poly) == self.num_vertices == 3:
+                selected_polygon_contours.append(contour)
+            elif len(approx_poly) == self.num_vertices == 4:
+                selected_polygon_contours.append(contour)
+            elif len(approx_poly) == self.num_vertices == 5:
+                selected_polygon_contours.append(contour)
+            elif len(approx_poly) == self.num_vertices == 6:
+                selected_polygon_contours.append(contour)
+            elif len(approx_poly) == self.num_vertices == 7:
+                selected_polygon_contours.append(contour)
+            elif len(approx_poly) == self.num_vertices == 8:
+                selected_polygon_contours.append(contour)
+            elif len(approx_poly) == self.num_vertices == 9:
+                selected_polygon_contours.append(contour)
+            elif len(approx_poly) == (self.num_vertices == 10
+                                      and not cv2.isContourConvex(contour)):
+                selected_polygon_contours.append(contour)
+
         if self.num_vertices == 11:
             self.polygon = 'circle'
             self.find_circles()
+            return
+
+        if self.show_hull and hull_list:
+            for _h in hull_list:
+                find_poly(_h)
         else:
-            for _c in selected_contour_list:
-                len_contour = cv2.arcLength(_c, True)
-                approx_poly = cv2.approxPolyDP(curve=_c,
-                                               epsilon=self.e_factor * len_contour,
-                                               closed=True)
-                if len(approx_poly) == self.num_vertices == 3:
-                    selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_vertices == 4:
-                    # Compute the bounding box of the contour and use the
-                    #   bounding box to compute the aspect ratio.
-                    # (_x, _y, _w, _h) = cv2.boundingRect(approx_poly)
-                    # _ar = _w / float(_h)
-                    # A square will have an aspect ratio that is approximately
-                    #   equal to one, otherwise, the shape is a rectangle.
-                    # self.polygon = "square" if 0.95 <= _ar <= 1.05 else "rectangle"
-                    # self.polygon = 'rectangle'
-                    selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_vertices == 5:
-                    selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_vertices == 6:
-                    selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_vertices == 7:
-                    selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_vertices == 8: # and cv2.isContourConvex(_c):
-                    selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_vertices == 9:
-                    selected_polygon_contours.append(_c)
-                elif len(approx_poly) == self.num_vertices == 10 and not cv2.isContourConvex(_c):
-                    selected_polygon_contours.append(_c)
+            for _c in contour_list:
+                find_poly(_c)
 
-            self.polygon = const.SHAPE_NAME[self.num_vertices]
+        self.num_shapes = len(selected_polygon_contours)
+        self.polygon = const.SHAPE_NAME[self.num_vertices]
+        self.draw_shapes(selected_polygon_contours)
 
-            # num_shapes is used only for reporting.
-            self.num_shapes = len(selected_polygon_contours)
-
-            self.contour_shapes(selected_polygon_contours)
-
-    def contour_shapes(self, contours: list) -> None:
+    def draw_shapes(self, contours: list) -> None:
         """
         Draw *contours* around detected polygon or circle.
         Calls show_settings(). Called from select_shape()
@@ -1040,32 +1082,20 @@ class ProcessImage:
         cv2.namedWindow(const.WIN_NAME['shape'],
                         flags=cv2.WINDOW_GUI_NORMAL)
 
+        cnt_color = 'sky blue' if self.show_hull else 'yellow'
+        thick_x = 3 if self.show_hull else 2
         if contours:
             for _c in contours:
-                # Compute the center of the contour, as a circle.
-                # (_x, _y), radius = cv2.minEnclosingCircle(_c)
-                # center = (int(_x), int(_y))
-
-                # NOTE: When no recognized polygon contour is sent here,
-                #  no window will pop up with drawn contours; the settings
-                #  window will indicate polygon selected as "None found".
-                #  Only when the polygon trackbar finds a match will the
-                #  window pop up.
-
                 cv2.drawContours(self.shaped_img,
                                  contours=[_c],
                                  contourIdx=-1,
-                                 color=const.CBLIND_COLOR_CV['yellow'],
-                                 thickness=self.line_thickness * 2,
+                                 color=const.CBLIND_COLOR_CV[cnt_color],
+                                 thickness=self.line_thickness * thick_x,
                                  lineType=cv2.LINE_AA
                                  )
 
-                # Show the input image with outline of selected polygon.
-                shapes_scaled = utils.scale_img(self.shaped_img, arguments['scale'])
-                cv2.imshow(const.WIN_NAME['shape'], shapes_scaled)
-        else:  # contours parameter is None, b/c selected_polygon_contours = [].
-            input_img_scaled = utils.scale_img(self.input_img, arguments['scale'])
-            cv2.imshow(const.WIN_NAME['shape'], input_img_scaled)
+        shapes_scaled = utils.scale_img(self.shaped_img, arguments['scale'])
+        cv2.imshow(const.WIN_NAME['shape'], shapes_scaled)
 
         # Now update the settings text with current values.
         self.show_settings()
@@ -1080,7 +1110,6 @@ class ProcessImage:
         Returns: An array of HoughCircles contours.
         """
         self.shaped_img = self.input_img.copy()
-
         # Note: these strings need to match those used in circle_img_selector().
         #   defined in contour_threshold().
         if self.circle_img2use == 'threshold image':
@@ -1095,7 +1124,7 @@ class ProcessImage:
             #  trackbars do nothing to find circles.
             circle_this_img_scaled = utils.scale_img(img=circle_this_img,
                                                      scale=arguments['scale'])
-            cv2.imshow(const.WIN_NAME['th+contours'], circle_this_img_scaled)
+            cv2.imshow(const.WIN_NAME['th+cnt&hull'], circle_this_img_scaled)
 
         else:  # is "filtered image"
             circle_this_img = self.filtered_img
@@ -1104,7 +1133,7 @@ class ProcessImage:
             text_msg = ("Circles are now being found\n "
                         "   using the filtered image,\n"
                         "   not the threshold image.")
-            cv2.imshow(const.WIN_NAME['th+contours'],
+            cv2.imshow(const.WIN_NAME['th+cnt&hull'],
                        utils.text_array((220, 350), text_msg))
 
         # source: https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
@@ -1129,7 +1158,6 @@ class ProcessImage:
 
             for _circle in found_circles[0, :]:
                 _x, _y, _r = _circle
-
                 # Draw the circumference of the found circle.
                 cv2.circle(self.shaped_img,
                            center=(_x, _y),
@@ -1204,6 +1232,8 @@ class ProcessImage:
             f' (from {self.num_th_contours_all} total)'
         )
 
+        shape_type = 'Hull shape' if self.show_hull else 'Contour shape'
+
         shape_txt = (
             f'{"cv2.approxPolyDP".ljust(20)}epsilon={epsilon_pct}% contour length\n'
             f'{" ".ljust(20)}closed=True\n'
@@ -1215,7 +1245,7 @@ class ProcessImage:
             f'{" ".ljust(20)}param2={self.circles_param2}\n'
             f'{" ".ljust(20)}minRadius={self.circles_min_radius}\n'
             f'{" ".ljust(20)}maxRadius={self.circles_max_radius}\n'
-            f'{"Shape selected:".ljust(20)}{self.polygon}, found: {self.num_shapes}\n'
+            f'{shape_type.ljust(20)}{self.polygon}, found: {self.num_shapes}\n'
         )
 
         # Put text into contoured_txt for printing and saving to file.
