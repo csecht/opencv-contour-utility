@@ -250,13 +250,13 @@ def save_img_and_settings(img2save: np.ndarray,
           f'{settings2save}')
 
 
-def scale_img(img_array: np.ndarray, scale: float) -> np.ndarray:
+def scale_img(img: np.ndarray, scale: float) -> np.ndarray:
     """
     Change size of displayed images from original (input) size.
     Intended mainly for when input image is too large to fit on screen.
 
     Args:
-        img_array: A numpy.ndarray imported from the image file.
+        img: A numpy.ndarray of image to be scaled.
         scale: The multiplication factor to grow or shrink the
                 displayed image. Defined from cmd line arg '--scale'.
                 Default from argparse is 1.0.
@@ -271,7 +271,7 @@ def scale_img(img_array: np.ndarray, scale: float) -> np.ndarray:
     #  resized image depending on whether it is down- or up-scaled.
     interpolate = cv2.INTER_AREA if scale < 0 else cv2.INTER_CUBIC
 
-    scaled_image = cv2.resize(src=img_array,
+    scaled_image = cv2.resize(src=img,
                               dsize=None,
                               fx=scale, fy=scale,
                               interpolation=interpolate)
