@@ -80,7 +80,7 @@ class ProcessImage:
         circle_the_contours
         show_settings
     """
-    __slots__ = ('alpha', 'beta', 'border_type', 'computed_threshold',
+    __slots__ = ('alpha', 'beta', 'border_type',
                  'contour_limit', 'contour_type', 'contrasted_img',
                  'curr_contrast_sd', 'reduced_noise_img',
                  'filter_kernel', 'filter_selection',
@@ -91,7 +91,7 @@ class ProcessImage:
                  'contoured_txt', 'contour_tb_win',
                  'sigma_color', 'sigma_space', 'sigma_x', 'sigma_y',
                  'font_scale', 'line_thickness', 'center_xoffset',
-                 'contour_mode', 'contour_method',
+                 'contour_mode', 'contour_method', 'show_hull',
                  )
 
     def __init__(self):
@@ -123,7 +123,7 @@ class ProcessImage:
         self.border_type = 4  # cv2.BORDER_DEFAULT == cv2.BORDER_REFLECT_101
         self.contour_type = ''
         self.contour_limit = 0
-        self.computed_threshold = 0
+        self.show_hull = ''
 
         self.font_scale = 0
         self.line_thickness = 0
@@ -216,17 +216,17 @@ class ProcessImage:
                            self.beta_selector)
         cv2.createTrackbar(const.TBNAME['_morph_op'],
                            self.contour_tb_win,
-                           1,
+                           0,
                            3,
                            self.morphology_op_selector)
         cv2.createTrackbar(const.TBNAME['_morph_shape'],
                            self.contour_tb_win,
-                           2,
+                           0,
                            2,
                            self.noise_redux_shape_selector)
         cv2.createTrackbar(const.TBNAME['_noise_k'],
                            self.contour_tb_win,
-                           3,
+                           0,
                            20,
                            self.noise_redux_kernel_selector)
         cv2.createTrackbar(const.TBNAME['_noise_i'],
@@ -237,12 +237,12 @@ class ProcessImage:
         cv2.setTrackbarMin(const.TBNAME['_noise_i'], self.contour_tb_win, 1)
         cv2.createTrackbar(const.TBNAME['_border'],
                            self.contour_tb_win,
-                           2,
+                           0,
                            3,
                            self.border_selector)
         cv2.createTrackbar(const.TBNAME['_filter'],
                            self.contour_tb_win,
-                           2,
+                           0,
                            3,
                            self.filter_type_selector)
         cv2.createTrackbar(const.TBNAME['_kernel_size'],
@@ -266,7 +266,7 @@ class ProcessImage:
         cv2.setTrackbarMin(const.TBNAME['_thresh_min'], self.contour_tb_win, 1)
         cv2.createTrackbar(const.TBNAME['_contour_type'],
                            self.contour_tb_win,
-                           1,
+                           0,
                            1,
                            self.contour_type_selector)
         cv2.createTrackbar(const.TBNAME['_contour_mode'],
@@ -276,10 +276,15 @@ class ProcessImage:
                            self.contour_mode_selector)
         cv2.createTrackbar(const.TBNAME['_contour_method'],
                            self.contour_tb_win,
-                           2,
+                           1,
                            2,
                            self.contour_method_selector)
         cv2.setTrackbarMin(const.TBNAME['_contour_method'], self.contour_tb_win, 1)
+        cv2.createTrackbar(const.TBNAME['_hull'],
+                           self.contour_tb_win,
+                           0,
+                           1,
+                           self.hull_selector)
         cv2.createTrackbar(const.TBNAME['_contour_min'],
                            self.contour_tb_win,
                            100,
@@ -546,6 +551,21 @@ class ProcessImage:
         self.contour_limit = cl_val
         self.contour_edges()
 
+    def hull_selector(self, h_val) -> None:
+        """
+        The "Show hull" trackbar controller that determines whether to
+        draw cv2.convexHull on selected contours.
+        Called from setup_trackbars(). Calls contour_threshold().
+
+        Args:
+            h_val: The integer value passed from trackbar.
+
+        Returns: None
+        """
+
+        self.show_hull = h_val
+        self.contour_edges()
+
     def save_with_click(self, event, *args):
         """
         Click on the namedWindow calls module that saves the image and
@@ -734,19 +754,37 @@ class ProcessImage:
 
         # 'contour_type' values are from "Contour size type" trackbar.
         if self.contour_type == 'cv2.contourArea':
-            selected_contours = [_c for _c in found_contours
-                                 if max_area > cv2.contourArea(_c) >= self.contour_limit]
-        else:  # is cv2.arcLength; aka "perimeter"
             selected_contours = [
                 _c for _c in found_contours
-                if max_length > cv2.arcLength(_c, closed=False) >= self.contour_limit
-            ]
+                if max_area > cv2.contourArea(_c) >= self.contour_limit]
+        else:  # type is cv2.arcLength; aka "perimeter"
+            selected_contours = [
+                _c for _c in found_contours
+                if max_length > cv2.arcLength(_c, closed=False) >= self.contour_limit]
 
         # Used only for reporting.
         self.num_edge_contours_all = len(found_contours)
         self.num_edge_contours_select = len(selected_contours)
 
         self.contoured_img = self.input_img.copy()
+
+        # Draw hulls around selected contours when hull area is more than
+        #   10% of contour area. This prevents obfuscation of drawn lines
+        #   when hulls and contours are similar. 10% limit is arbitrary.
+        if self.show_hull:
+            hull_list = []
+            for i in range(len(selected_contours)):
+                hull = cv2.convexHull(selected_contours[i])
+                if cv2.contourArea(hull) >= cv2.contourArea(selected_contours[i]) * 1.1:
+                    hull_list.append(hull)
+
+            cv2.drawContours(self.contoured_img,
+                             contours=hull_list,
+                             contourIdx=-1,  # all hulls.
+                             color=const.CBLIND_COLOR_CV['sky blue'],
+                             thickness=self.line_thickness * 3,
+                             lineType=cv2.LINE_AA)
+
         drawn_contours = cv2.drawContours(self.contoured_img,
                                           contours=selected_contours,
                                           contourIdx=-1,  # all contours.
