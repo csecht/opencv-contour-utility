@@ -87,21 +87,21 @@ All screenshots are from a Ubuntu Linux platform. For Windows and macOS platform
 Opening windows for `thresh_it.py` with the `sample3.jpg` input file.
 (Note: As of 25/02/2023 all contour and identification marking are now yellow, not green. )
 
-![thresh_it_settings_window](images/settings_screenshot.png)
+![thresh_it_settings_window](images/threshold_settings_screenshot.png)
 
-All available threshold parameters.
-
-![edge_it_settings_window](images/edges_settings_screenshot.png)
-
-All available Canny edges parameters.
+All available threshold parameters and trackbars.
 
 ![ID_objects_window](images/objects_screenshot.png)
 
 Expanded window for identified threshold objects and their comparative pixel sizes with default `thresh_it.py` settings. Input file is `sample3.jpg`.
 
+![edge_it_settings_window](images/edges_settings_screenshot.png)
+
+All available Canny edges parameters and trackbars.
+
 ![found_hexagon_shapes](images/found_hexagon_screenshot.png)
 
-Identified hexagon shapes in `sample4.jpg` are outlined in yellow with `shape_it.py`.
+Identified hexagon shapes in `sample4.jpg` are outlined in yellow with `shape_it.py`. If the convexHull option is selected, then only hulls will be outlined, in blue.
 
 ![shape_settings_window](images/shape_settings_screenshot.png)
 
