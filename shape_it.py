@@ -194,8 +194,10 @@ class ProcessImage:
 
         # Need to scale only images to display, not those to be processed.
         #   Default --scale arg is 1.0, so no scaling when option not used.
-        input_img_scaled = utils.scale_img(self.input_img, arguments['scale'])
-        gray_img_scaled = utils.scale_img(self.gray_img, arguments['scale'])
+        input_img_scaled = utils.scale_img(img=self.input_img,
+                                           scale=arguments['scale'])
+        gray_img_scaled = utils.scale_img(img=self.gray_img,
+                                          scale=arguments['scale'])
         side_by_side = cv2.hconcat(
             [input_img_scaled, cv2.cvtColor(gray_img_scaled, cv2.COLOR_GRAY2RGB)])
         cv2.imshow(const.WIN_NAME['input+gray'], side_by_side)
@@ -1089,13 +1091,11 @@ class ProcessImage:
 
             # Here HoughCircles works on the threshold image, not found
             #  contours, so need to replace selected threshold contours image
-            #  with a blank image so the user knows that contour trackbars
-            #  do nothing to find circles.
-            circle_this_img_scaled = utils.scale_img(circle_this_img, arguments['scale'])
-            side_by_side = cv2.hconcat([circle_this_img_scaled,
-                                        np.ones(circle_this_img_scaled.shape,
-                                                dtype='uint8')])
-            cv2.imshow(const.WIN_NAME['th+contours'], side_by_side)
+            #  with just the threshold image so the user knows that contour
+            #  trackbars do nothing to find circles.
+            circle_this_img_scaled = utils.scale_img(img=circle_this_img,
+                                                     scale=arguments['scale'])
+            cv2.imshow(const.WIN_NAME['th+contours'], circle_this_img_scaled)
 
         else:  # is "filtered image"
             circle_this_img = self.filtered_img
