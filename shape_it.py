@@ -971,8 +971,8 @@ class ProcessImage:
 
         self.contoured_img = self.input_img.copy()
 
-        # Draw hulls around selected contours when hull area is more than
-        #   10% of contour area. This prevents obfuscation of drawn lines
+        # Draw hulls around selected contours when hull area is 10% or
+        #   more than contour area. This prevents obfuscation of outlines
         #   when hulls and contours are similar. 10% limit is arbitrary.
         hull_list = []
         # for i in range(len(selected_contours)):
@@ -1020,42 +1020,43 @@ class ProcessImage:
         # inspiration: Adrian Rosebrock
         #  https://pyimagesearch.com/2016/02/08/opencv-shape-detection/
 
+        # Note: num_vertices value is assigned by num_vertices_selector();
+        #   num_vertices of 11 is to select circles.
+        # Finding and drawing circles is a special condition that sidesteps
+        #   cv2.findContours and cv2.drawContours.
+        if self.num_vertices == 11:
+            self.polygon = 'circle'
+            self.find_circles()
+            return
+
         self.polygon = 'None found'
         selected_polygon_contours = []
         self.num_shapes = len(selected_polygon_contours)
         self.polygon = const.SHAPE_NAME[self.num_vertices]
         self.draw_shapes(selected_polygon_contours)
 
-        # Note: num_vertices value is assigned by num_vertices_selector().
-        # Shape trackbar value of 11 is for circles.
-
-        def find_poly(contour):
-            len_contour = cv2.arcLength(contour, True)
-            approx_poly = cv2.approxPolyDP(curve=contour,
+        def find_poly(point_set):
+            len_contour = cv2.arcLength(point_set, True)
+            approx_poly = cv2.approxPolyDP(curve=point_set,
                                            epsilon=self.e_factor * len_contour,
                                            closed=True)
             if len(approx_poly) == self.num_vertices == 3:
-                selected_polygon_contours.append(contour)
+                selected_polygon_contours.append(point_set)
             elif len(approx_poly) == self.num_vertices == 4:
-                selected_polygon_contours.append(contour)
+                selected_polygon_contours.append(point_set)
             elif len(approx_poly) == self.num_vertices == 5:
-                selected_polygon_contours.append(contour)
+                selected_polygon_contours.append(point_set)
             elif len(approx_poly) == self.num_vertices == 6:
-                selected_polygon_contours.append(contour)
+                selected_polygon_contours.append(point_set)
             elif len(approx_poly) == self.num_vertices == 7:
-                selected_polygon_contours.append(contour)
+                selected_polygon_contours.append(point_set)
             elif len(approx_poly) == self.num_vertices == 8:
-                selected_polygon_contours.append(contour)
+                selected_polygon_contours.append(point_set)
             elif len(approx_poly) == self.num_vertices == 9:
-                selected_polygon_contours.append(contour)
+                selected_polygon_contours.append(point_set)
             elif len(approx_poly) == (self.num_vertices == 10
-                                      and not cv2.isContourConvex(contour)):
-                selected_polygon_contours.append(contour)
-
-        if self.num_vertices == 11:
-            self.polygon = 'circle'
-            self.find_circles()
-            return
+                                      and not cv2.isContourConvex(point_set)):
+                selected_polygon_contours.append(point_set)
 
         if self.show_hull and hull_list:
             for _h in hull_list:
@@ -1070,7 +1071,7 @@ class ProcessImage:
 
     def draw_shapes(self, contours: list) -> None:
         """
-        Draw *contours* around detected polygon or circle.
+        Draw *contours* around detected polygons, hulls, or circles.
         Calls show_settings(). Called from select_shape()
 
         Args:
@@ -1124,7 +1125,8 @@ class ProcessImage:
             #  trackbars do nothing to find circles.
             circle_this_img_scaled = utils.scale_img(img=circle_this_img,
                                                      scale=arguments['scale'])
-            cv2.imshow(const.WIN_NAME['th+cnt&hull'], circle_this_img_scaled)
+            cv2.imshow(const.WIN_NAME['th+cnt&hull'],
+                       circle_this_img_scaled)
 
         else:  # is "filtered image"
             circle_this_img = self.filtered_img
@@ -1138,7 +1140,6 @@ class ProcessImage:
 
         # source: https://www.geeksforgeeks.org/circle-detection-using-opencv-python/
         # https://docs.opencv.org/4.x/dd/d1a/group__imgproc__feature.html#ga47849c3be0d0406ad3ca45db65a25d2d
-        # Apply Hough transform on the filtered (blured) image.
         # Docs general recommendations for HOUGH_GRADIENT_ALT with good image contrast:
         #    param1=300, param2=0.9, minRadius=20, maxRadius=400
         found_circles = cv2.HoughCircles(image=circle_this_img,
@@ -1177,10 +1178,12 @@ class ProcessImage:
 
                 # Show found circles marked on the input image.
                 circles_scaled = utils.scale_img(self.shaped_img, arguments['scale'])
-                cv2.imshow(const.WIN_NAME['shape'], circles_scaled)
+                cv2.imshow(const.WIN_NAME['shape'],
+                           circles_scaled)
         else:
             shapes_scaled = utils.scale_img(self.input_img, arguments['scale'])
-            cv2.imshow(const.WIN_NAME['shape'], shapes_scaled)
+            cv2.imshow(const.WIN_NAME['shape'],
+                       shapes_scaled)
 
         # Now update the settings text with current values.
         self.show_settings()
