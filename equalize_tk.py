@@ -118,7 +118,7 @@ class ProcessImage:
 
         # utils.args_handler() has verified image path, so read from it.
         self.input_img = cv2.imread(arguments['input'])
-        self.gray_img = cv2.cvtColor(self.input_img, cv2.COLOR_BGR2GRAY)
+        self.gray_img = cv2.imread(arguments['input'], cv2.IMREAD_GRAYSCALE)
 
         cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)

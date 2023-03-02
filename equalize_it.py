@@ -121,7 +121,7 @@ class ProcessImage:
 
         # utils.args_handler() has verified image path, so read from it.
         self.input_img = cv2.imread(arguments['input'])
-        self.gray_img = cv2.cvtColor(self.input_img, cv2.COLOR_BGR2GRAY)
+        self.gray_img = cv2.imread(arguments['input'], cv2.IMREAD_GRAYSCALE)
         self.flat_gray_array = self.gray_img.ravel()
 
         cv2.namedWindow(const.WIN_NAME['input+gray'],
@@ -368,6 +368,6 @@ if __name__ == "__main__":
     # Set infinite loop with sigint handler to monitor "quit"
     #  keystrokes.
     quit_thread = threading.Thread(
-        target= utils.quit_keys(), daemon=True)
+        target=utils.quit_keys(), daemon=True)
 
     quit_thread.start()

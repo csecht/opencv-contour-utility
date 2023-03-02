@@ -155,7 +155,7 @@ class ProcessImage:
 
         # utils.args_handler() has verified the image path, so read from it.
         self.input_img = cv2.imread(arguments['input'])
-        self.gray_img = cv2.cvtColor(self.input_img, cv2.COLOR_BGR2GRAY)
+        self.gray_img = cv2.imread(arguments['input'], cv2.IMREAD_GRAYSCALE)
 
         # Ideas for scaling: https://stackoverflow.com/questions/52846474/
         #   how-to-resize-text-for-cv2-puttext-according-to-the-image-size-in-opencv-python
@@ -911,7 +911,6 @@ class ProcessImage:
 
 
 if __name__ == "__main__":
-
     # Program exits here if system platform or Python version check fails.
     utils.check_platform()
     vcheck.minversion('3.7')
@@ -926,5 +925,5 @@ if __name__ == "__main__":
     # Set infinite loop with sigint handler to monitor "quit"
     #  keystrokes.
     quit_thread = threading.Thread(
-        target= utils.quit_keys(), daemon=True)
+        target=utils.quit_keys(), daemon=True)
     quit_thread.start()

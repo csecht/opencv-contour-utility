@@ -154,7 +154,7 @@ class ProcessImage:
 
         # utils.args_handler() has verified the image path, so read from it.
         self.input_img = cv2.imread(arguments['input'])
-        self.gray_img = cv2.cvtColor(self.input_img, cv2.COLOR_BGR2GRAY)
+        self.gray_img = cv2.imread(arguments['input'], cv2.IMREAD_GRAYSCALE)
 
         # Ideas for scaling: https://stackoverflow.com/questions/52846474/
         #   how-to-resize-text-for-cv2-puttext-according-to-the-image-size-in-opencv-python
