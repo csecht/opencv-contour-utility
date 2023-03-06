@@ -20,7 +20,7 @@ window. Or quit from command line with Ctrl-C.
 Requires Python3.7 or later and the packages opencv-python and numpy.
 Developed in Python 3.8-3.9.
 """
-# Copyright (C) 2022 C.S. Echt, under GNU General Public License
+# Copyright (C) 2022-2023 C.S. Echt, under GNU General Public License
 
 # Standard library imports.
 import sys
