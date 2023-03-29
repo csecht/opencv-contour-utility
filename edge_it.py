@@ -309,7 +309,6 @@ class ProcessImage:
         #   how-do-i-increase-the-contrast-of-an-image-in-python-opencv
         self.alpha = a_val / 100
         self.adjust_contrast()
-        self.reduce_noise()
         self.contour_edges()
 
     def beta_selector(self, b_val) -> None:
@@ -330,7 +329,6 @@ class ProcessImage:
 
         self.beta = b_val - 127
         self.adjust_contrast()
-        self.reduce_noise()
         self.contour_edges()
 
     def morphology_op_selector(self, op_val) -> None:
@@ -348,7 +346,6 @@ class ProcessImage:
         """
         self.morph_op = const.CV_MORPHOP[op_val]
         self.adjust_contrast()
-        self.reduce_noise()
         self.contour_edges()
 
     def noise_redux_iter_selector(self, i_val) -> None:
@@ -366,7 +363,6 @@ class ProcessImage:
         """
         self.noise_iter = i_val
         self.adjust_contrast()
-        self.reduce_noise()
         self.contour_edges()
 
     def noise_redux_shape_selector(self, s_val) -> None:
@@ -384,7 +380,6 @@ class ProcessImage:
         """
         self.morph_shape = s_val
         self.adjust_contrast()
-        self.reduce_noise()
         self.contour_edges()
 
     def noise_redux_kernel_selector(self, k_val) -> None:
@@ -403,7 +398,6 @@ class ProcessImage:
         val_k = k_val + 1 if k_val % 2 == 0 else k_val
         self.noise_kernel = (val_k, val_k)
         self.adjust_contrast()
-        self.reduce_noise()
         self.contour_edges()
 
     def border_selector(self, bd_val):
