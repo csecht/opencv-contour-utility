@@ -11,7 +11,7 @@ https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-
 
 The intention is to help OpenCV users understand the pertinent parameters and value ranges needed to identify objects.
 
-Development environment was Linux Ubuntu 20.04 with PyQt5 API. Has been tested in macOS 13.2 and Windows10 for basic functionality, but window formatting on those platforms still needs work.
+Development environment was Linux Ubuntu 20.04 with PyQt5 API.
 
 ## edge_it.py
 The module `edge_it.py` uses Canny edge detection, cv2.Canny, as the basis to identify contours.
@@ -51,7 +51,7 @@ List command line options, ex: `python3 -m thresh_it --help`
 
 Basic information, author, version, license, etc.: `python3 -m thresh_it --about`
 
-All windows, except for Settings, can be dragged to resize. In Ubuntu Linux, windows automatically size to easily fit on the screen. In macOS and Windows, however, image windows display their native sizes. For larger images, therefore, it is recommended to use the --scale (or -s) command line option to reduce window sizes to easily fit everything on the screen. For example, on a 13-inch MacBook Pro, the command `python3 -m  shape_it -i images/sample4.jpg -s 0.3` will make all image windows small enough so they can be easily rearranged (or manually resized). The scale option does not change the export size of any saved image files. 
+All windows, except for Settings, can be dragged to resize. In Ubuntu Linux, windows automatically size to easily fit on the screen. For larger images, therefore, you may want to use the --scale (or -s) command line option to reduce window sizes. The scale option does not change the export size of any saved image files. 
  
 The Esc or Q key will quit any running module (except if "Histograms" window in `equalize_it.py` is currently selected; then just select one of the other windows to use a Quit key). From the command line, the usual Ctrl-C will also exit a module.
 
@@ -73,15 +73,13 @@ from the downloaded GitHub repository folder, run this command
 
 Alternative commands (system dependent):
 
-    python3 -m pip install -r requirements.txt (recommended for all systems)
-    py -m pip install -r requirements.txt (Windows)
+    python3 -m pip install -r requirements.txt
 
 ### Known Issues:
-In macOS 13 and Windows10, proper scaling of image windows is not automatic. All windows may need to be manually resized it they are too large to easily navigate, or use the `--scale` command line option as explained above. Ideas for configuring window management in Mac or Windows are welcome.
+Waiting for user comments.
 
 ### Screenshots:
-All screenshots are from a Ubuntu Linux platform. For Windows and macOS platforms, trackbar names are much shorter, but text reporting of current settings is the same for all platforms.
-
+All screenshots are from a Ubuntu Linux platform. 
 ![opening_thresh_it_windows](images/thresh_it_screenshot.png)
 
 Opening windows for `thresh_it.py` with the `sample3.jpg` input file.

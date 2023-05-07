@@ -124,10 +124,6 @@ class PlotWindow(QDialog):
         cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
 
-        # NOTE: In Windows, w/o scaling, window may be expanded to full screen
-        #   if system is set to remember window positions.
-        if utils.MY_OS == 'win':
-            cv2.resizeWindow(const.WIN_NAME['input+gray'], 1000, 500)
 
         # Need to scale only images to display, not those to be processed.
         #   Default --scale arg is 1.0, so no scaling when option not used.
@@ -145,36 +141,18 @@ class PlotWindow(QDialog):
         Returns: None
         """
 
-        if utils.MY_OS in 'lin, win':
-            self.settings_win = "cv2.createCLAHE settings (dbl-click text to save)"
-        else:  # is macOS
-            self.settings_win = "cv2.createCLAHE settings (rt-click text to save)"
+        self.settings_win = "cv2.createCLAHE settings (dbl-click text to save)"
 
         # Move the control window away from the processing windows.
         # Place window at right edge of screen by using an excessive x-coordinate.
-        if utils.MY_OS == 'lin':
-            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.settings_win, 800, 35)
-        elif utils.MY_OS == 'dar':
-            cv2.namedWindow(self.settings_win)
-            cv2.moveWindow(self.settings_win, 600, 300)
-        else:  # is Windows
-            # Need to compensate for WINDOW_AUTOSIZE not working in Windows10.
-            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
-            cv2.resizeWindow(self.settings_win, 900, 500)
+        cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
+        cv2.moveWindow(self.settings_win, 800, 35)
 
         cv2.setMouseCallback(self.settings_win,
                              self.save_with_click)
 
-        if utils.MY_OS == 'lin':
-            clip_tb_name = 'Clip limit\n10X'
-            tile_tb_name = 'Tile size (N, N)\n'
-        elif utils.MY_OS == 'win':  # is WindowsS, limited to 10 characters
-            clip_tb_name = 'Clip, 10X'
-            tile_tb_name = 'Tile size'
-        else:  # is macOS
-            clip_tb_name = 'Clip limit, (10X)'
-            tile_tb_name = 'Tile size, (N, N)'
+        clip_tb_name = 'Clip limit\n10X'
+        tile_tb_name = 'Tile size (N, N)\n'
 
         cv2.createTrackbar(clip_tb_name,
                            self.settings_win,
@@ -208,12 +186,8 @@ class PlotWindow(QDialog):
         Returns: *event* as a formality.
 
         """
-        if utils.MY_OS in 'lin, win':
-            mouse_event = cv2.EVENT_LBUTTONDBLCLK
-        else:
-            mouse_event = cv2.EVENT_RBUTTONDOWN
 
-        if event == mouse_event:
+        if event == cv2.EVENT_LBUTTONDBLCLK:
             utils.save_img_and_settings(self.clahe_img,
                                         self.settings_txt,
                                         f'{Path(__file__).stem}')
@@ -359,7 +333,6 @@ class PlotWindow(QDialog):
 
 if __name__ == '__main__':
     # Program exits here if system platform or Python version check fails.
-    utils.check_platform()
     vcheck.minversion('3.7')
 
     # All checks are good, so grab as a 'global' the dictionary of

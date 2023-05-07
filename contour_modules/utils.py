@@ -13,7 +13,6 @@ quit_keys -  Error-free and informative exit from the program.
 
 # Standard library imports.
 import argparse
-import platform
 import signal
 import sys
 
@@ -30,27 +29,6 @@ import numpy as np
 # Local application imports.
 import contour_modules
 from contour_modules import constants as const
-
-MY_OS = sys.platform[:3]
-
-
-def check_platform() -> None:
-    if MY_OS == 'dar':
-        print('Developed in macOS 13; earlier versions may not work.\n')
-
-    # Need to account for scaling in Windows10 and earlier releases.
-    if MY_OS == 'win':
-        from ctypes import windll
-
-        if platform.release() < '10':
-            windll.user32.SetProcessDPIAware()
-        else:
-            windll.shcore.SetProcessDpiAwareness(1)
-
-        print('NOTE: Windows window sizing has issues.\n'
-              'Manual window resizing may be needed.\n')
-
-    print('Quit program with Esc or Q key, or Ctrl-C from Terminal.\n')
 
 
 def args_handler() -> dict:

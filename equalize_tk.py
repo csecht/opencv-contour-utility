@@ -68,23 +68,22 @@ class ProcessImage:
         self.gray_img = None
         self.clahe_img = None
 
-        if utils.MY_OS == 'lin':
-            # Matplotlib plotting with live updates.
-            plt.style.use(('bmh', 'fast'))
-            self.fig, (self.ax1, self.ax2) = plt.subplots(
-                nrows=2,
-                num='Histograms',  # Provide a window title to replace 'Figure 1'.
-                sharex='all',
-                sharey='all',
-                clear=True
-            )
-            # Note that plt.ion() needs to be called
-            # AFTER subplots(), otherwise
-            #   a "Segmentation fault (core dumped)" error is raised.
-            # plt.ion() is used with fig.canvas.start_event_loop(0.1);
-            #   it is not needed if fig.canvas.draw_idle() is used.
-            # matplotlib.get_backend()
-            plt.ion()
+        # Matplotlib plotting with live updates.
+        plt.style.use(('bmh', 'fast'))
+        self.fig, (self.ax1, self.ax2) = plt.subplots(
+            nrows=2,
+            num='Histograms',  # Provide a window title to replace 'Figure 1'.
+            sharex='all',
+            sharey='all',
+            clear=True
+        )
+        # Note that plt.ion() needs to be called
+        # AFTER subplots(), otherwise
+        #   a "Segmentation fault (core dumped)" error is raised.
+        # plt.ion() is used with fig.canvas.start_event_loop(0.1);
+        #   it is not needed if fig.canvas.draw_idle() is used.
+        # matplotlib.get_backend()
+        plt.ion()
 
         # Image processing parameters amd metrics.
         self.clip_limit = 2.0  # Default trackbar value.
@@ -102,9 +101,8 @@ class ProcessImage:
         #  event issue (where setup_trackbars() triggers an event
         #  that prompts drawing of histogram window).
         self.manage_input()
-        if utils.MY_OS == 'lin':
-            self.setup_canvas_window()
-            self.show_input_histogram()
+        self.setup_canvas_window()
+        self.show_input_histogram()
         self.setup_trackbars()
 
     def manage_input(self):
@@ -122,11 +120,6 @@ class ProcessImage:
 
         cv2.namedWindow(const.WIN_NAME['input+gray'],
                         flags=cv2.WINDOW_GUI_NORMAL)
-
-        # NOTE: In Windows, w/o scaling, window may be expanded to full screen
-        #   if system is set to remember window positions.
-        if utils.MY_OS == 'win':
-            cv2.resizeWindow(const.WIN_NAME['input+gray'], 1000, 500)
 
         # Need to scale only images to display, not those to be processed.
         #   Default --scale arg is 1.0, so no scaling when option not used.
@@ -181,36 +174,18 @@ class ProcessImage:
         Returns: None
         """
 
-        if utils.MY_OS in 'lin, win':
-            self.settings_win = "cv2.createCLAHE settings (dbl-click text to save)"
-        else:  # is macOS
-            self.settings_win = "cv2.createCLAHE settings (rt-click text to save)"
+        self.settings_win = "cv2.createCLAHE settings (dbl-click text to save)"
 
         # Move the control window away from the processing windows.
         # Place window at right edge of screen by using an excessive x-coordinate.
-        if utils.MY_OS == 'lin':
-            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.settings_win, 800, 35)
-        elif utils.MY_OS == 'dar':
-            cv2.namedWindow(self.settings_win)
-            cv2.moveWindow(self.settings_win, 600, 300)
-        else:  # is Windows
-            # Need to compensate for WINDOW_AUTOSIZE not working in Windows10.
-            cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_GUI_NORMAL)
-            cv2.resizeWindow(self.settings_win, 900, 500)
+        cv2.namedWindow(self.settings_win, flags=cv2.WINDOW_AUTOSIZE)
+        cv2.moveWindow(self.settings_win, 800, 35)
 
         cv2.setMouseCallback(self.settings_win,
                              self.save_with_click)
 
-        if utils.MY_OS == 'lin':
-            clip_tb_name = 'Clip limit\n10X'
-            tile_tb_name = 'Tile size (N, N)\n'
-        elif utils.MY_OS == 'win':  # is WindowsS, limited to 10 characters
-            clip_tb_name = 'Clip, 10X'
-            tile_tb_name = 'Tile size'
-        else:  # is macOS
-            clip_tb_name = 'Clip limit, (10X)'
-            tile_tb_name = 'Tile size, (N, N)'
+        clip_tb_name = 'Clip limit\n10X'
+        tile_tb_name = 'Tile size (N, N)\n'
 
         cv2.createTrackbar(clip_tb_name,
                            self.settings_win,
@@ -244,12 +219,8 @@ class ProcessImage:
         Returns: *event* as a formality.
 
         """
-        if utils.MY_OS in 'lin, win':
-            mouse_event = cv2.EVENT_LBUTTONDBLCLK
-        else:
-            mouse_event = cv2.EVENT_RBUTTONDOWN
 
-        if event == mouse_event:
+        if event == cv2.EVENT_LBUTTONDBLCLK:
             utils.save_img_and_settings(self.clahe_img,
                                         self.settings_txt,
                                         f'{Path(__file__).stem}')
@@ -301,8 +272,7 @@ class ProcessImage:
         self.clahe_sd = int(self.clahe_img.std())
         self.clahe_mean = int(self.clahe_img.mean())
 
-        if utils.MY_OS == 'lin':
-            self.show_clahe_histogram()
+        self.show_clahe_histogram()
         self.show_settings()
 
         cv2.namedWindow(const.WIN_NAME['clahe'],
@@ -394,7 +364,6 @@ class ProcessImage:
 
 if __name__ == "__main__":
     # Program exits here if system platform or Python version check fails.
-    utils.check_platform()
     vcheck.minversion('3.7')
 
     # All checks are good, so grab as a 'global' the dictionary of
@@ -404,24 +373,16 @@ if __name__ == "__main__":
     # Need to not set up tk canvas to display Histograms b/c
     #  generates a fatal memory allocation error. It has something
     #  to do with the start_event_loop function.
-    if utils.MY_OS in 'dar, win':
-        PI = ProcessImage()
-        print(f'{Path(__file__).name} is now running...')
-        print('Currently, histograms do not plot in Windows or macOS.\n'
-              'Working on it though...')
+    # Run the Matplotlib histogram plots in a tkinter window.
+    canvas_window = tk.Tk()
 
-        # Set infinite loop with sigint handler to monitor "quit" keystrokes.
-        utils.quit_keys()
-    else:  # is Linux
-        # Run the Matplotlib histogram plots in a tkinter window.
-        canvas_window = tk.Tk()
+    PI = ProcessImage()
+    print(f'{Path(__file__).name} is now running...\n',
+          'Quit program with Esc or Q key, or Ctrl-C from Terminal.\n')
 
-        PI = ProcessImage()
-        print(f'{Path(__file__).name} is now running...')
+# Set infinite loop with sigint handler to monitor "quit" keystrokes.
+    quit_thread = threading.Thread(
+        target=utils.quit_keys(), daemon=True)
+    quit_thread.start()
 
-        # Set infinite loop with sigint handler to monitor "quit" keystrokes.
-        quit_thread = threading.Thread(
-            target=utils.quit_keys(), daemon=True)
-        quit_thread.start()
-
-        canvas_window.mainloop()
+    canvas_window.mainloop()

@@ -214,24 +214,13 @@ class ProcessImage:
         #   Names are also used in show_settings().
         # Set up two separate windows; one for threshold and contour
         # trackbars and reporting and one for polygon trackbars and reporting.
-        if utils.MY_OS in 'lin, win':
-            self.contour_tb_win = "Threshold & contour settings (dbl-click text to save)"
-            self.shape_tb_win = 'Shape approximation settings (dbl-click text to save)'
-        else:  # is macOS
-            self.contour_tb_win = "Threshold & contour settings (rt-click text to save)"
-            self.shape_tb_win = 'Shape approximation settings (rt-click text to save)'
+        self.contour_tb_win = "Threshold & contour settings (dbl-click text to save)"
+        self.shape_tb_win = 'Shape approximation settings (dbl-click text to save)'
 
         # Move the control window away from the processing windows.
         # Force each window positions to make them visible on startup.
-        if utils.MY_OS == 'lin':
-            cv2.namedWindow(self.contour_tb_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.contour_tb_win, 1000, 95)
-        elif utils.MY_OS == 'dar':
-            cv2.namedWindow(self.contour_tb_win)
-            cv2.moveWindow(self.contour_tb_win, 500, 35)
-        else:  # is Windows
-            cv2.namedWindow(self.contour_tb_win, flags=cv2.WINDOW_GUI_NORMAL)
-            cv2.resizeWindow(self.contour_tb_win, 500, 500)
+        cv2.namedWindow(self.contour_tb_win, flags=cv2.WINDOW_AUTOSIZE)
+        cv2.moveWindow(self.contour_tb_win, 1000, 95)
 
         cv2.setMouseCallback(self.contour_tb_win,
                              self.save_with_click)
@@ -313,15 +302,8 @@ class ProcessImage:
 
         # Place namedWindow for shapes here so that the contrast_img is
         #   first created.
-        if utils.MY_OS == 'lin':
-            cv2.namedWindow(self.shape_tb_win, flags=cv2.WINDOW_AUTOSIZE)
-            cv2.moveWindow(self.shape_tb_win, 500, 500)
-        elif utils.MY_OS == 'dar':
-            cv2.namedWindow(self.shape_tb_win)
-            cv2.moveWindow(self.shape_tb_win, 400, 100)
-        else:  # is Windows
-            cv2.namedWindow(self.shape_tb_win, flags=cv2.WINDOW_GUI_NORMAL)
-            cv2.resizeWindow(self.shape_tb_win, 400, 200)
+        cv2.namedWindow(self.shape_tb_win, flags=cv2.WINDOW_AUTOSIZE)
+        cv2.moveWindow(self.shape_tb_win, 500, 500)
 
         cv2.setMouseCallback(self.shape_tb_win,
                              self.save_with_click)
@@ -789,14 +771,7 @@ class ProcessImage:
         Returns: *event* as a formality.
         """
 
-        #  For mouse buttons, double click doesn't work in macOS;
-        #    rt-click does Frame menu in Linux, hence different actions.
-        if utils.MY_OS in 'lin, win':
-            mouse_event = cv2.EVENT_LBUTTONDBLCLK
-        else:  # is macOS
-            mouse_event = cv2.EVENT_RBUTTONDOWN
-
-        if event == mouse_event:
+        if event == cv2.EVENT_LBUTTONDBLCLK:
             utils.save_img_and_settings(img2save=self.contoured_img,
                                         txt2save=self.contoured_txt,
                                         caller=f'{Path(__file__).stem}')
@@ -1257,19 +1232,8 @@ class ProcessImage:
 
         # Need to set the dimensions of the settings area to fit all text.
         #   Font style parameters are set in constants.py module.
-        if utils.MY_OS == 'lin':
-            settings_img = utils.text_array((420, 650), the_text)
-        elif utils.MY_OS == 'dar':
-            settings_img = utils.text_array((350, 620), the_text)
-        else:  # is Windows
-            settings_img = utils.text_array((820, 1200), the_text)
-
-        if utils.MY_OS == 'lin':
-            shape_settings_img = utils.text_array((280, 460), shape_txt)
-        elif utils.MY_OS == 'dar':
-            shape_settings_img = utils.text_array((240, 430), shape_txt)
-        else:  # is Windows
-            shape_settings_img = utils.text_array((490, 700), shape_txt)
+        settings_img = utils.text_array((420, 650), the_text)
+        shape_settings_img = utils.text_array((280, 460), shape_txt)
 
         cv2.imshow(self.contour_tb_win, settings_img)
         cv2.imshow(self.shape_tb_win, shape_settings_img)
@@ -1278,7 +1242,6 @@ class ProcessImage:
 if __name__ == "__main__":
     # Program exits here, with msg, if system platform or Python version
     #  check fails.
-    utils.check_platform()
     vcheck.minversion('3.7')
 
     # All checks are good, so grab as a 'global' the dictionary for
@@ -1286,7 +1249,8 @@ if __name__ == "__main__":
     arguments = utils.args_handler()
 
     PI = ProcessImage()
-    print(f'{Path(__file__).name} is now running...')
+    print(f'{Path(__file__).name} is now running...\n',
+          'Quit program with Esc or Q key, or Ctrl-C from Terminal.\n')
 
     # Set infinite loop with sigint handler to monitor "quit"
     #  keystrokes.
