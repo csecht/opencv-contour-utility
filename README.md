@@ -1,5 +1,7 @@
 # Project: opencv-contour-util
-A set of Python utilities to easily explore OpenCV parameters involved in drawing contours for object and shape detection. A variety of parameter values can be adjusted with OpenCV trackbars (see figures below). Live image updates are displayed in multiple windows for each processing step leading to object detection.
+A set of Python utilities to easily explore OpenCV parameters involved in drawing contours for object and shape detection on Linux platforms. A variety of parameter values can be adjusted with OpenCV trackbars (see figures below). Live image updates are displayed in multiple windows for each processing step leading to object detection.
+
+An updated version that runs on Linux, Windows, and macOS platforms with a tkinter GUI is available at: https://github.com/csecht/opencv-contour-utility2'
 
 A utility is also provided to explore parameters for automatic histogram equalization.
 
@@ -11,7 +13,7 @@ https://pyimagesearch.com/2016/03/28/measuring-size-of-objects-in-an-image-with-
 
 The intention is to help OpenCV users understand the pertinent parameters and value ranges needed to identify objects.
 
-Development environment was Linux Ubuntu 20.04 with PyQt5 API.
+Development environment was Linux Ubuntu 20.04.
 
 ## edge_it.py
 The module `edge_it.py` uses Canny edge detection, cv2.Canny, as the basis to identify contours.
